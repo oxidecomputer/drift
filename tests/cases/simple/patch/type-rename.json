@@ -1,0 +1,14 @@
+[
+  {
+    "op": "move",
+    "from": "/components/schemas/GreetingResponse",
+    "path": "/components/schemas/HelloWorld"
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/HelloWorld"
+    }
+  }
+]

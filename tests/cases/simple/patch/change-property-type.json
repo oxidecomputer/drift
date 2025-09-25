@@ -1,0 +1,7 @@
+[
+	{
+		"op": "replace",
+		"path": "/components/schemas/GreetingResponse/properties/message/type",
+		"value": "integer"
+	}
+]

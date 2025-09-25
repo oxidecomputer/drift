@@ -1,0 +1,28 @@
+--- change-operation-parameter-type.json
++++ patched
+@@ -39,7 +39,7 @@
+             "name": "language",
+             "required": false,
+             "schema": {
+-              "type": "string"
++              "type": "integer"
+             }
+           }
+         ],
+
+
+Result for patch:
+[
+    Change {
+        message: "schema types changed",
+        old_path: [
+            "#/paths/~1hello~1{name}/get/parameters/1/schema",
+        ],
+        new_path: [
+            "#/paths/~1hello~1{name}/get/parameters/1/schema",
+        ],
+        comparison: Input,
+        class: Incompatible,
+        details: UnknownDifference,
+    },
+]

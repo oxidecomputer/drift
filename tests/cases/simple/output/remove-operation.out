@@ -1,0 +1,38 @@
+--- remove-operation.json
++++ patched
+@@ -58,17 +58,6 @@
+         "summary": "Say hello"
+       }
+     },
+-    "/ping": {
+-      "get": {
+-        "description": "A simple ping endpoint that does nothing.",
+-        "operationId": "ping",
+-        "responses": {
+-          "200": {
+-            "description": "Ping successful"
+-          }
+-        },
+-        "summary": "Ping operation"
+-      }
+-    }
++    "/ping": {}
+   }
+ }
+
+
+Result for patch:
+[
+    Change {
+        message: "The operation ping was removed",
+        old_path: [
+            "#/paths/~1ping/get",
+        ],
+        new_path: [
+            "#/paths",
+        ],
+        comparison: Structural,
+        class: BackwardIncompatible,
+        details: Removed,
+    },
+]

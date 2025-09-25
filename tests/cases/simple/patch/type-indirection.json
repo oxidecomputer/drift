@@ -1,0 +1,20 @@
+[
+  {
+    "op": "replace",
+    "path": "/components/schemas/GreetingResponse/properties/message",
+    "value": {
+      "$ref": "#/components/schemas/GreetingResponseMessage"
+    }
+  },
+  {
+    "op": "add",
+    "path": "/components/schemas/GreetingResponseMessage",
+    "value": {
+      "type": "string",
+      "description": "The greeting message",
+      "x-rust-type": {
+        "jank": true
+      }
+    }
+  }
+]

@@ -1,0 +1,52 @@
+--- unhandled-add-prop.json
++++ patched
+@@ -6,10 +6,15 @@
+           "message": {
+             "description": "The greeting message",
+             "type": "string"
++          },
++          "source": {
++            "description": "Where the greeting originated",
++            "type": "string"
+           }
+         },
+         "required": [
+-          "message"
++          "message",
++          "source"
+         ],
+         "type": "object"
+       }
+
+
+Result for patch:
+[
+    Change {
+        message: "object required properties changed",
+        old_path: [
+            "#/components/schemas/GreetingResponse",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/GreetingResponse",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: Unhandled,
+        details: UnknownDifference,
+    },
+    Change {
+        message: "object properties changed",
+        old_path: [
+            "#/components/schemas/GreetingResponse",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/GreetingResponse",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: Unhandled,
+        details: UnknownDifference,
+    },
+]

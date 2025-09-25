@@ -1,0 +1,28 @@
+--- change-operation-parameter-requirement.json
++++ patched
+@@ -37,7 +37,7 @@
+             "description": "Language for the greeting",
+             "in": "query",
+             "name": "language",
+-            "required": false,
++            "required": true,
+             "schema": {
+               "type": "string"
+             }
+
+
+Result for patch:
+[
+    Change {
+        message: "The parameter 'language' was optional and is now required",
+        old_path: [
+            "#/paths/~1hello~1{name}/get/parameters/1",
+        ],
+        new_path: [
+            "#/paths/~1hello~1{name}/get/parameters/1",
+        ],
+        comparison: Input,
+        class: BackwardIncompatible,
+        details: MoreStrict,
+    },
+]

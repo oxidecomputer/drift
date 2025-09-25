@@ -1,0 +1,30 @@
+--- change-property-type.json
++++ patched
+@@ -5,7 +5,7 @@
+         "properties": {
+           "message": {
+             "description": "The greeting message",
+-            "type": "string"
++            "type": "integer"
+           }
+         },
+         "required": [
+
+
+Result for patch:
+[
+    Change {
+        message: "schema types changed",
+        old_path: [
+            "#/components/schemas/GreetingResponse/properties/message",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/GreetingResponse/properties/message",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: Incompatible,
+        details: UnknownDifference,
+    },
+]

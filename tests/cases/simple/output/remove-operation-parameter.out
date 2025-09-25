@@ -1,0 +1,35 @@
+--- remove-operation-parameter.json
++++ patched
+@@ -32,15 +32,6 @@
+             "schema": {
+               "type": "string"
+             }
+-          },
+-          {
+-            "description": "Language for the greeting",
+-            "in": "query",
+-            "name": "language",
+-            "required": false,
+-            "schema": {
+-              "type": "string"
+-            }
+           }
+         ],
+         "responses": {
+
+
+Result for patch:
+[
+    Change {
+        message: "The parameter 'language' was removed",
+        old_path: [
+            "#/paths/~1hello~1{name}/get/parameters/1",
+        ],
+        new_path: [
+            "#/paths/~1hello~1{name}/get",
+        ],
+        comparison: Input,
+        class: BackwardIncompatible,
+        details: Removed,
+    },
+]

@@ -1,0 +1,9 @@
+[
+  {
+    "op": "add",
+    "path": "/components/schemas/GreetingResponse/x-rust-type",
+    "value": {
+      "mumble": "frotz"
+    }
+  }
+]

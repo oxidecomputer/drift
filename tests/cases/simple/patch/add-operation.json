@@ -1,0 +1,16 @@
+[
+  {
+    "op": "add",
+    "path": "/paths/~1foo",
+    "value": {
+      "get": {
+        "summary": "Foo operation",
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          }
+        }
+      }
+    }
+  }
+]

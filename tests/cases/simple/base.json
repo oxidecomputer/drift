@@ -1,0 +1,74 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Simple API",
+    "version": "1.0.0",
+    "description": "A simple OpenAPI example"
+  },
+  "paths": {
+    "/hello/{name}": {
+      "get": {
+        "summary": "Say hello",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Name to greet"
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Language for the greeting",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A friendly greeting",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GreetingResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ping": {
+      "get": {
+        "operationId": "ping",
+        "summary": "Ping operation",
+        "description": "A simple ping endpoint that does nothing.",
+        "responses": {
+          "200": {
+            "description": "Ping successful"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GreetingResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "The greeting message"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      }
+    }
+  }
+}

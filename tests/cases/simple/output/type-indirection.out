@@ -1,0 +1,45 @@
+--- type-indirection.json
++++ patched
+@@ -4,14 +4,20 @@
+       "GreetingResponse": {
+         "properties": {
+           "message": {
+-            "description": "The greeting message",
+-            "type": "string"
++            "$ref": "#/components/schemas/GreetingResponseMessage"
+           }
+         },
+         "required": [
+           "message"
+         ],
+         "type": "object"
++      },
++      "GreetingResponseMessage": {
++        "description": "The greeting message",
++        "type": "string",
++        "x-rust-type": {
++          "jank": true
++        }
+       }
+     }
+   },
+
+
+Result for patch:
+[
+    Change {
+        message: "schema metadata changed",
+        old_path: [
+            "#/components/schemas/GreetingResponse/properties/message",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/GreetingResponseMessage",
+            "#/components/schemas/GreetingResponse/properties/message/$ref",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: Trivial,
+        details: Metadata,
+    },
+]
