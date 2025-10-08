@@ -1,0 +1,34 @@
+--- modify-cycle-type.json
++++ patched
+@@ -16,10 +16,7 @@
+       "Tree": {
+         "properties": {
+           "children": {
+-            "items": {
+-              "$ref": "#/components/schemas/Tree"
+-            },
+-            "type": "array"
++            "$ref": "#/components/schemas/Tree"
+           }
+         },
+         "type": "object"
+
+
+Result for patch:
+[
+    Change {
+        message: "schema types changed",
+        old_path: [
+            "#/components/schemas/Tree/properties/children",
+            "#/paths/~1tree/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/Tree",
+            "#/components/schemas/Tree/properties/children/$ref",
+            "#/paths/~1tree/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: Incompatible,
+        details: UnknownDifference,
+    },
+]

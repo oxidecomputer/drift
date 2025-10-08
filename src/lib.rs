@@ -67,6 +67,10 @@ impl JsonPathStack {
         }
     }
 
+    pub fn contains_cycle(&self) -> bool {
+        self.stack.iter().any(|item| item.starts_with(&self.top))
+    }
+
     pub fn iter(&self) -> impl Iterator<Item = &String> {
         std::iter::once(&self.top).chain(self.stack.iter().rev())
     }

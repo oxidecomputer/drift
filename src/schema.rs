@@ -58,6 +58,26 @@ impl Compare {
         old_schema: Contextual<'_, &Schema>,
         new_schema: Contextual<'_, &Schema>,
     ) -> anyhow::Result<bool> {
+        // We wait for both new and old to contain a cycle; this ensures that
+        // we consider "unrolled" cycles properly. There is a possibility of
+        // getting stuck in an A->B->A / B->A->B cycle... we can address that
+        // should that construction arise.
+        if old_schema.context().stack().contains_cycle()
+            && new_schema.context().stack().contains_cycle()
+        {
+            return Ok(true);
+        }
+
+        // Return the cached compatibility of these schemas so that we don't
+        // generate redundant notes.
+        if let Some(equal) = self.visited.get(&(
+            comparison,
+            old_schema.context().stack().top.clone(),
+            new_schema.context().stack().top.clone(),
+        )) {
+            return Ok(*equal);
+        }
+
         // We expand structures to ensure we don't accidentally fail to examine
         // a field.
         let Schema {
@@ -126,6 +146,16 @@ impl Compare {
             Contextual::new(old_schema.context().clone(), old_schema_kind),
             Contextual::new(new_schema.context().clone(), new_schema_kind),
         )?;
+
+        // Cache the result.
+        self.visited.insert(
+            (
+                comparison,
+                old_schema.context().stack().top.clone(),
+                new_schema.context().stack().top.clone(),
+            ),
+            nullable_equal && schema_equal,
+        );
 
         Ok(nullable_equal && schema_equal)
     }
@@ -565,6 +595,7 @@ impl Compare {
                 ChangeDetails::UnknownDifference,
             );
         }
+
         // TODO we could be resilient to reordering... but aren't for now.
 
         let mut ret = true;

@@ -1,6 +1,6 @@
 --- remove-operation-parameter.json
 +++ patched
-@@ -32,15 +32,6 @@
+@@ -43,15 +43,6 @@
              "schema": {
                "type": "string"
              }
