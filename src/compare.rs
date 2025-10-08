@@ -25,6 +25,8 @@ pub fn compare(old: &Value, new: &Value) -> anyhow::Result<Vec<Change>> {
 #[derive(Default)]
 pub(crate) struct Compare {
     pub changes: Vec<Change>,
+    /// Cache comparisons (type of comparison, old and new path to the schema)
+    /// and the boolean result (are the schemas backward-compatible?).
     pub visited: BTreeMap<(SchemaComparison, String, String), bool>,
 }
 

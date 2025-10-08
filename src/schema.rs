@@ -595,6 +595,7 @@ impl Compare {
                 ChangeDetails::UnknownDifference,
             );
         }
+
         // TODO we could be resilient to reordering... but aren't for now.
 
         let mut ret = true;
