@@ -9,9 +9,9 @@
 +        "x-rust-type": {
 +          "mumble": "frotz"
 +        }
-       }
-     }
-   },
+       },
+       "Tree": {
+         "properties": {
 
 
 Result for patch:

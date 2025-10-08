@@ -1,6 +1,6 @@
 --- type-indirection.json
 +++ patched
-@@ -4,14 +4,20 @@
+@@ -4,8 +4,7 @@
        "GreetingResponse": {
          "properties": {
            "message": {
@@ -10,19 +10,20 @@
            }
          },
          "required": [
-           "message"
+@@ -13,6 +12,13 @@
          ],
          "type": "object"
-+      },
+       },
 +      "GreetingResponseMessage": {
 +        "description": "The greeting message",
 +        "type": "string",
 +        "x-rust-type": {
 +          "jank": true
 +        }
-       }
-     }
-   },
++      },
+       "Tree": {
+         "properties": {
+           "children": {
 
 
 Result for patch:

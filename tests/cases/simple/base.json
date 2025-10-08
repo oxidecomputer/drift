@@ -53,6 +53,23 @@
           }
         }
       }
+    },
+    "/tree": {
+      "get": {
+        "summary": "Get a tree structure",
+        "responses": {
+          "200": {
+            "description": "A tree structure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Tree"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -68,6 +85,17 @@
         "required": [
           "message"
         ]
+      },
+      "Tree": {
+        "type": "object",
+        "properties": {
+          "children": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Tree"
+            }
+          }
+        }
       }
     }
   }

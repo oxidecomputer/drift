@@ -1,6 +1,6 @@
 --- remove-operation.json
 +++ patched
-@@ -58,17 +58,6 @@
+@@ -69,18 +69,7 @@
          "summary": "Say hello"
        }
      },
@@ -15,10 +15,11 @@
 -        },
 -        "summary": "Ping operation"
 -      }
--    }
-+    "/ping": {}
-   }
- }
+-    },
++    "/ping": {},
+     "/tree": {
+       "get": {
+         "responses": {
 
 
 Result for patch:

@@ -28,9 +28,7 @@ where
     ) -> anyhow::Result<(Cow<'a, T>, Context<'context>)> {
         let mut context = context.clone();
         let mut target = match self {
-            ReferenceOr::Item(item) => {
-                return Ok((Cow::Borrowed(item), context));
-            }
+            ReferenceOr::Item(item) => return Ok((Cow::Borrowed(item), context)),
             ReferenceOr::Reference { reference } => Cow::Borrowed(reference),
         };
 
@@ -46,9 +44,7 @@ where
             let item_or_reference = ReferenceOr::<T>::deserialize(subtree)?;
 
             match item_or_reference {
-                ReferenceOr::Item(item) => {
-                    return Ok((Cow::Owned(item), context));
-                }
+                ReferenceOr::Item(item) => return Ok((Cow::Owned(item), context)),
 
                 ReferenceOr::Reference { reference } => {
                     target = Cow::Owned(reference);

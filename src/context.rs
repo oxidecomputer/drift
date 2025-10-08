@@ -41,6 +41,10 @@ impl<'a> Context<'a> {
             stack,
         }
     }
+
+    pub fn stack(&self) -> &JsonPathStack {
+        &self.stack
+    }
 }
 
 #[derive(Clone)]

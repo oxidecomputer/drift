@@ -1,5 +1,7 @@
 // Copyright 2025 Oxide Computer Company
 
+use std::collections::BTreeMap;
+
 use indexmap::IndexMap;
 use openapiv3::{MediaType, Operation, Parameter, ParameterSchemaOrContent, ReferenceOr};
 use serde_json::Value;
@@ -14,23 +16,19 @@ use crate::{
 };
 
 pub fn compare(old: &Value, new: &Value) -> anyhow::Result<Vec<Change>> {
-    let mut comp = Compare::new();
+    let mut comp = Compare::default();
     comp.compare(old, new)?;
 
     Ok(comp.changes)
 }
 
+#[derive(Default)]
 pub(crate) struct Compare {
     pub changes: Vec<Change>,
+    pub visited: BTreeMap<(SchemaComparison, String, String), bool>,
 }
 
 impl Compare {
-    pub fn new() -> Self {
-        Self {
-            changes: Default::default(),
-        }
-    }
-
     pub fn compare(&mut self, old: &Value, new: &Value) -> anyhow::Result<()> {
         let old_context = Context::new(old);
         let old_operations = operations(&old_context)?;
