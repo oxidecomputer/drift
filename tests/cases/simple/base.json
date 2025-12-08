@@ -80,11 +80,46 @@
           "message": {
             "type": "string",
             "description": "The greeting message"
+          },
+          "via_ref": {
+            "$ref": "#/components/schemas/SubType"
+          },
+          "via_allof": {
+            "description": "Via allOf.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SubType"
+              }
+            ]
+          },
+          "via_anyof": {
+            "description": "Via anyOf.",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SubType"
+              }
+            ]
+          },
+          "via_oneof": {
+            "description": "Via oneOf.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/SubType"
+              }
+            ]
           }
         },
         "required": [
           "message"
         ]
+      },
+      "SubType": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        }
       },
       "Tree": {
         "type": "object",

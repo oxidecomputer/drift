@@ -1,0 +1,35 @@
+--- ref-to-anyof.json
++++ patched
+@@ -32,7 +32,12 @@
+             ]
+           },
+           "via_ref": {
+-            "$ref": "#/components/schemas/SubType"
++            "anyOf": [
++              {
++                "$ref": "#/components/schemas/SubType"
++              }
++            ],
++            "description": "Via anyOf."
+           }
+         },
+         "required": [
+
+
+Result for patch:
+[
+    Change {
+        message: "schema metadata changed",
+        old_path: [
+            "#/components/schemas/GreetingResponse/properties/via_ref",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/GreetingResponse/properties/via_ref",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: Trivial,
+        details: Metadata,
+    },
+]

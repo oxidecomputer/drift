@@ -1,6 +1,6 @@
 --- add-type-extension.json
 +++ patched
-@@ -11,7 +11,10 @@
+@@ -38,7 +38,10 @@
          "required": [
            "message"
          ],
@@ -10,7 +10,7 @@
 +          "mumble": "frotz"
 +        }
        },
-       "Tree": {
+       "SubType": {
          "properties": {
 
 

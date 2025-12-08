@@ -1,13 +1,17 @@
 --- unhandled-add-prop.json
 +++ patched
-@@ -6,10 +6,15 @@
-           "message": {
+@@ -7,6 +7,10 @@
              "description": "The greeting message",
              "type": "string"
-+          },
+           },
 +          "source": {
 +            "description": "Where the greeting originated",
 +            "type": "string"
++          },
+           "via_allof": {
+             "allOf": [
+               {
+@@ -36,7 +40,8 @@
            }
          },
          "required": [

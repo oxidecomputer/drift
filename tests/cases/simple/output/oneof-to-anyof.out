@@ -1,0 +1,37 @@
+--- oneof-to-anyof.json
++++ patched
+@@ -24,12 +24,12 @@
+             "description": "Via anyOf."
+           },
+           "via_oneof": {
+-            "description": "Via oneOf.",
+-            "oneOf": [
++            "anyOf": [
+               {
+                 "$ref": "#/components/schemas/SubType"
+               }
+-            ]
++            ],
++            "description": "Via anyOf."
+           },
+           "via_ref": {
+             "$ref": "#/components/schemas/SubType"
+
+
+Result for patch:
+[
+    Change {
+        message: "schema metadata changed",
+        old_path: [
+            "#/components/schemas/GreetingResponse/properties/via_oneof",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/GreetingResponse/properties/via_oneof",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: Trivial,
+        details: Metadata,
+    },
+]

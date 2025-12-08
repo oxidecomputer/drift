@@ -1,0 +1,19 @@
+[
+  {
+    "op": "replace",
+    "path": "/components/schemas/GreetingResponse/properties/via_allof",
+    "value": {
+      "description": "Via oneOf.",
+      "oneOf": [
+        {
+          "$ref": "#/components/schemas/SubType"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/components/schemas/SubType/properties/value/type",
+    "value": "integer"
+  }
+]

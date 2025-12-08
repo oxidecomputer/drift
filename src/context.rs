@@ -47,7 +47,7 @@ impl<'a> Context<'a> {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Contextual<'a, T> {
     context: Context<'a>,
     value: T,

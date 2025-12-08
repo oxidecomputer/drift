@@ -1,0 +1,14 @@
+[
+  {
+    "op": "replace",
+    "path": "/components/schemas/GreetingResponse/properties/via_anyof",
+    "value": {
+      "description": "Via allOf.",
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/SubType"
+        }
+      ]
+    }
+  }
+]

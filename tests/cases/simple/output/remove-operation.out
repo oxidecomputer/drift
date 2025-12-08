@@ -1,6 +1,6 @@
 --- remove-operation.json
 +++ patched
-@@ -69,18 +69,7 @@
+@@ -104,18 +104,7 @@
          "summary": "Say hello"
        }
      },

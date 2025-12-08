@@ -1,0 +1,16 @@
+[
+  {
+    "op": "replace",
+    "path": "/components/schemas/GreetingResponse/properties/via_allof",
+    "value": {
+      "$ref": "#/components/schemas/SubType"
+    }
+  },
+  {
+    "op": "add",
+    "path": "/components/schemas/SubType/properties/extra",
+    "value": {
+      "type": "integer"
+    }
+  }
+]
