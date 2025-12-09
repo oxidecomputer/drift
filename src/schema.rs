@@ -118,9 +118,12 @@ impl Compare {
             ) => {
                 // Old is a single-element wrapper, new is a bare ref or inline
                 // type.
+                //
+                // A bare ref or inline type does not have metadata, so if the
+                // old metadata is non-default, report a trivial change.
                 if has_meaningful_metadata(old_meta) {
                     self.push_change(
-                        "schema metadata changed",
+                        "schema metadata removed",
                         old_schema,
                         new_schema,
                         comparison.into(),
@@ -145,9 +148,12 @@ impl Compare {
             ) => {
                 // Old is a bare ref or inline type, new is a single-element
                 // wrapper.
+                //
+                // A bare ref or inline type does not have metadata, so if the
+                // new metadata is non-default, report a trivial change.
                 if has_meaningful_metadata(new_meta) {
                     self.push_change(
-                        "schema metadata changed",
+                        "schema metadata added",
                         old_schema,
                         new_schema,
                         comparison.into(),
@@ -836,7 +842,8 @@ enum SchemaRefKind<'a> {
         inner: &'a ReferenceOr<Schema>,
         metadata: &'a SchemaData,
     },
-    /// Multi-element allOf/anyOf/oneOf: cannot be flattened.
+    /// Multi (or, less commonly, zero) element allOf/anyOf/oneOf: cannot be
+    /// flattened.
     MultiElement,
 }
 

@@ -19,7 +19,7 @@
 Result for patch:
 [
     Change {
-        message: "schema metadata changed",
+        message: "schema metadata added",
         old_path: [
             "#/paths/~1hello~1{name}/get/parameters/0/schema",
         ],
