@@ -3,6 +3,10 @@
 <!-- next-header -->
 ## Unreleased - ReleaseDate
 
+## [0.1.2] - 2025-12-09
+
+- Improved support for trivial `allOf`/`anyOf`/`oneOf` constructions
+
 ## [0.1.1] - 2025-10-08
 
 - Fixed an instance of infinite recursion with cycle schemas
@@ -12,5 +16,6 @@
 Initial release.
 
 <!-- next-url -->
+[0.1.2]: https://github.com/oxidecomputer/drift/releases/tag/drift-0.1.2
 [0.1.1]: https://github.com/oxidecomputer/drift/releases/tag/drift-0.1.1
 [0.1.0]: https://github.com/oxidecomputer/drift/releases/tag/drift-0.1.0
