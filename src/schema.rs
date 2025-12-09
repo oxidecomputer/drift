@@ -1,5 +1,7 @@
 // Copyright 2025 Oxide Computer Company
 
+use std::fmt;
+
 use openapiv3::{AdditionalProperties, ArrayType, ObjectType, ReferenceOr, Schema, SchemaData};
 
 use crate::{
@@ -42,13 +44,139 @@ impl Compare {
         old_schema: Contextual<'_, &ReferenceOr<Schema>>,
         new_schema: Contextual<'_, &ReferenceOr<Schema>>,
     ) -> anyhow::Result<bool> {
-        let (old_schema, old_context) = old_schema.contextual_resolve()?;
-        let (new_schema, new_context) = new_schema.contextual_resolve()?;
+        // Handle single-element wrappers: allOf/anyOf/oneOf with one item.
+        // These are semantically equivalent to their inner type.
+        //
+        // An allOf wrapper is commonly added to include additional metadata
+        // such as an additional description field.
+        if let Some(result) =
+            self.try_compare_flattened(dry_run, comparison, &old_schema, &new_schema)?
+        {
+            Ok(result)
+        } else {
+            // General path: resolve and compare.
+            let (old_schema, old_context) = old_schema.contextual_resolve()?;
+            let (new_schema, new_context) = new_schema.contextual_resolve()?;
 
-        let old_schema = Contextual::new(old_context, old_schema.as_ref());
-        let new_schema = Contextual::new(new_context, new_schema.as_ref());
+            let old_schema = Contextual::new(old_context, old_schema.as_ref());
+            let new_schema = Contextual::new(new_context, new_schema.as_ref());
 
-        self.compare_schema(comparison, dry_run, old_schema, new_schema)
+            self.compare_schema(comparison, dry_run, old_schema, new_schema)
+        }
+    }
+
+    /// Try to compare schemas by flattening single-element wrappers.
+    ///
+    /// Returns `Some(result)` if flattening was applicable, `None` to fall
+    /// through to the general path.
+    fn try_compare_flattened(
+        &mut self,
+        dry_run: bool,
+        comparison: SchemaComparison,
+        old_schema: &Contextual<'_, &ReferenceOr<Schema>>,
+        new_schema: &Contextual<'_, &ReferenceOr<Schema>>,
+    ) -> anyhow::Result<Option<bool>> {
+        use SchemaRefKind::*;
+
+        let old_kind = classify_schema_ref(old_schema.as_ref());
+        let new_kind = classify_schema_ref(new_schema.as_ref());
+
+        match (old_kind, new_kind) {
+            (
+                SingleElement {
+                    inner: old_inner,
+                    metadata: old_meta,
+                },
+                SingleElement {
+                    inner: new_inner,
+                    metadata: new_meta,
+                },
+            ) => {
+                // Both old and new are single-element wrappers.
+                if old_meta != new_meta {
+                    self.push_change(
+                        "schema metadata changed",
+                        old_schema,
+                        new_schema,
+                        comparison.into(),
+                        ChangeClass::Trivial,
+                        ChangeDetails::Metadata,
+                    );
+                }
+                let old_inner = old_schema.append_deref(old_inner, "0");
+                let new_inner = new_schema.append_deref(new_inner, "0");
+                Ok(Some(self.compare_schema_ref_helper(
+                    dry_run, comparison, old_inner, new_inner,
+                )?))
+            }
+            (
+                SingleElement {
+                    inner: old_inner,
+                    metadata: old_meta,
+                },
+                BareRef | InlineType,
+            ) => {
+                // Old is a single-element wrapper, new is a bare ref or inline
+                // type.
+                //
+                // A bare ref or inline type does not have metadata, so if the
+                // old metadata is non-default, report a trivial change.
+                if has_meaningful_metadata(old_meta) {
+                    self.push_change(
+                        "schema metadata removed",
+                        old_schema,
+                        new_schema,
+                        comparison.into(),
+                        ChangeClass::Trivial,
+                        ChangeDetails::Metadata,
+                    );
+                }
+                let old_inner = old_schema.append_deref(old_inner, "0");
+                Ok(Some(self.compare_schema_ref_helper(
+                    dry_run,
+                    comparison,
+                    old_inner,
+                    new_schema.clone(),
+                )?))
+            }
+            (
+                BareRef | InlineType,
+                SingleElement {
+                    inner: new_inner,
+                    metadata: new_meta,
+                },
+            ) => {
+                // Old is a bare ref or inline type, new is a single-element
+                // wrapper.
+                //
+                // A bare ref or inline type does not have metadata, so if the
+                // new metadata is non-default, report a trivial change.
+                if has_meaningful_metadata(new_meta) {
+                    self.push_change(
+                        "schema metadata added",
+                        old_schema,
+                        new_schema,
+                        comparison.into(),
+                        ChangeClass::Trivial,
+                        ChangeDetails::Metadata,
+                    );
+                }
+                let new_inner = new_schema.append_deref(new_inner, "0");
+                Ok(Some(self.compare_schema_ref_helper(
+                    dry_run,
+                    comparison,
+                    old_schema.clone(),
+                    new_inner,
+                )?))
+            }
+            (BareRef | InlineType | MultiElement, BareRef | InlineType | MultiElement)
+            | (SingleElement { .. }, MultiElement)
+            | (MultiElement, SingleElement { .. }) => {
+                // No flattening applicable, so fall through to the general
+                // comparison path.
+                Ok(None)
+            }
+        }
     }
 
     fn compare_schema(
@@ -215,19 +343,9 @@ impl Compare {
                 openapiv3::SchemaKind::Not { not: old_not },
                 openapiv3::SchemaKind::Not { not: new_not },
             ) => {
-                if old_not != new_not {
-                    self.schema_push_change(
-                        dry_run,
-                        "unhandled, 'not' schema",
-                        &old_schema_kind,
-                        &new_schema_kind,
-                        comparison,
-                        ChangeClass::Unhandled,
-                        ChangeDetails::UnknownDifference,
-                    )
-                } else {
-                    Ok(true)
-                }
+                let old_not = old_schema_kind.append_deref(old_not.as_ref(), "not");
+                let new_not = new_schema_kind.append_deref(new_not.as_ref(), "not");
+                self.compare_schema_ref_helper(dry_run, comparison, old_not, new_not)
             }
             (&openapiv3::SchemaKind::Any(old_any), &openapiv3::SchemaKind::Any(new_any)) => {
                 if old_any == new_any {
@@ -244,15 +362,19 @@ impl Compare {
                     )
                 }
             }
-            _ => self.schema_push_change(
-                dry_run,
-                "schema kinds changed".to_string(),
-                &old_schema_kind,
-                &new_schema_kind,
-                comparison,
-                ChangeClass::Incompatible,
-                ChangeDetails::Datatype,
-            ),
+            _ => {
+                let old_tag = SchemaKindTag::new(&old_schema_kind);
+                let new_tag = SchemaKindTag::new(&new_schema_kind);
+                self.schema_push_change(
+                    dry_run,
+                    format!("schema kind changed from {} to {}", old_tag, new_tag),
+                    &old_schema_kind,
+                    &new_schema_kind,
+                    comparison,
+                    ChangeClass::Incompatible,
+                    ChangeDetails::Datatype,
+                )
+            }
         }
     }
 
@@ -667,4 +789,100 @@ impl Compare {
         }
         Ok(false)
     }
+}
+
+#[derive(Clone, Debug)]
+enum SchemaKindTag {
+    Type,
+    OneOf,
+    AllOf,
+    AnyOf,
+    Not,
+    Any,
+}
+
+impl fmt::Display for SchemaKindTag {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Type => write!(f, "regular type"),
+            Self::OneOf => write!(f, "oneOf"),
+            Self::AllOf => write!(f, "allOf"),
+            Self::AnyOf => write!(f, "anyOf"),
+            Self::Not => write!(f, "not"),
+            Self::Any => write!(f, "any"),
+        }
+    }
+}
+
+impl SchemaKindTag {
+    fn new(kind: &openapiv3::SchemaKind) -> Self {
+        match kind {
+            openapiv3::SchemaKind::Type(_) => Self::Type,
+            openapiv3::SchemaKind::OneOf { .. } => Self::OneOf,
+            openapiv3::SchemaKind::AllOf { .. } => Self::AllOf,
+            openapiv3::SchemaKind::AnyOf { .. } => Self::AnyOf,
+            openapiv3::SchemaKind::Not { .. } => Self::Not,
+            openapiv3::SchemaKind::Any { .. } => Self::Any,
+        }
+    }
+}
+
+/// Classification of a schema reference for flattening purposes.
+enum SchemaRefKind<'a> {
+    /// A bare $ref.
+    BareRef,
+    /// An inline type (Type, Any, Not).
+    ///
+    /// It is okay to compare something like Not with single-element wrappers.
+    /// When recursing, we'll ensure that the child is also Not.
+    InlineType,
+    /// A single-element allOf/anyOf/oneOf wrapper that can be flattened to its
+    /// inner type.
+    SingleElement {
+        inner: &'a ReferenceOr<Schema>,
+        metadata: &'a SchemaData,
+    },
+    /// Multi (or, less commonly, zero) element allOf/anyOf/oneOf: cannot be
+    /// flattened.
+    MultiElement,
+}
+
+/// Classify a schema reference for flattening purposes.
+fn classify_schema_ref(schema_ref: &ReferenceOr<Schema>) -> SchemaRefKind<'_> {
+    match schema_ref {
+        ReferenceOr::Reference { .. } => SchemaRefKind::BareRef,
+        ReferenceOr::Item(schema) => match &schema.schema_kind {
+            openapiv3::SchemaKind::Type(_)
+            | openapiv3::SchemaKind::Not { .. }
+            | openapiv3::SchemaKind::Any(_) => SchemaRefKind::InlineType,
+            openapiv3::SchemaKind::AllOf { all_of } if all_of.len() == 1 => {
+                SchemaRefKind::SingleElement {
+                    inner: all_of.first().unwrap(),
+                    metadata: &schema.schema_data,
+                }
+            }
+            openapiv3::SchemaKind::AnyOf { any_of } if any_of.len() == 1 => {
+                SchemaRefKind::SingleElement {
+                    inner: any_of.first().unwrap(),
+                    metadata: &schema.schema_data,
+                }
+            }
+            openapiv3::SchemaKind::OneOf { one_of } if one_of.len() == 1 => {
+                SchemaRefKind::SingleElement {
+                    inner: one_of.first().unwrap(),
+                    metadata: &schema.schema_data,
+                }
+            }
+            // Multi-element wrappers - not semantically equivalent to single schemas.
+            openapiv3::SchemaKind::AllOf { .. }
+            | openapiv3::SchemaKind::AnyOf { .. }
+            | openapiv3::SchemaKind::OneOf { .. } => SchemaRefKind::MultiElement,
+        },
+    }
+}
+
+/// Check if schema_data has any non-default values that would constitute
+/// metadata worth preserving.
+fn has_meaningful_metadata(data: &SchemaData) -> bool {
+    *data != SchemaData::default()
 }

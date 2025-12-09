@@ -1,0 +1,62 @@
+--- allof-to-oneof-with-type-change.json
++++ patched
+@@ -13,12 +13,12 @@
+             }
+           },
+           "via_allof": {
+-            "allOf": [
++            "description": "Via oneOf.",
++            "oneOf": [
+               {
+                 "$ref": "#/components/schemas/SubType"
+               }
+-            ],
+-            "description": "Via allOf."
++            ]
+           },
+           "via_anyof": {
+             "anyOf": [
+@@ -48,7 +48,7 @@
+       "SubType": {
+         "properties": {
+           "value": {
+-            "type": "string"
++            "type": "integer"
+           }
+         },
+         "type": "object"
+
+
+Result for patch:
+[
+    Change {
+        message: "schema metadata changed",
+        old_path: [
+            "#/components/schemas/GreetingResponse/properties/via_allof",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/GreetingResponse/properties/via_allof",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: Trivial,
+        details: Metadata,
+    },
+    Change {
+        message: "schema types changed",
+        old_path: [
+            "#/components/schemas/SubType/properties/value",
+            "#/components/schemas/GreetingResponse/properties/via_allof/0/$ref",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/SubType/properties/value",
+            "#/components/schemas/GreetingResponse/properties/via_allof/0/$ref",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: Incompatible,
+        details: UnknownDifference,
+    },
+]

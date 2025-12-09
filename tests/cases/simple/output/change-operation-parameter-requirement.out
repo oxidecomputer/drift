@@ -1,6 +1,6 @@
 --- change-operation-parameter-requirement.json
 +++ patched
-@@ -48,7 +48,7 @@
+@@ -88,7 +88,7 @@
              "description": "Language for the greeting",
              "in": "query",
              "name": "language",

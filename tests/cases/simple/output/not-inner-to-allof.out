@@ -1,0 +1,35 @@
+--- not-inner-to-allof.json
++++ patched
+@@ -9,7 +9,12 @@
+           },
+           "not_a_number": {
+             "not": {
+-              "type": "number"
++              "allOf": [
++                {
++                  "type": "number"
++                }
++              ],
++              "description": "A number type"
+             }
+           },
+           "via_allof": {
+
+
+Result for patch:
+[
+    Change {
+        message: "schema metadata added",
+        old_path: [
+            "#/components/schemas/GreetingResponse/properties/not_a_number/not",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/GreetingResponse/properties/not_a_number/not",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: Trivial,
+        details: Metadata,
+    },
+]

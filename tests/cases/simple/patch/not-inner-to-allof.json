@@ -1,0 +1,16 @@
+[
+  {
+    "op": "replace",
+    "path": "/components/schemas/GreetingResponse/properties/not_a_number",
+    "value": {
+      "not": {
+        "description": "A number type",
+        "allOf": [
+          {
+            "type": "number"
+          }
+        ]
+      }
+    }
+  }
+]

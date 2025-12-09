@@ -1,0 +1,14 @@
+[
+  {
+    "op": "replace",
+    "path": "/paths/~1hello~1{name}/get/parameters/0/schema",
+    "value": {
+      "description": "A string parameter",
+      "allOf": [
+        {
+          "type": "string"
+        }
+      ]
+    }
+  }
+]

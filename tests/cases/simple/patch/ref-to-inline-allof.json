@@ -1,0 +1,20 @@
+[
+  {
+    "op": "replace",
+    "path": "/components/schemas/GreetingResponse/properties/via_ref",
+    "value": {
+      "description": "A greeting response",
+      "allOf": [
+        {
+          "type": "object",
+          "description": "Greeting response type",
+          "properties": {
+            "value": {
+              "type": "string"
+            }
+          }
+        }
+      ]
+    }
+  }
+]

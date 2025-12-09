@@ -7,10 +7,10 @@
 -            "description": "The greeting message",
 -            "type": "string"
 +            "$ref": "#/components/schemas/GreetingResponseMessage"
-           }
-         },
-         "required": [
-@@ -13,6 +12,13 @@
+           },
+           "not_a_number": {
+             "not": {
+@@ -45,6 +44,13 @@
          ],
          "type": "object"
        },
@@ -21,9 +21,9 @@
 +          "jank": true
 +        }
 +      },
-       "Tree": {
+       "SubType": {
          "properties": {
-           "children": {
+           "value": {
 
 
 Result for patch:
