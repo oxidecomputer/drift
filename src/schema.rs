@@ -44,14 +44,17 @@ impl Compare {
         old_schema: Contextual<'_, &ReferenceOr<Schema>>,
         new_schema: Contextual<'_, &ReferenceOr<Schema>>,
     ) -> anyhow::Result<bool> {
-        // Handle single-element wrapper equivalence (allOf/anyOf/oneOf with one
-        // item). These are semantically equivalent to their inner type.
+        // Handle single-element wrappers: allOf/anyOf/oneOf with one item.
+        // These are semantically equivalent to their inner type.
+        //
+        // An allOf wrapper is commonly added to include additional metadata
+        // such as an additional description field.
         if let Some(result) =
-            self.try_compare_unwrapped(dry_run, comparison, &old_schema, &new_schema)?
+            self.try_compare_flattened(dry_run, comparison, &old_schema, &new_schema)?
         {
             Ok(result)
         } else {
-            // Normal path: resolve and compare.
+            // General path: resolve and compare.
             let (old_schema, old_context) = old_schema.contextual_resolve()?;
             let (new_schema, new_context) = new_schema.contextual_resolve()?;
 
@@ -62,11 +65,11 @@ impl Compare {
         }
     }
 
-    /// Try to compare schemas by unwrapping single-element wrappers.
+    /// Try to compare schemas by flattening single-element wrappers.
     ///
-    /// Returns `Some(result)` if unwrapping was applicable, `None` to fall
-    /// through.
-    fn try_compare_unwrapped(
+    /// Returns `Some(result)` if flattening was applicable, `None` to fall
+    /// through to the general path.
+    fn try_compare_flattened(
         &mut self,
         dry_run: bool,
         comparison: SchemaComparison,
@@ -79,7 +82,6 @@ impl Compare {
         let new_kind = classify_schema_ref(new_schema.as_ref());
 
         match (old_kind, new_kind) {
-            // Both are single-element wrappers. Compare metadata and recurse
             (
                 SingleElement {
                     inner: old_inner,
@@ -90,6 +92,7 @@ impl Compare {
                     metadata: new_meta,
                 },
             ) => {
+                // Both old and new are single-element wrappers.
                 if old_meta != new_meta {
                     self.push_change(
                         "schema metadata changed",
@@ -106,14 +109,15 @@ impl Compare {
                     dry_run, comparison, old_inner, new_inner,
                 )?))
             }
-            // Old is single-element wrapper, new is bare ref.
             (
                 SingleElement {
                     inner: old_inner,
                     metadata: old_meta,
                 },
-                BareRef,
+                BareRef | InlineType,
             ) => {
+                // Old is a single-element wrapper, new is a bare ref or inline
+                // type.
                 if has_meaningful_metadata(old_meta) {
                     self.push_change(
                         "schema metadata changed",
@@ -132,14 +136,15 @@ impl Compare {
                     new_schema.clone(),
                 )?))
             }
-            // Old is bare ref, new is single-element wrapper.
             (
-                BareRef,
+                BareRef | InlineType,
                 SingleElement {
                     inner: new_inner,
                     metadata: new_meta,
                 },
             ) => {
+                // Old is a bare ref or inline type, new is a single-element
+                // wrapper.
                 if has_meaningful_metadata(new_meta) {
                     self.push_change(
                         "schema metadata changed",
@@ -158,13 +163,13 @@ impl Compare {
                     new_inner,
                 )?))
             }
-            // No unwrapping applicable - fall through to normal comparison.
-            (BareRef, BareRef)
-            | (BareRef, Other)
-            | (Other, BareRef)
-            | (Other, Other)
-            | (SingleElement { .. }, Other)
-            | (Other, SingleElement { .. }) => Ok(None),
+            (BareRef | InlineType | MultiElement, BareRef | InlineType | MultiElement)
+            | (SingleElement { .. }, MultiElement)
+            | (MultiElement, SingleElement { .. }) => {
+                // No flattening applicable, so fall through to the general
+                // comparison path.
+                Ok(None)
+            }
         }
     }
 
@@ -332,19 +337,9 @@ impl Compare {
                 openapiv3::SchemaKind::Not { not: old_not },
                 openapiv3::SchemaKind::Not { not: new_not },
             ) => {
-                if old_not != new_not {
-                    self.schema_push_change(
-                        dry_run,
-                        "unhandled, 'not' schema",
-                        &old_schema_kind,
-                        &new_schema_kind,
-                        comparison,
-                        ChangeClass::Unhandled,
-                        ChangeDetails::UnknownDifference,
-                    )
-                } else {
-                    Ok(true)
-                }
+                let old_not = old_schema_kind.append_deref(old_not.as_ref(), "not");
+                let new_not = new_schema_kind.append_deref(new_not.as_ref(), "not");
+                self.compare_schema_ref_helper(dry_run, comparison, old_not, new_not)
             }
             (&openapiv3::SchemaKind::Any(old_any), &openapiv3::SchemaKind::Any(new_any)) => {
                 if old_any == new_any {
@@ -826,25 +821,33 @@ impl SchemaKindTag {
     }
 }
 
-/// Classification of a schema reference for wrapper unwrapping purposes.
+/// Classification of a schema reference for flattening purposes.
 enum SchemaRefKind<'a> {
-    /// A bare $ref - can be compared with single-element wrappers.
+    /// A bare $ref.
     BareRef,
-    /// A single-element allOf/anyOf/oneOf wrapper, semantically equivalent to
-    /// the inner type.
+    /// An inline type (Type, Any, Not).
+    ///
+    /// It is okay to compare something like Not with single-element wrappers.
+    /// When recursing, we'll ensure that the child is also Not.
+    InlineType,
+    /// A single-element allOf/anyOf/oneOf wrapper that can be flattened to its
+    /// inner type.
     SingleElement {
         inner: &'a ReferenceOr<Schema>,
         metadata: &'a SchemaData,
     },
-    /// Something else (multi-element wrapper or non-wrapper type).
-    Other,
+    /// Multi-element allOf/anyOf/oneOf: cannot be flattened.
+    MultiElement,
 }
 
-/// Classify a schema reference for wrapper unwrapping purposes.
+/// Classify a schema reference for flattening purposes.
 fn classify_schema_ref(schema_ref: &ReferenceOr<Schema>) -> SchemaRefKind<'_> {
     match schema_ref {
         ReferenceOr::Reference { .. } => SchemaRefKind::BareRef,
         ReferenceOr::Item(schema) => match &schema.schema_kind {
+            openapiv3::SchemaKind::Type(_)
+            | openapiv3::SchemaKind::Not { .. }
+            | openapiv3::SchemaKind::Any(_) => SchemaRefKind::InlineType,
             openapiv3::SchemaKind::AllOf { all_of } if all_of.len() == 1 => {
                 SchemaRefKind::SingleElement {
                     inner: all_of.first().unwrap(),
@@ -863,12 +866,10 @@ fn classify_schema_ref(schema_ref: &ReferenceOr<Schema>) -> SchemaRefKind<'_> {
                     metadata: &schema.schema_data,
                 }
             }
+            // Multi-element wrappers - not semantically equivalent to single schemas.
             openapiv3::SchemaKind::AllOf { .. }
             | openapiv3::SchemaKind::AnyOf { .. }
-            | openapiv3::SchemaKind::OneOf { .. }
-            | openapiv3::SchemaKind::Type(_)
-            | openapiv3::SchemaKind::Not { .. }
-            | openapiv3::SchemaKind::Any(_) => SchemaRefKind::Other,
+            | openapiv3::SchemaKind::OneOf { .. } => SchemaRefKind::MultiElement,
         },
     }
 }

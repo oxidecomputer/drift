@@ -1,0 +1,39 @@
+--- not-to-allof.json
++++ patched
+@@ -8,9 +8,14 @@
+             "type": "string"
+           },
+           "not_a_number": {
+-            "not": {
+-              "type": "number"
+-            }
++            "allOf": [
++              {
++                "not": {
++                  "type": "number"
++                }
++              }
++            ],
++            "description": "Not a number, wrapped in allOf"
+           },
+           "via_allof": {
+             "allOf": [
+
+
+Result for patch:
+[
+    Change {
+        message: "schema metadata changed",
+        old_path: [
+            "#/components/schemas/GreetingResponse/properties/not_a_number",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/GreetingResponse/properties/not_a_number",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: Trivial,
+        details: Metadata,
+    },
+]

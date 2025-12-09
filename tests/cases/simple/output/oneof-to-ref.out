@@ -1,6 +1,6 @@
 --- oneof-to-ref.json
 +++ patched
-@@ -24,12 +24,7 @@
+@@ -29,12 +29,7 @@
              "description": "Via anyOf."
            },
            "via_oneof": {

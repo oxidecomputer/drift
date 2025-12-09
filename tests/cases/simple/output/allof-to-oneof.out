@@ -1,7 +1,7 @@
 --- allof-to-oneof.json
 +++ patched
-@@ -8,12 +8,12 @@
-             "type": "string"
+@@ -13,12 +13,12 @@
+             }
            },
            "via_allof": {
 -            "allOf": [

@@ -107,6 +107,11 @@
                 "$ref": "#/components/schemas/SubType"
               }
             ]
+          },
+          "not_a_number": {
+            "not": {
+              "type": "number"
+            }
           }
         },
         "required": [

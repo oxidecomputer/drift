@@ -1,0 +1,56 @@
+--- ref-to-inline-allof.json
++++ patched
+@@ -37,7 +37,18 @@
+             ]
+           },
+           "via_ref": {
+-            "$ref": "#/components/schemas/SubType"
++            "allOf": [
++              {
++                "description": "Greeting response type",
++                "properties": {
++                  "value": {
++                    "type": "string"
++                  }
++                },
++                "type": "object"
++              }
++            ],
++            "description": "A greeting response"
+           }
+         },
+         "required": [
+
+
+Result for patch:
+[
+    Change {
+        message: "schema metadata changed",
+        old_path: [
+            "#/components/schemas/GreetingResponse/properties/via_ref",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/GreetingResponse/properties/via_ref",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: Trivial,
+        details: Metadata,
+    },
+    Change {
+        message: "schema metadata changed",
+        old_path: [
+            "#/components/schemas/SubType",
+            "#/components/schemas/GreetingResponse/properties/via_ref/$ref",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/GreetingResponse/properties/via_ref/0",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: Trivial,
+        details: Metadata,
+    },
+]

@@ -1,0 +1,33 @@
+--- inline-to-allof.json
++++ patched
+@@ -81,7 +81,12 @@
+             "in": "path",
+             "name": "name",
+             "schema": {
+-              "type": "string"
++              "allOf": [
++                {
++                  "type": "string"
++                }
++              ],
++              "description": "A string parameter"
+             }
+           },
+           {
+
+
+Result for patch:
+[
+    Change {
+        message: "schema metadata changed",
+        old_path: [
+            "#/paths/~1hello~1{name}/get/parameters/0/schema",
+        ],
+        new_path: [
+            "#/paths/~1hello~1{name}/get/parameters/0/schema",
+        ],
+        comparison: Input,
+        class: Trivial,
+        details: Metadata,
+    },
+]

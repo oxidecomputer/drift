@@ -7,8 +7,8 @@
 -            "type": "string"
 +            "type": "integer"
            },
-           "via_allof": {
-             "allOf": [
+           "not_a_number": {
+             "not": {
 
 
 Result for patch:

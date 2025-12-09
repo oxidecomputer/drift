@@ -1,6 +1,6 @@
 --- ref-to-anyof.json
 +++ patched
-@@ -32,7 +32,12 @@
+@@ -37,7 +37,12 @@
              ]
            },
            "via_ref": {

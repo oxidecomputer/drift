@@ -1,7 +1,7 @@
 --- allof-to-oneof-with-type-change.json
 +++ patched
-@@ -8,12 +8,12 @@
-             "type": "string"
+@@ -13,12 +13,12 @@
+             }
            },
            "via_allof": {
 -            "allOf": [
@@ -16,7 +16,7 @@
            },
            "via_anyof": {
              "anyOf": [
-@@ -43,7 +43,7 @@
+@@ -48,7 +48,7 @@
        "SubType": {
          "properties": {
            "value": {

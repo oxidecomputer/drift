@@ -1,6 +1,6 @@
 --- wrapper-unchanged-with-type-change.json
 +++ patched
-@@ -43,7 +43,7 @@
+@@ -48,7 +48,7 @@
        "SubType": {
          "properties": {
            "value": {
