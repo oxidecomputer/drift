@@ -1,0 +1,35 @@
+--- add-optional-parameter.json
++++ patched
+@@ -111,6 +111,15 @@
+             "schema": {
+               "type": "string"
+             }
++          },
++          {
++            "description": "Maximum number of results",
++            "in": "query",
++            "name": "limit",
++            "required": false,
++            "schema": {
++              "type": "integer"
++            }
+           }
+         ],
+         "responses": {
+
+
+Result for patch:
+[
+    Change {
+        message: "A new, optional parameter 'limit' was added",
+        old_path: [
+            "#/paths/~1hello~1{name}/get",
+        ],
+        new_path: [
+            "#/paths/~1hello~1{name}/get/parameters/2",
+        ],
+        comparison: Input,
+        class: ForwardIncompatible,
+        details: Added,
+    },
+]

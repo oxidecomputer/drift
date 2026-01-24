@@ -1,6 +1,6 @@
 --- allof-to-ref.json
 +++ patched
-@@ -13,12 +13,7 @@
+@@ -24,12 +24,7 @@
              }
            },
            "via_allof": {

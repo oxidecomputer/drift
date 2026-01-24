@@ -1,0 +1,28 @@
+--- body-optional-to-required.json
++++ patched
+@@ -158,7 +158,7 @@
+               }
+             }
+           },
+-          "required": false
++          "required": true
+         },
+         "responses": {
+           "200": {
+
+
+Result for patch:
+[
+    Change {
+        message: "the body parameter was optional and is now required",
+        old_path: [
+            "#/paths/~1items/put",
+        ],
+        new_path: [
+            "#/paths/~1items/put",
+        ],
+        comparison: Input,
+        class: BackwardIncompatible,
+        details: MoreStrict,
+    },
+]

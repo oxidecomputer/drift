@@ -1,0 +1,35 @@
+--- add-required-parameter.json
++++ patched
+@@ -111,6 +111,15 @@
+             "schema": {
+               "type": "string"
+             }
++          },
++          {
++            "description": "Output format",
++            "in": "query",
++            "name": "format",
++            "required": true,
++            "schema": {
++              "type": "string"
++            }
+           }
+         ],
+         "responses": {
+
+
+Result for patch:
+[
+    Change {
+        message: "A new, required parameter 'format' was added",
+        old_path: [
+            "#/paths/~1hello~1{name}/get",
+        ],
+        new_path: [
+            "#/paths/~1hello~1{name}/get/parameters/2",
+        ],
+        comparison: Input,
+        class: BackwardIncompatible,
+        details: AddedRequired,
+    },
+]

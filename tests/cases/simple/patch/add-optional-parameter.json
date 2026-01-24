@@ -1,0 +1,15 @@
+[
+  {
+    "op": "add",
+    "path": "/paths/~1hello~1{name}/get/parameters/-",
+    "value": {
+      "name": "limit",
+      "in": "query",
+      "schema": {
+        "type": "integer"
+      },
+      "description": "Maximum number of results",
+      "required": false
+    }
+  }
+]

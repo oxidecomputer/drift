@@ -1,6 +1,6 @@
 --- unhandled-add-prop.json
 +++ patched
-@@ -12,6 +12,10 @@
+@@ -23,6 +23,10 @@
                "type": "number"
              }
            },
@@ -11,7 +11,7 @@
            "via_allof": {
              "allOf": [
                {
-@@ -41,7 +45,8 @@
+@@ -52,7 +56,8 @@
            }
          },
          "required": [

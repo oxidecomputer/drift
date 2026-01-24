@@ -1,0 +1,36 @@
+--- remove-required-body.json
++++ patched
+@@ -131,16 +131,6 @@
+     "/items": {
+       "post": {
+         "operationId": "create_item",
+-        "requestBody": {
+-          "content": {
+-            "application/json": {
+-              "schema": {
+-                "$ref": "#/components/schemas/CreateItem"
+-              }
+-            }
+-          },
+-          "required": true
+-        },
+         "responses": {
+           "201": {
+             "description": "Item created"
+
+
+Result for patch:
+[
+    Change {
+        message: "a required body parameter was removed",
+        old_path: [
+            "#/paths/~1items/post",
+        ],
+        new_path: [
+            "#/paths/~1items/post",
+        ],
+        comparison: Input,
+        class: ForwardIncompatible,
+        details: Removed,
+    },
+]
