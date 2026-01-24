@@ -1,0 +1,27 @@
+--- body-description-change.json
++++ patched
+@@ -139,6 +139,7 @@
+               }
+             }
+           },
++          "description": "The item to create",
+           "required": true
+         },
+         "responses": {
+
+
+Result for patch:
+[
+    Change {
+        message: "the body metadata (description or extensions) changed",
+        old_path: [
+            "#/paths/~1items/post",
+        ],
+        new_path: [
+            "#/paths/~1items/post",
+        ],
+        comparison: Input,
+        class: Trivial,
+        details: Metadata,
+    },
+]

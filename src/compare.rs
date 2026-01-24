@@ -3,7 +3,9 @@
 use std::collections::BTreeMap;
 
 use indexmap::IndexMap;
-use openapiv3::{MediaType, Operation, Parameter, ParameterSchemaOrContent, ReferenceOr};
+use openapiv3::{
+    MediaType, Operation, Parameter, ParameterSchemaOrContent, ReferenceOr, RequestBody,
+};
 use serde_json::Value;
 
 use crate::{
@@ -299,9 +301,33 @@ impl Compare {
                 let (new_body, new_body_context) =
                     new_body_or_ref.resolve(new_request_body.context())?;
 
-                // Check if the required field changed.
-                if !old_body.required && new_body.required {
-                    // Body was optional and is now required.
+                // Check if any of the fields changed.
+                let RequestBody {
+                    description: old_description,
+                    content: old_content,
+                    required: old_required,
+                    extensions: old_extensions,
+                } = &*old_body;
+                let RequestBody {
+                    description: new_description,
+                    content: new_content,
+                    required: new_required,
+                    extensions: new_extensions,
+                } = &*new_body;
+
+                // Description and extension changes are trivial metadata changes.
+                if old_description != new_description || old_extensions != new_extensions {
+                    self.push_change(
+                        "the body metadata (description or extensions) changed",
+                        old_operation,
+                        new_operation,
+                        ChangeComparison::Input,
+                        ChangeClass::Trivial,
+                        ChangeDetails::Metadata,
+                    );
+                }
+
+                if !*old_required && *new_required {
                     self.push_change(
                         "the body parameter was optional and is now required",
                         old_operation,
@@ -310,8 +336,7 @@ impl Compare {
                         ChangeClass::BackwardIncompatible,
                         ChangeDetails::MoreStrict,
                     );
-                } else if old_body.required && !new_body.required {
-                    // Body was required and is now optional.
+                } else if *old_required && !*new_required {
                     self.push_change(
                         "the body parameter was required and is now optional",
                         old_operation,
@@ -323,9 +348,9 @@ impl Compare {
                 }
 
                 let old_body_content =
-                    Contextual::new(old_body_context.append("content"), &old_body.content);
+                    Contextual::new(old_body_context.append("content"), old_content);
                 let new_body_content =
-                    Contextual::new(new_body_context.append("content"), &new_body.content);
+                    Contextual::new(new_body_context.append("content"), new_content);
 
                 self.compare_content(
                     SchemaComparison::Input,

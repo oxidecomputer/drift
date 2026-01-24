@@ -1,0 +1,7 @@
+[
+  {
+    "op": "add",
+    "path": "/paths/~1items/post/requestBody/x-custom-extension",
+    "value": "some-value"
+  }
+]
