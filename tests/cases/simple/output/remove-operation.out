@@ -1,7 +1,7 @@
 --- remove-operation.json
 +++ patched
-@@ -109,18 +109,7 @@
-         "summary": "Say hello"
+@@ -168,18 +168,7 @@
+         "summary": "Update an item"
        }
      },
 -    "/ping": {

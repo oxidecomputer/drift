@@ -70,6 +70,46 @@
           }
         }
       }
+    },
+    "/items": {
+      "post": {
+        "operationId": "create_item",
+        "summary": "Create an item",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateItem"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Item created"
+          }
+        }
+      },
+      "put": {
+        "operationId": "update_item",
+        "summary": "Update an item",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateItem"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Item updated"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -134,6 +174,23 @@
             "items": {
               "$ref": "#/components/schemas/Tree"
             }
+          }
+        }
+      },
+      "CreateItem": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": ["name"]
+      },
+      "UpdateItem": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
           }
         }
       }

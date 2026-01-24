@@ -1,6 +1,6 @@
 --- change-operation-parameter-type.json
 +++ patched
-@@ -90,7 +90,7 @@
+@@ -109,7 +109,7 @@
              "name": "language",
              "required": false,
              "schema": {

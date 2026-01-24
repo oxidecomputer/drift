@@ -3,7 +3,9 @@
 use std::collections::BTreeMap;
 
 use indexmap::IndexMap;
-use openapiv3::{MediaType, Operation, Parameter, ParameterSchemaOrContent, ReferenceOr};
+use openapiv3::{
+    MediaType, Operation, Parameter, ParameterSchemaOrContent, ReferenceOr, RequestBody,
+};
 use serde_json::Value;
 
 use crate::{
@@ -133,9 +135,11 @@ impl Compare {
         }
 
         // New required parameters will break old clients.
+        // New optional parameters are forward-incompatible because new clients
+        // might send the parameter to old servers that don't understand it.
         for new_param in b_unique.values() {
+            let param_name = &new_param.parameter_data_ref().name;
             if new_param.parameter_data_ref().required {
-                let param_name = &new_param.parameter_data_ref().name;
                 self.push_change(
                     format!("A new, required parameter '{param_name}' was added"),
                     &old_operation.operation,
@@ -143,6 +147,15 @@ impl Compare {
                     ChangeComparison::Input,
                     ChangeClass::BackwardIncompatible,
                     ChangeDetails::AddedRequired,
+                );
+            } else {
+                self.push_change(
+                    format!("A new, optional parameter '{param_name}' was added"),
+                    &old_operation.operation,
+                    new_param,
+                    ChangeComparison::Input,
+                    ChangeClass::ForwardIncompatible,
+                    ChangeDetails::Added,
                 );
             }
         }
@@ -218,8 +231,37 @@ impl Compare {
 
         match (old_request_body.as_ref(), new_request_body.as_ref()) {
             (None, None) => {}
-            // A request body is no longer specified.
-            (Some(_), None) => {}
+            // A request body is no longer specified. Old clients may still
+            // send a body, which the new server won't expect.
+            (Some(old_body_or_ref), None) => {
+                let contextual_old_body =
+                    Contextual::new(old_request_body.context().clone(), old_body_or_ref);
+                let (old_body, _) = contextual_old_body.contextual_resolve()?;
+
+                if old_body.required {
+                    // Old clients will send a required body that new servers
+                    // don't expect.
+                    self.push_change(
+                        "a required body parameter was removed",
+                        old_operation,
+                        new_operation,
+                        ChangeComparison::Input,
+                        ChangeClass::ForwardIncompatible,
+                        ChangeDetails::Removed,
+                    );
+                } else {
+                    // Old clients may send an optional body that new servers
+                    // don't expect.
+                    self.push_change(
+                        "an optional body parameter was removed",
+                        old_operation,
+                        new_operation,
+                        ChangeComparison::Input,
+                        ChangeClass::ForwardIncompatible,
+                        ChangeDetails::Removed,
+                    );
+                }
+            }
 
             (None, Some(new_body_or_ref)) => {
                 let contextual_new_body =
@@ -259,10 +301,56 @@ impl Compare {
                 let (new_body, new_body_context) =
                     new_body_or_ref.resolve(new_request_body.context())?;
 
+                // Check if any of the fields changed.
+                let RequestBody {
+                    description: old_description,
+                    content: old_content,
+                    required: old_required,
+                    extensions: old_extensions,
+                } = &*old_body;
+                let RequestBody {
+                    description: new_description,
+                    content: new_content,
+                    required: new_required,
+                    extensions: new_extensions,
+                } = &*new_body;
+
+                // Description and extension changes are trivial metadata changes.
+                if old_description != new_description || old_extensions != new_extensions {
+                    self.push_change(
+                        "the body metadata (description or extensions) changed",
+                        old_operation,
+                        new_operation,
+                        ChangeComparison::Input,
+                        ChangeClass::Trivial,
+                        ChangeDetails::Metadata,
+                    );
+                }
+
+                if !*old_required && *new_required {
+                    self.push_change(
+                        "the body parameter was optional and is now required",
+                        old_operation,
+                        new_operation,
+                        ChangeComparison::Input,
+                        ChangeClass::BackwardIncompatible,
+                        ChangeDetails::MoreStrict,
+                    );
+                } else if *old_required && !*new_required {
+                    self.push_change(
+                        "the body parameter was required and is now optional",
+                        old_operation,
+                        new_operation,
+                        ChangeComparison::Input,
+                        ChangeClass::ForwardIncompatible,
+                        ChangeDetails::LessStrict,
+                    );
+                }
+
                 let old_body_content =
-                    Contextual::new(old_body_context.append("content"), &old_body.content);
+                    Contextual::new(old_body_context.append("content"), old_content);
                 let new_body_content =
-                    Contextual::new(new_body_context.append("content"), &new_body.content);
+                    Contextual::new(new_body_context.append("content"), new_content);
 
                 self.compare_content(
                     SchemaComparison::Input,

@@ -1,6 +1,6 @@
 --- type-indirection.json
 +++ patched
-@@ -4,8 +4,7 @@
+@@ -15,8 +15,7 @@
        "GreetingResponse": {
          "properties": {
            "message": {
@@ -10,7 +10,7 @@
            },
            "not_a_number": {
              "not": {
-@@ -45,6 +44,13 @@
+@@ -56,6 +55,13 @@
          ],
          "type": "object"
        },

@@ -1,6 +1,6 @@
 --- anyof-to-oneof.json
 +++ patched
-@@ -21,12 +21,12 @@
+@@ -32,12 +32,12 @@
              "description": "Via allOf."
            },
            "via_anyof": {

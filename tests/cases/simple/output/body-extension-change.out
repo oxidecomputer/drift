@@ -1,0 +1,29 @@
+--- body-extension-change.json
++++ patched
+@@ -139,7 +139,8 @@
+               }
+             }
+           },
+-          "required": true
++          "required": true,
++          "x-custom-extension": "some-value"
+         },
+         "responses": {
+           "201": {
+
+
+Result for patch:
+[
+    Change {
+        message: "the body metadata (description or extensions) changed",
+        old_path: [
+            "#/paths/~1items/post",
+        ],
+        new_path: [
+            "#/paths/~1items/post",
+        ],
+        comparison: Input,
+        class: Trivial,
+        details: Metadata,
+    },
+]

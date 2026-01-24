@@ -1,0 +1,15 @@
+[
+  {
+    "op": "add",
+    "path": "/paths/~1hello~1{name}/get/parameters/-",
+    "value": {
+      "name": "format",
+      "in": "query",
+      "schema": {
+        "type": "string"
+      },
+      "description": "Output format",
+      "required": true
+    }
+  }
+]

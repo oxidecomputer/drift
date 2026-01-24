@@ -1,6 +1,6 @@
 --- ref-to-allof.json
 +++ patched
-@@ -37,7 +37,12 @@
+@@ -48,7 +48,12 @@
              ]
            },
            "via_ref": {

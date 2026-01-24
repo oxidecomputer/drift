@@ -1,6 +1,6 @@
 --- allof-to-oneof.json
 +++ patched
-@@ -13,12 +13,12 @@
+@@ -24,12 +24,12 @@
              }
            },
            "via_allof": {
