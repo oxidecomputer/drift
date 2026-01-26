@@ -3,6 +3,8 @@
 <!-- next-header -->
 ## Unreleased - ReleaseDate
 
+## [0.1.3] - 2026-01-26
+
 Fixed a few missing cases:
 
 - A new optional query param: forward-incompatible
@@ -22,6 +24,7 @@ Fixed a few missing cases:
 Initial release.
 
 <!-- next-url -->
+[0.1.3]: https://github.com/oxidecomputer/drift/releases/tag/drift-0.1.3
 [0.1.2]: https://github.com/oxidecomputer/drift/releases/tag/drift-0.1.2
 [0.1.1]: https://github.com/oxidecomputer/drift/releases/tag/drift-0.1.1
 [0.1.0]: https://github.com/oxidecomputer/drift/releases/tag/drift-0.1.0
