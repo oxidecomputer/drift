@@ -3,6 +3,12 @@
 <!-- next-header -->
 ## Unreleased - ReleaseDate
 
+Fixed a few missing cases:
+
+- A new optional query param: forward-incompatible
+- A request body is removed: forward-incompatible
+- Required changed between old and new bodies: backward or forward-incompatible, depending
+
 ## [0.1.2] - 2025-12-09
 
 - Improved support for trivial `allOf`/`anyOf`/`oneOf` constructions
