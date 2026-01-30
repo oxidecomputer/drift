@@ -1,0 +1,16 @@
+[
+  {
+    "op": "add",
+    "path": "/paths/~1items/post/responses/201/content",
+    "value": {
+      "application/json": {}
+    }
+  },
+  {
+    "op": "add",
+    "path": "/paths/~1items/post/responses/201/content/application~1json/schema",
+    "value": {
+      "type": "object"
+    }
+  }
+]

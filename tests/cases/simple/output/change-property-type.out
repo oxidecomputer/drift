@@ -1,6 +1,6 @@
 --- change-property-type.json
 +++ patched
-@@ -16,7 +16,7 @@
+@@ -50,7 +50,7 @@
          "properties": {
            "message": {
              "description": "The greeting message",

@@ -1,0 +1,15 @@
+--- change-default-response.json
++++ patched
+@@ -411,7 +411,7 @@
+                 }
+               }
+             },
+-            "description": "Error response"
++            "description": "Modified error response"
+           }
+         },
+         "summary": "Operation with default response"
+
+
+Result for patch:
+[]

@@ -1,0 +1,13 @@
+[
+  {
+    "op": "add",
+    "path": "/paths/~1ping/get/responses/200/content",
+    "value": {
+      "application/json": {
+        "schema": {
+          "type": "string"
+        }
+      }
+    }
+  }
+]

@@ -1,7 +1,7 @@
 --- remove-operation.json
 +++ patched
-@@ -168,18 +168,7 @@
-         "summary": "Update an item"
+@@ -321,18 +321,7 @@
+         "summary": "Get objects"
        }
      },
 -    "/ping": {
@@ -17,9 +17,9 @@
 -      }
 -    },
 +    "/ping": {},
-     "/tree": {
+     "/refs": {
        "get": {
-         "responses": {
+         "operationId": "get_refs",
 
 
 Result for patch:

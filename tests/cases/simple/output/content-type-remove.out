@@ -1,0 +1,34 @@
+--- content-type-remove.json
++++ patched
+@@ -225,13 +225,7 @@
+         ],
+         "responses": {
+           "200": {
+-            "content": {
+-              "application/json": {
+-                "schema": {
+-                  "$ref": "#/components/schemas/GreetingResponse"
+-                }
+-              }
+-            },
++            "content": {},
+             "description": "A friendly greeting"
+           }
+         },
+
+
+Result for patch:
+[
+    Change {
+        message: "content type 'application/json' was removed",
+        old_path: [
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json",
+        ],
+        new_path: [
+            "#/paths/~1hello~1{name}/get/responses/200/content",
+        ],
+        comparison: Output,
+        class: ForwardIncompatible,
+        details: Removed,
+    },
+]
