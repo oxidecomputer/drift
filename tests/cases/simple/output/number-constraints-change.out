@@ -1,0 +1,29 @@
+--- number-constraints-change.json
++++ patched
+@@ -162,6 +162,7 @@
+             "type": "boolean"
+           },
+           "ratio": {
++            "minimum": 0,
+             "type": "number"
+           }
+         },
+
+
+Result for patch:
+[
+    Change {
+        message: "number schema changed",
+        old_path: [
+            "#/components/schemas/TypedProperties/properties/ratio",
+            "#/paths/~1typed/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/TypedProperties/properties/ratio",
+            "#/paths/~1typed/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: Unhandled,
+        details: UnknownDifference,
+    },
+]

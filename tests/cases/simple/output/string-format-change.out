@@ -1,0 +1,29 @@
+--- string-format-change.json
++++ patched
+@@ -50,6 +50,7 @@
+         "properties": {
+           "message": {
+             "description": "The greeting message",
++            "format": "uuid",
+             "type": "string"
+           },
+           "not_a_number": {
+
+
+Result for patch:
+[
+    Change {
+        message: "string schema changed",
+        old_path: [
+            "#/components/schemas/GreetingResponse/properties/message",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/GreetingResponse/properties/message",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: Unhandled,
+        details: UnknownDifference,
+    },
+]
