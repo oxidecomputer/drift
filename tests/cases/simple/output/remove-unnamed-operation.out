@@ -1,0 +1,36 @@
+--- remove-unnamed-operation.json
++++ patched
+@@ -372,16 +372,6 @@
+         "summary": "Get typed properties"
+       }
+     },
+-    "/unnamed": {
+-      "get": {
+-        "responses": {
+-          "200": {
+-            "description": "Success"
+-          }
+-        },
+-        "summary": "Unnamed operation"
+-      }
+-    },
+     "/with-default": {
+       "get": {
+         "operationId": "with_default",
+
+
+Result for patch:
+[
+    Change {
+        message: "The operation <unnamed> was removed",
+        old_path: [
+            "#/paths/~1unnamed/get",
+        ],
+        new_path: [
+            "#/paths",
+        ],
+        comparison: Structural,
+        class: BackwardIncompatible,
+        details: Removed,
+    },
+]

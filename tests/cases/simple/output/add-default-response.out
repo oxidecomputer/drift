@@ -1,0 +1,36 @@
+--- add-default-response.json
++++ patched
+@@ -314,6 +314,16 @@
+         "responses": {
+           "200": {
+             "description": "Ping successful"
++          },
++          "default": {
++            "content": {
++              "application/json": {
++                "schema": {
++                  "$ref": "#/components/schemas/ErrorResponse"
++                }
++              }
++            },
++            "description": "Error response"
+           }
+         },
+         "summary": "Ping operation"
+
+
+Result for patch:
+[
+    Change {
+        message: "operation added a default response",
+        old_path: [
+            "#/paths/~1ping/get",
+        ],
+        new_path: [
+            "#/paths/~1ping/get",
+        ],
+        comparison: Output,
+        class: Unhandled,
+        details: Added,
+    },
+]

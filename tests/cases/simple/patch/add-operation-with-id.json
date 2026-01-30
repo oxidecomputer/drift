@@ -1,0 +1,17 @@
+[
+  {
+    "op": "add",
+    "path": "/paths/~1new-endpoint",
+    "value": {
+      "get": {
+        "operationId": "new_endpoint",
+        "summary": "New endpoint with explicit operationId",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    }
+  }
+]
