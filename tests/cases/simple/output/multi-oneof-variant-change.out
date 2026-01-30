@@ -1,0 +1,30 @@
+--- multi-oneof-variant-change.json
++++ patched
+@@ -113,7 +113,7 @@
+       "MultiOneOf": {
+         "oneOf": [
+           {
+-            "type": "string"
++            "type": "number"
+           },
+           {
+             "type": "integer"
+
+
+Result for patch:
+[
+    Change {
+        message: "schema types changed",
+        old_path: [
+            "#/components/schemas/MultiOneOf/oneOf/0",
+            "#/paths/~1oneof/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/MultiOneOf/oneOf/0",
+            "#/paths/~1oneof/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: Incompatible,
+        details: UnknownDifference,
+    },
+]

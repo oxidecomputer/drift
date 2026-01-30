@@ -1,0 +1,36 @@
+--- remove-default-response.json
++++ patched
+@@ -456,16 +456,6 @@
+         "responses": {
+           "200": {
+             "description": "Success"
+-          },
+-          "default": {
+-            "content": {
+-              "application/json": {
+-                "schema": {
+-                  "$ref": "#/components/schemas/ErrorResponse"
+-                }
+-              }
+-            },
+-            "description": "Error response"
+           }
+         },
+         "summary": "Operation with default response"
+
+
+Result for patch:
+[
+    Change {
+        message: "operation removed a default response",
+        old_path: [
+            "#/paths/~1with-default/get",
+        ],
+        new_path: [
+            "#/paths/~1with-default/get",
+        ],
+        comparison: Output,
+        class: Unhandled,
+        details: Removed,
+    },
+]

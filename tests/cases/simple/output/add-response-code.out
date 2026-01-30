@@ -1,0 +1,29 @@
+--- add-response-code.json
++++ patched
+@@ -382,6 +382,9 @@
+         "responses": {
+           "200": {
+             "description": "Ping successful"
++          },
++          "500": {
++            "description": "Internal server error"
+           }
+         },
+         "summary": "Ping operation"
+
+
+Result for patch:
+[
+    Change {
+        message: "operation added a new response code 500",
+        old_path: [
+            "#/paths/~1ping/get",
+        ],
+        new_path: [
+            "#/paths/~1ping/get",
+        ],
+        comparison: Output,
+        class: BackwardIncompatible,
+        details: Added,
+    },
+]

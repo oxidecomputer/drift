@@ -1,0 +1,29 @@
+--- remove-response-code.json
++++ patched
+@@ -454,9 +454,6 @@
+       "get": {
+         "operationId": "with_default",
+         "responses": {
+-          "200": {
+-            "description": "Success"
+-          },
+           "default": {
+             "content": {
+               "application/json": {
+
+
+Result for patch:
+[
+    Change {
+        message: "operation no longer responds with status 200",
+        old_path: [
+            "#/paths/~1with-default/get",
+        ],
+        new_path: [
+            "#/paths/~1with-default/get",
+        ],
+        comparison: Output,
+        class: ForwardIncompatible,
+        details: Removed,
+    },
+]

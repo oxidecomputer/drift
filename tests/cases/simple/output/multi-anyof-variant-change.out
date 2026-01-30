@@ -1,0 +1,30 @@
+--- multi-anyof-variant-change.json
++++ patched
+@@ -4,7 +4,7 @@
+       "AnyOfExample": {
+         "anyOf": [
+           {
+-            "type": "string"
++            "type": "integer"
+           },
+           {
+             "type": "number"
+
+
+Result for patch:
+[
+    Change {
+        message: "unhandled, 'anyOf' schema",
+        old_path: [
+            "#/components/schemas/AnyOfExample",
+            "#/paths/~1anyof/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/AnyOfExample",
+            "#/paths/~1anyof/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: Unhandled,
+        details: UnknownDifference,
+    },
+]

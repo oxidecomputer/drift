@@ -435,7 +435,7 @@ impl Compare {
                 if old_boolean != new_boolean {
                     self.schema_push_change(
                         dry_run,
-                        "integer schema changed",
+                        "boolean schema changed",
                         &old_schema_type,
                         &new_schema_type,
                         comparison,
@@ -733,6 +733,9 @@ impl Compare {
         Ok(ret)
     }
 
+    // NOTE: Single-element allOf schemas are flattened by `try_compare_flattened`
+    // before reaching this function. Multi-element allOf would require semantic
+    // merging for proper comparison, so we just do an equality check.
     fn compare_schema_type_all_of(
         &mut self,
         comparison: SchemaComparison,
@@ -740,37 +743,19 @@ impl Compare {
         old_all_of: Contextual<'_, &Vec<ReferenceOr<Schema>>>,
         new_all_of: Contextual<'_, &Vec<ReferenceOr<Schema>>>,
     ) -> anyhow::Result<bool> {
-        let old_schemas = old_all_of.as_ref();
-        let new_schemas = new_all_of.as_ref();
-
-        if old_schemas.len() != new_schemas.len() {
-            return self.schema_push_change(
+        if old_all_of.as_ref() != new_all_of.as_ref() {
+            self.schema_push_change(
                 dry_run,
-                "allOf schema count changed",
+                "unhandled, 'allOf' schema",
                 &old_all_of,
                 &new_all_of,
                 comparison,
                 ChangeClass::Unhandled,
                 ChangeDetails::UnknownDifference,
-            );
+            )
+        } else {
+            Ok(true)
         }
-
-        if old_schemas.len() != 1 {
-            return self.schema_push_change(
-                dry_run,
-                "allOf with multiple schemas is unhandled",
-                &old_all_of,
-                &new_all_of,
-                comparison,
-                ChangeClass::Unhandled,
-                ChangeDetails::UnknownDifference,
-            );
-        }
-
-        let old_single_schema = old_all_of.append_deref(old_all_of.first().unwrap(), "0");
-        let new_single_schema = new_all_of.append_deref(new_all_of.first().unwrap(), "0");
-
-        self.compare_schema_ref_helper(dry_run, comparison, old_single_schema, new_single_schema)
     }
 
     #[allow(clippy::too_many_arguments)]

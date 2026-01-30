@@ -1,0 +1,29 @@
+--- integer-format-change.json
++++ patched
+@@ -156,6 +156,7 @@
+       "TypedProperties": {
+         "properties": {
+           "count": {
++            "format": "int64",
+             "type": "integer"
+           },
+           "enabled": {
+
+
+Result for patch:
+[
+    Change {
+        message: "integer schema changed",
+        old_path: [
+            "#/components/schemas/TypedProperties/properties/count",
+            "#/paths/~1typed/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/TypedProperties/properties/count",
+            "#/paths/~1typed/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: Unhandled,
+        details: UnknownDifference,
+    },
+]

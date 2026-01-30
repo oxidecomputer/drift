@@ -1,0 +1,36 @@
+--- remove-optional-body.json
++++ patched
+@@ -296,16 +296,6 @@
+       },
+       "put": {
+         "operationId": "update_item",
+-        "requestBody": {
+-          "content": {
+-            "application/json": {
+-              "schema": {
+-                "$ref": "#/components/schemas/UpdateItem"
+-              }
+-            }
+-          },
+-          "required": false
+-        },
+         "responses": {
+           "200": {
+             "description": "Item updated"
+
+
+Result for patch:
+[
+    Change {
+        message: "an optional body parameter was removed",
+        old_path: [
+            "#/paths/~1items/put",
+        ],
+        new_path: [
+            "#/paths/~1items/put",
+        ],
+        comparison: Input,
+        class: ForwardIncompatible,
+        details: Removed,
+    },
+]

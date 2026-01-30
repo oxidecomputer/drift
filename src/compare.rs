@@ -505,26 +505,61 @@ impl Compare {
             b_unique,
         } = SetCompare::new(old_content.iter(), new_content.iter());
 
-        // TODO
-        assert!(a_unique.is_empty());
-        assert!(b_unique.is_empty());
+        // Content types that were removed.
+        for (mime_type, _) in a_unique {
+            self.push_change(
+                format!("content type '{}' was removed", mime_type),
+                &old_content.context().append(mime_type),
+                new_content,
+                comparison.into(),
+                ChangeClass::ForwardIncompatible,
+                ChangeDetails::Removed,
+            );
+        }
+
+        // Content types that were added.
+        for (mime_type, _) in b_unique {
+            self.push_change(
+                format!("content type '{}' was added", mime_type),
+                old_content,
+                &new_content.context().append(mime_type),
+                comparison.into(),
+                ChangeClass::BackwardIncompatible,
+                ChangeDetails::Added,
+            );
+        }
 
         for (mime_type, (old_media, new_media)) in common {
+            let old_media_context = old_content.context().append(mime_type);
+            let new_media_context = new_content.context().append(mime_type);
+
             match (&old_media.schema, &new_media.schema) {
                 (None, None) => {}
                 (None, Some(_)) => {
-                    todo!()
+                    self.push_change(
+                        "schema added to response content",
+                        &old_media_context,
+                        &new_media_context,
+                        comparison.into(),
+                        ChangeClass::BackwardIncompatible,
+                        ChangeDetails::Added,
+                    );
                 }
-                (Some(_), None) => todo!(),
+                (Some(_), None) => {
+                    self.push_change(
+                        "schema removed from response content",
+                        &old_media_context,
+                        &new_media_context,
+                        comparison.into(),
+                        ChangeClass::ForwardIncompatible,
+                        ChangeDetails::Removed,
+                    );
+                }
                 (Some(old_schema), Some(new_schema)) => {
-                    let old_schema = Contextual::new(
-                        old_content.context().append(mime_type).append("schema"),
-                        old_schema,
-                    );
-                    let new_schema = Contextual::new(
-                        new_content.context().append(mime_type).append("schema"),
-                        new_schema,
-                    );
+                    let old_schema =
+                        Contextual::new(old_media_context.append("schema"), old_schema);
+                    let new_schema =
+                        Contextual::new(new_media_context.append("schema"), new_schema);
 
                     self.compare_schema_ref(comparison, old_schema, new_schema)?;
                 }
