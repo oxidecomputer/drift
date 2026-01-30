@@ -1,6 +1,6 @@
 --- type-indirection.json
 +++ patched
-@@ -15,8 +15,7 @@
+@@ -49,8 +49,7 @@
        "GreetingResponse": {
          "properties": {
            "message": {
@@ -10,7 +10,7 @@
            },
            "not_a_number": {
              "not": {
-@@ -56,6 +55,13 @@
+@@ -90,6 +89,13 @@
          ],
          "type": "object"
        },
@@ -21,9 +21,9 @@
 +          "jank": true
 +        }
 +      },
-       "SubType": {
-         "properties": {
-           "value": {
+       "MultiAllOf": {
+         "allOf": [
+           {
 
 
 Result for patch:

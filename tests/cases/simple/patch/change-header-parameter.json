@@ -1,0 +1,7 @@
+[
+  {
+    "op": "replace",
+    "path": "/paths/~1with-header/get/parameters/0/schema/type",
+    "value": "integer"
+  }
+]
