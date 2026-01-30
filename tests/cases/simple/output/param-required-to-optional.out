@@ -1,0 +1,28 @@
+--- param-required-to-optional.json
++++ patched
+@@ -410,7 +410,7 @@
+           {
+             "in": "header",
+             "name": "X-Request-Id",
+-            "required": true,
++            "required": false,
+             "schema": {
+               "type": "string"
+             }
+
+
+Result for patch:
+[
+    Change {
+        message: "The parameter 'X-Request-Id' was required and is now optional",
+        old_path: [
+            "#/paths/~1with-header/get/parameters/0",
+        ],
+        new_path: [
+            "#/paths/~1with-header/get/parameters/0",
+        ],
+        comparison: Input,
+        class: ForwardIncompatible,
+        details: LessStrict,
+    },
+]
