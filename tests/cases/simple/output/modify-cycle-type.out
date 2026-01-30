@@ -1,6 +1,6 @@
 --- modify-cycle-type.json
 +++ patched
-@@ -67,10 +67,7 @@
+@@ -145,10 +145,7 @@
        "Tree": {
          "properties": {
            "children": {
