@@ -1,6 +1,6 @@
 --- add-operation.json
 +++ patched
-@@ -92,6 +92,16 @@
+@@ -184,6 +184,16 @@
    },
    "openapi": "3.0.0",
    "paths": {
