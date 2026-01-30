@@ -1,0 +1,16 @@
+[
+  {
+    "op": "add",
+    "path": "/paths/~1ping/get/parameters",
+    "value": [
+      {
+        "name": "X-Trace-Id",
+        "in": "header",
+        "schema": {
+          "type": "string"
+        },
+        "required": false
+      }
+    ]
+  }
+]

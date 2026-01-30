@@ -1,0 +1,16 @@
+[
+  {
+    "op": "add",
+    "path": "/paths/~1ping/get/parameters",
+    "value": [
+      {
+        "name": "tracking",
+        "in": "cookie",
+        "schema": {
+          "type": "string"
+        },
+        "required": false
+      }
+    ]
+  }
+]

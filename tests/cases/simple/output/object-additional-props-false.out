@@ -1,0 +1,32 @@
+--- object-additional-props-false.json
++++ patched
+@@ -121,9 +121,7 @@
+         ]
+       },
+       "ObjectWithConstraints": {
+-        "additionalProperties": {
+-          "type": "string"
+-        },
++        "additionalProperties": false,
+         "maxProperties": 5,
+         "minProperties": 1,
+         "type": "object"
+
+
+Result for patch:
+[
+    Change {
+        message: "object additionalProperties changed",
+        old_path: [
+            "#/components/schemas/ObjectWithConstraints",
+            "#/paths/~1objects/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/ObjectWithConstraints",
+            "#/paths/~1objects/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: Unhandled,
+        details: UnknownDifference,
+    },
+]
