@@ -1,0 +1,33 @@
+--- response-schema-add.json
++++ patched
+@@ -327,6 +327,13 @@
+         "operationId": "ping",
+         "responses": {
+           "200": {
++            "content": {
++              "application/json": {
++                "schema": {
++                  "type": "string"
++                }
++              }
++            },
+             "description": "Ping successful"
+           }
+         },
+
+
+Result for patch:
+[
+    Change {
+        message: "content type 'application/json' was added",
+        old_path: [
+            "#/paths/~1ping/get/responses/200/content",
+        ],
+        new_path: [
+            "#/paths/~1ping/get/responses/200/content/application~1json",
+        ],
+        comparison: Output,
+        class: BackwardIncompatible,
+        details: Added,
+    },
+]

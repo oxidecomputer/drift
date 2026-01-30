@@ -1,6 +1,6 @@
 --- add-type-extension.json
 +++ patched
-@@ -54,7 +54,10 @@
+@@ -88,7 +88,10 @@
          "required": [
            "message"
          ],
@@ -10,8 +10,8 @@
 +          "mumble": "frotz"
 +        }
        },
-       "SubType": {
-         "properties": {
+       "MultiAllOf": {
+         "allOf": [
 
 
 Result for patch:

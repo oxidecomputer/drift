@@ -110,6 +110,163 @@
           }
         }
       }
+    },
+    "/unnamed": {
+      "get": {
+        "summary": "Unnamed operation",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/with-header": {
+      "get": {
+        "operationId": "with_header",
+        "summary": "Operation with header and cookie params",
+        "parameters": [
+          {
+            "name": "X-Request-Id",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "session",
+            "in": "cookie",
+            "schema": {
+              "type": "string"
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/with-default": {
+      "get": {
+        "operationId": "with_default",
+        "summary": "Operation with default response",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "default": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/no-body": {
+      "post": {
+        "operationId": "no_body",
+        "summary": "POST without request body",
+        "responses": {
+          "204": {
+            "description": "No content"
+          }
+        }
+      }
+    },
+    "/no-schema": {
+      "get": {
+        "operationId": "no_schema",
+        "summary": "Response with content but no schema",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/arrays": {
+      "get": {
+        "operationId": "get_arrays",
+        "summary": "Get arrays",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArrayWithConstraints"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/objects": {
+      "get": {
+        "operationId": "get_objects",
+        "summary": "Get objects",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ObjectWithConstraints"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/typed": {
+      "get": {
+        "operationId": "get_typed",
+        "summary": "Get typed properties",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TypedProperties"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/refs": {
+      "get": {
+        "operationId": "get_refs",
+        "summary": "Get via ref chain",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefChainA"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -193,6 +350,95 @@
             "type": "string"
           }
         }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "code": {
+            "type": "integer"
+          }
+        },
+        "required": ["message", "code"]
+      },
+      "ArrayWithConstraints": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "minItems": 1,
+        "maxItems": 10,
+        "uniqueItems": false
+      },
+      "ObjectWithConstraints": {
+        "type": "object",
+        "minProperties": 1,
+        "maxProperties": 5,
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "MultiOneOf": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "integer"
+          }
+        ]
+      },
+      "MultiAllOf": {
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "AnyOfExample": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "number"
+          }
+        ]
+      },
+      "TypedProperties": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "integer"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "ratio": {
+            "type": "number"
+          }
+        }
+      },
+      "RefChainA": {
+        "$ref": "#/components/schemas/RefChainB"
+      },
+      "RefChainB": {
+        "$ref": "#/components/schemas/SubType"
       }
     }
   }

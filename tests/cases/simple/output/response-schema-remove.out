@@ -1,0 +1,32 @@
+--- response-schema-remove.json
++++ patched
+@@ -226,11 +226,7 @@
+         "responses": {
+           "200": {
+             "content": {
+-              "application/json": {
+-                "schema": {
+-                  "$ref": "#/components/schemas/GreetingResponse"
+-                }
+-              }
++              "application/json": {}
+             },
+             "description": "A friendly greeting"
+           }
+
+
+Result for patch:
+[
+    Change {
+        message: "schema removed from response content",
+        old_path: [
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json",
+        ],
+        new_path: [
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json",
+        ],
+        comparison: Output,
+        class: ForwardIncompatible,
+        details: Removed,
+    },
+]

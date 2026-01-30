@@ -1,0 +1,28 @@
+--- change-header-parameter.json
++++ patched
+@@ -426,7 +426,7 @@
+             "name": "X-Request-Id",
+             "required": true,
+             "schema": {
+-              "type": "string"
++              "type": "integer"
+             }
+           },
+           {
+
+
+Result for patch:
+[
+    Change {
+        message: "schema types changed",
+        old_path: [
+            "#/paths/~1with-header/get/parameters/0/schema",
+        ],
+        new_path: [
+            "#/paths/~1with-header/get/parameters/0/schema",
+        ],
+        comparison: Input,
+        class: Incompatible,
+        details: UnknownDifference,
+    },
+]

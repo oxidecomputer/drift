@@ -1,0 +1,16 @@
+[
+  {
+    "op": "add",
+    "path": "/paths/~1ping/get/responses/default",
+    "value": {
+      "description": "Error response",
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "#/components/schemas/ErrorResponse"
+          }
+        }
+      }
+    }
+  }
+]
