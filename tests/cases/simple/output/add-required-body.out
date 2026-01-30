@@ -1,0 +1,41 @@
+--- add-required-body.json
++++ patched
+@@ -281,6 +281,21 @@
+     "/no-body": {
+       "post": {
+         "operationId": "no_body",
++        "requestBody": {
++          "content": {
++            "application/json": {
++              "schema": {
++                "properties": {
++                  "data": {
++                    "type": "string"
++                  }
++                },
++                "type": "object"
++              }
++            }
++          },
++          "required": true
++        },
+         "responses": {
+           "204": {
+             "description": "No content"
+
+
+Result for patch:
+[
+    Change {
+        message: "no body parameter was specified and now one is required",
+        old_path: [
+            "#/paths/~1no-body/post",
+        ],
+        new_path: [
+            "#/paths/~1no-body/post",
+        ],
+        comparison: Input,
+        class: Incompatible,
+        details: AddedRequired,
+    },
+]

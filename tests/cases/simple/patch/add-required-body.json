@@ -1,0 +1,21 @@
+[
+  {
+    "op": "add",
+    "path": "/paths/~1no-body/post/requestBody",
+    "value": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+]
