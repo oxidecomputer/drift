@@ -1,7 +1,7 @@
 --- remove-operation.json
 +++ patched
-@@ -271,18 +271,7 @@
-         "summary": "POST without request body"
+@@ -307,18 +307,7 @@
+         "summary": "Get objects"
        }
      },
 -    "/ping": {
@@ -17,9 +17,9 @@
 -      }
 -    },
 +    "/ping": {},
-     "/tree": {
+     "/refs": {
        "get": {
-         "responses": {
+         "operationId": "get_refs",
 
 
 Result for patch:

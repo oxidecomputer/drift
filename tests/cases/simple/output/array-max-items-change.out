@@ -1,0 +1,30 @@
+--- array-max-items-change.json
++++ patched
+@@ -15,7 +15,7 @@
+         "items": {
+           "type": "string"
+         },
+-        "maxItems": 10,
++        "maxItems": 20,
+         "minItems": 1,
+         "type": "array",
+         "uniqueItems": false
+
+
+Result for patch:
+[
+    Change {
+        message: "array maxItems changed",
+        old_path: [
+            "#/components/schemas/ArrayWithConstraints",
+            "#/paths/~1arrays/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/ArrayWithConstraints",
+            "#/paths/~1arrays/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: Unhandled,
+        details: UnknownDifference,
+    },
+]

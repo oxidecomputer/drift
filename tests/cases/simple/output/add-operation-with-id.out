@@ -1,6 +1,6 @@
 --- add-operation-with-id.json
 +++ patched
-@@ -260,6 +260,17 @@
+@@ -278,6 +278,17 @@
          "summary": "Update an item"
        }
      },

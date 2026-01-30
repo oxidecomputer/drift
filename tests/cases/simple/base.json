@@ -181,6 +181,78 @@
           }
         }
       }
+    },
+    "/arrays": {
+      "get": {
+        "operationId": "get_arrays",
+        "summary": "Get arrays",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArrayWithConstraints"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/objects": {
+      "get": {
+        "operationId": "get_objects",
+        "summary": "Get objects",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ObjectWithConstraints"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/typed": {
+      "get": {
+        "operationId": "get_typed",
+        "summary": "Get typed properties",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TypedProperties"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/refs": {
+      "get": {
+        "operationId": "get_refs",
+        "summary": "Get via ref chain",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefChainA"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
