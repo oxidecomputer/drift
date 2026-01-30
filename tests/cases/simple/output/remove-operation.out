@@ -1,7 +1,7 @@
 --- remove-operation.json
 +++ patched
-@@ -168,18 +168,7 @@
-         "summary": "Update an item"
+@@ -271,18 +271,7 @@
+         "summary": "POST without request body"
        }
      },
 -    "/ping": {

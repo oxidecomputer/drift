@@ -1,0 +1,37 @@
+--- add-operation-with-id.json
++++ patched
+@@ -260,6 +260,17 @@
+         "summary": "Update an item"
+       }
+     },
++    "/new-endpoint": {
++      "get": {
++        "operationId": "new_endpoint",
++        "responses": {
++          "200": {
++            "description": "Success"
++          }
++        },
++        "summary": "New endpoint with explicit operationId"
++      }
++    },
+     "/no-body": {
+       "post": {
+         "operationId": "no_body",
+
+
+Result for patch:
+[
+    Change {
+        message: "The operation new_endpoint was added",
+        old_path: [
+            "#/paths",
+        ],
+        new_path: [
+            "#/paths/~1new-endpoint/get",
+        ],
+        comparison: Structural,
+        class: ForwardIncompatible,
+        details: Added,
+    },
+]
