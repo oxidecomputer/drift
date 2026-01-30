@@ -1,6 +1,6 @@
 --- not-inner-to-allof.json
 +++ patched
-@@ -20,7 +20,12 @@
+@@ -54,7 +54,12 @@
            },
            "not_a_number": {
              "not": {

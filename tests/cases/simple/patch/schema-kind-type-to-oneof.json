@@ -1,0 +1,22 @@
+[
+  {
+    "op": "remove",
+    "path": "/components/schemas/SubType/type"
+  },
+  {
+    "op": "remove",
+    "path": "/components/schemas/SubType/properties"
+  },
+  {
+    "op": "add",
+    "path": "/components/schemas/SubType/oneOf",
+    "value": [
+      {
+        "type": "string"
+      },
+      {
+        "type": "integer"
+      }
+    ]
+  }
+]
