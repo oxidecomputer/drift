@@ -1,0 +1,30 @@
+--- array-unique-items-change.json
++++ patched
+@@ -18,7 +18,7 @@
+         "maxItems": 10,
+         "minItems": 1,
+         "type": "array",
+-        "uniqueItems": false
++        "uniqueItems": true
+       },
+       "CreateItem": {
+         "properties": {
+
+
+Result for patch:
+[
+    Change {
+        message: "array uniqueItems changed",
+        old_path: [
+            "#/components/schemas/ArrayWithConstraints",
+            "#/paths/~1arrays/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/ArrayWithConstraints",
+            "#/paths/~1arrays/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: Unhandled,
+        details: UnknownDifference,
+    },
+]

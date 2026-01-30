@@ -1,0 +1,9 @@
+[
+  {
+    "op": "add",
+    "path": "/components/schemas/Tree/properties/children/items",
+    "value": {
+      "type": "string"
+    }
+  }
+]

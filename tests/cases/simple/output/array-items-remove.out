@@ -1,0 +1,31 @@
+--- array-items-remove.json
++++ patched
+@@ -146,7 +146,7 @@
+         "properties": {
+           "children": {
+             "items": {
+-              "$ref": "#/components/schemas/Tree"
++              "type": "string"
+             },
+             "type": "array"
+           }
+
+
+Result for patch:
+[
+    Change {
+        message: "schema types changed",
+        old_path: [
+            "#/components/schemas/Tree",
+            "#/components/schemas/Tree/properties/children/items/$ref",
+            "#/paths/~1tree/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/Tree/properties/children/items",
+            "#/paths/~1tree/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: Incompatible,
+        details: UnknownDifference,
+    },
+]

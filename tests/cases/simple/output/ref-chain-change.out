@@ -1,0 +1,52 @@
+--- ref-chain-change.json
++++ patched
+@@ -132,7 +132,7 @@
+         "$ref": "#/components/schemas/RefChainB"
+       },
+       "RefChainB": {
+-        "$ref": "#/components/schemas/SubType"
++        "$ref": "#/components/schemas/ErrorResponse"
+       },
+       "SubType": {
+         "properties": {
+
+
+Result for patch:
+[
+    Change {
+        message: "object required properties changed",
+        old_path: [
+            "#/components/schemas/SubType",
+            "#/components/schemas/RefChainB/$ref",
+            "#/components/schemas/RefChainA/$ref",
+            "#/paths/~1refs/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/ErrorResponse",
+            "#/components/schemas/RefChainB/$ref",
+            "#/components/schemas/RefChainA/$ref",
+            "#/paths/~1refs/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: Unhandled,
+        details: UnknownDifference,
+    },
+    Change {
+        message: "object properties changed",
+        old_path: [
+            "#/components/schemas/SubType",
+            "#/components/schemas/RefChainB/$ref",
+            "#/components/schemas/RefChainA/$ref",
+            "#/paths/~1refs/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/ErrorResponse",
+            "#/components/schemas/RefChainB/$ref",
+            "#/components/schemas/RefChainA/$ref",
+            "#/paths/~1refs/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: Unhandled,
+        details: UnknownDifference,
+    },
+]

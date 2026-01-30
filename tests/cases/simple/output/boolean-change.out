@@ -1,0 +1,29 @@
+--- boolean-change.json
++++ patched
+@@ -159,6 +159,7 @@
+             "type": "integer"
+           },
+           "enabled": {
++            "default": false,
+             "type": "boolean"
+           },
+           "ratio": {
+
+
+Result for patch:
+[
+    Change {
+        message: "schema metadata changed",
+        old_path: [
+            "#/components/schemas/TypedProperties/properties/enabled",
+            "#/paths/~1typed/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/TypedProperties/properties/enabled",
+            "#/paths/~1typed/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: Trivial,
+        details: Metadata,
+    },
+]

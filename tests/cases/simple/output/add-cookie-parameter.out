@@ -1,0 +1,36 @@
+--- add-cookie-parameter.json
++++ patched
+@@ -311,6 +311,16 @@
+       "get": {
+         "description": "A simple ping endpoint that does nothing.",
+         "operationId": "ping",
++        "parameters": [
++          {
++            "in": "cookie",
++            "name": "tracking",
++            "required": false,
++            "schema": {
++              "type": "string"
++            }
++          }
++        ],
+         "responses": {
+           "200": {
+             "description": "Ping successful"
+
+
+Result for patch:
+[
+    Change {
+        message: "A new, optional parameter 'tracking' was added",
+        old_path: [
+            "#/paths/~1ping/get",
+        ],
+        new_path: [
+            "#/paths/~1ping/get/parameters/0",
+        ],
+        comparison: Input,
+        class: ForwardIncompatible,
+        details: Added,
+    },
+]

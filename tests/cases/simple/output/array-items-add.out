@@ -1,0 +1,31 @@
+--- array-items-add.json
++++ patched
+@@ -12,9 +12,6 @@
+         ]
+       },
+       "ArrayWithConstraints": {
+-        "items": {
+-          "type": "string"
+-        },
+         "maxItems": 10,
+         "minItems": 1,
+         "type": "array",
+
+
+Result for patch:
+[
+    Change {
+        message: "array items changed",
+        old_path: [
+            "#/components/schemas/ArrayWithConstraints",
+            "#/paths/~1arrays/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/ArrayWithConstraints",
+            "#/paths/~1arrays/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: Unhandled,
+        details: UnknownDifference,
+    },
+]

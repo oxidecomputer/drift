@@ -1,0 +1,30 @@
+--- object-additional-props-schema-change.json
++++ patched
+@@ -122,7 +122,7 @@
+       },
+       "ObjectWithConstraints": {
+         "additionalProperties": {
+-          "type": "string"
++          "type": "integer"
+         },
+         "maxProperties": 5,
+         "minProperties": 1,
+
+
+Result for patch:
+[
+    Change {
+        message: "schema types changed",
+        old_path: [
+            "#/components/schemas/ObjectWithConstraints/additionalProperties",
+            "#/paths/~1objects/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/ObjectWithConstraints/additionalProperties",
+            "#/paths/~1objects/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: Incompatible,
+        details: UnknownDifference,
+    },
+]
