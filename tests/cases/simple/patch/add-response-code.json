@@ -1,0 +1,9 @@
+[
+  {
+    "op": "add",
+    "path": "/paths/~1ping/get/responses/500",
+    "value": {
+      "description": "Internal server error"
+    }
+  }
+]
