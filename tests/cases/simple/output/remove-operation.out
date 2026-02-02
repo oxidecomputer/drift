@@ -1,6 +1,6 @@
 --- remove-operation.json
 +++ patched
-@@ -321,18 +321,7 @@
+@@ -307,18 +307,7 @@
          "summary": "Get objects"
        }
      },

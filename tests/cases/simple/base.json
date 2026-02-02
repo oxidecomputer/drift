@@ -182,20 +182,6 @@
         }
       }
     },
-    "/no-schema": {
-      "get": {
-        "operationId": "no_schema",
-        "summary": "Response with content but no schema",
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {}
-            }
-          }
-        }
-      }
-    },
     "/arrays": {
       "get": {
         "operationId": "get_arrays",

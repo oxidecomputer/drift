@@ -1,6 +1,6 @@
 --- add-default-response.json
 +++ patched
-@@ -328,6 +328,16 @@
+@@ -314,6 +314,16 @@
          "responses": {
            "200": {
              "description": "Ping successful"
