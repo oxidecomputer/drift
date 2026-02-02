@@ -1,6 +1,6 @@
 --- remove-response-code.json
 +++ patched
-@@ -314,9 +314,6 @@
+@@ -386,9 +386,6 @@
        "get": {
          "operationId": "with_default",
          "responses": {

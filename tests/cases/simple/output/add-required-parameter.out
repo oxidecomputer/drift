@@ -1,6 +1,6 @@
 --- add-required-parameter.json
 +++ patched
-@@ -203,6 +203,15 @@
+@@ -221,6 +221,15 @@
              "schema": {
                "type": "string"
              }

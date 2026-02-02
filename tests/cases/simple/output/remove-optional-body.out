@@ -1,6 +1,6 @@
 --- remove-optional-body.json
 +++ patched
-@@ -242,16 +242,6 @@
+@@ -260,16 +260,6 @@
        },
        "put": {
          "operationId": "update_item",

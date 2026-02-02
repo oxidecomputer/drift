@@ -1,6 +1,6 @@
 --- remove-required-body.json
 +++ patched
-@@ -223,16 +223,6 @@
+@@ -241,16 +241,6 @@
      "/items": {
        "post": {
          "operationId": "create_item",

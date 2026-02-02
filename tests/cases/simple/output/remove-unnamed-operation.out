@@ -1,7 +1,7 @@
 --- remove-unnamed-operation.json
 +++ patched
-@@ -300,16 +300,6 @@
-         "summary": "Get a tree structure"
+@@ -372,16 +372,6 @@
+         "summary": "Get typed properties"
        }
      },
 -    "/unnamed": {

@@ -1,6 +1,6 @@
 --- add-header-parameter.json
 +++ patched
-@@ -275,6 +275,16 @@
+@@ -311,6 +311,16 @@
        "get": {
          "description": "A simple ping endpoint that does nothing.",
          "operationId": "ping",
