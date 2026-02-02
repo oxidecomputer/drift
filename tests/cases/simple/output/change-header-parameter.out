@@ -1,14 +1,14 @@
---- change-operation-parameter-type.json
+--- change-header-parameter.json
 +++ patched
-@@ -201,7 +201,7 @@
-             "name": "language",
-             "required": false,
+@@ -340,7 +340,7 @@
+             "name": "X-Request-Id",
+             "required": true,
              "schema": {
 -              "type": "string"
 +              "type": "integer"
              }
-           }
-         ],
+           },
+           {
 
 
 Result for patch:
@@ -16,10 +16,10 @@ Result for patch:
     Change {
         message: "schema types changed",
         old_path: [
-            "#/paths/~1hello~1{name}/get/parameters/1/schema",
+            "#/paths/~1with-header/get/parameters/0/schema",
         ],
         new_path: [
-            "#/paths/~1hello~1{name}/get/parameters/1/schema",
+            "#/paths/~1with-header/get/parameters/0/schema",
         ],
         comparison: Input,
         class: Incompatible,
