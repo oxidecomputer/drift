@@ -1,6 +1,6 @@
 --- remove-header-parameter.json
 +++ patched
-@@ -476,14 +476,6 @@
+@@ -462,14 +462,6 @@
          "operationId": "with_header",
          "parameters": [
            {

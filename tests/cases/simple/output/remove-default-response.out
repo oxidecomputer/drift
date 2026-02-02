@@ -1,6 +1,6 @@
 --- remove-default-response.json
 +++ patched
-@@ -456,16 +456,6 @@
+@@ -442,16 +442,6 @@
          "responses": {
            "200": {
              "description": "Success"

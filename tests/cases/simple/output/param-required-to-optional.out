@@ -1,6 +1,6 @@
 --- param-required-to-optional.json
 +++ patched
-@@ -478,7 +478,7 @@
+@@ -464,7 +464,7 @@
            {
              "in": "header",
              "name": "X-Request-Id",

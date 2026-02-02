@@ -1,6 +1,6 @@
 --- add-response-code.json
 +++ patched
-@@ -382,6 +382,9 @@
+@@ -368,6 +368,9 @@
          "responses": {
            "200": {
              "description": "Ping successful"

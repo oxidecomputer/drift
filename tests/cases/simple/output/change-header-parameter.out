@@ -1,6 +1,6 @@
 --- change-header-parameter.json
 +++ patched
-@@ -480,7 +480,7 @@
+@@ -466,7 +466,7 @@
              "name": "X-Request-Id",
              "required": true,
              "schema": {

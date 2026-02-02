@@ -1,6 +1,0 @@
-[
-  {
-    "op": "remove",
-    "path": "/paths/~1hello~1{name}/get/responses/200/content/application~1json"
-  }
-]

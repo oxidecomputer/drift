@@ -1,0 +1,31 @@
+--- boolean-enum-change.json
++++ patched
+@@ -159,6 +159,9 @@
+             "type": "integer"
+           },
+           "enabled": {
++            "enum": [
++              true
++            ],
+             "type": "boolean"
+           },
+           "ratio": {
+
+
+Result for patch:
+[
+    Change {
+        message: "boolean schema changed",
+        old_path: [
+            "#/components/schemas/TypedProperties/properties/enabled",
+            "#/paths/~1typed/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/TypedProperties/properties/enabled",
+            "#/paths/~1typed/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: Unhandled,
+        details: UnknownDifference,
+    },
+]

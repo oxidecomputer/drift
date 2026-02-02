@@ -1,9 +1,0 @@
-[
-  {
-    "op": "add",
-    "path": "/paths/~1no-schema/get/responses/200/content/application~1json/schema",
-    "value": {
-      "type": "string"
-    }
-  }
-]
