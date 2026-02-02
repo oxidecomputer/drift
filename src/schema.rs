@@ -93,19 +93,8 @@ impl Compare {
                 },
             ) => {
                 // Both old and new are single-element wrappers.
-                //
-                // Compare effective nullable (wrapper || inner) since nullable
-                // is a semantic property, not metadata.
-                let old_nullable = get_effective_nullable(old_schema)?;
-                let new_nullable = get_effective_nullable(new_schema)?;
-                let _ = self.compare_wrapper_nullable(
-                    dry_run,
-                    comparison,
-                    old_schema,
-                    new_schema,
-                    old_nullable,
-                    new_nullable,
-                )?;
+                let _ =
+                    self.compare_wrapper_nullable(dry_run, comparison, old_schema, new_schema)?;
                 if has_non_nullable_metadata_diff(old_meta, new_meta) {
                     self.push_change(
                         "schema metadata changed",
@@ -131,19 +120,8 @@ impl Compare {
             ) => {
                 // Old is a single-element wrapper, new is a bare ref or inline
                 // type.
-                //
-                // Compare effective nullable (wrapper || inner) since nullable
-                // is a semantic property, not metadata.
-                let old_nullable = get_effective_nullable(old_schema)?;
-                let new_nullable = get_effective_nullable(new_schema)?;
-                let _ = self.compare_wrapper_nullable(
-                    dry_run,
-                    comparison,
-                    old_schema,
-                    new_schema,
-                    old_nullable,
-                    new_nullable,
-                )?;
+                let _ =
+                    self.compare_wrapper_nullable(dry_run, comparison, old_schema, new_schema)?;
                 if has_meaningful_non_nullable_metadata(old_meta) {
                     self.push_change(
                         "schema metadata removed",
@@ -171,19 +149,8 @@ impl Compare {
             ) => {
                 // Old is a bare ref or inline type, new is a single-element
                 // wrapper.
-                //
-                // Compare effective nullable (wrapper || inner) since nullable
-                // is a semantic property, not metadata.
-                let old_nullable = get_effective_nullable(old_schema)?;
-                let new_nullable = get_effective_nullable(new_schema)?;
-                let _ = self.compare_wrapper_nullable(
-                    dry_run,
-                    comparison,
-                    old_schema,
-                    new_schema,
-                    old_nullable,
-                    new_nullable,
-                )?;
+                let _ =
+                    self.compare_wrapper_nullable(dry_run, comparison, old_schema, new_schema)?;
                 if has_meaningful_non_nullable_metadata(new_meta) {
                     self.push_change(
                         "schema metadata added",
@@ -217,15 +184,19 @@ impl Compare {
     ///
     /// This is used during wrapper flattening to ensure nullable changes at the
     /// wrapper level are properly classified (not treated as trivial metadata).
-    fn compare_wrapper_nullable<T, U>(
+    ///
+    /// Computes the effective nullable for each schema (wrapper || inner for
+    /// single-element wrappers).
+    fn compare_wrapper_nullable(
         &mut self,
         dry_run: bool,
         comparison: SchemaComparison,
-        old_schema: &Contextual<'_, T>,
-        new_schema: &Contextual<'_, U>,
-        old_nullable: bool,
-        new_nullable: bool,
+        old_schema: &Contextual<'_, &ReferenceOr<Schema>>,
+        new_schema: &Contextual<'_, &ReferenceOr<Schema>>,
     ) -> anyhow::Result<bool> {
+        let old_nullable = get_effective_nullable(old_schema)?;
+        let new_nullable = get_effective_nullable(new_schema)?;
+
         if old_nullable == new_nullable {
             return Ok(true);
         }
@@ -251,13 +222,7 @@ impl Compare {
         };
 
         self.schema_push_change(
-            dry_run,
-            message,
-            old_schema,
-            new_schema,
-            comparison,
-            class,
-            details,
+            dry_run, message, old_schema, new_schema, comparison, class, details,
         )
     }
 
