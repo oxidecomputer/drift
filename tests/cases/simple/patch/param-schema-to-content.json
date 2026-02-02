@@ -1,0 +1,17 @@
+[
+  {
+    "op": "remove",
+    "path": "/paths/~1hello~1{name}/get/parameters/1/schema"
+  },
+  {
+    "op": "add",
+    "path": "/paths/~1hello~1{name}/get/parameters/1/content",
+    "value": {
+      "application/json": {
+        "schema": {
+          "type": "string"
+        }
+      }
+    }
+  }
+]

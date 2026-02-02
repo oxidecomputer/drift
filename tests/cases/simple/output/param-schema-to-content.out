@@ -1,0 +1,41 @@
+--- param-schema-to-content.json
++++ patched
+@@ -214,13 +214,17 @@
+             }
+           },
+           {
++            "content": {
++              "application/json": {
++                "schema": {
++                  "type": "string"
++                }
++              }
++            },
+             "description": "Language for the greeting",
+             "in": "query",
+             "name": "language",
+-            "required": false,
+-            "schema": {
+-              "type": "string"
+-            }
++            "required": false
+           }
+         ],
+         "responses": {
+
+
+Result for patch:
+[
+    Change {
+        message: "Unhandled change to parameter schema or content",
+        old_path: [
+            "#/paths/~1hello~1{name}/get/parameters/1",
+        ],
+        new_path: [
+            "#/paths/~1hello~1{name}/get/parameters/1",
+        ],
+        comparison: Input,
+        class: Unhandled,
+        details: UnknownDifference,
+    },
+]
