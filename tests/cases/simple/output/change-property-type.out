@@ -1,14 +1,14 @@
 --- change-property-type.json
 +++ patched
-@@ -50,7 +50,7 @@
+@@ -69,7 +69,7 @@
          "properties": {
            "message": {
              "description": "The greeting message",
 -            "type": "string"
 +            "type": "integer"
            },
-           "not_a_number": {
-             "not": {
+           "non_nullable_wrapper_of_nullable": {
+             "allOf": [
 
 
 Result for patch:

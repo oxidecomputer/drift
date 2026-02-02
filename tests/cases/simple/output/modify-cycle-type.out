@@ -1,7 +1,7 @@
 --- modify-cycle-type.json
 +++ patched
-@@ -145,10 +145,7 @@
-       "Tree": {
+@@ -218,10 +218,7 @@
+         "nullable": true,
          "properties": {
            "children": {
 -            "items": {
@@ -16,6 +16,21 @@
 
 Result for patch:
 [
+    Change {
+        message: "schema became nullable",
+        old_path: [
+            "#/components/schemas/Tree/properties/children",
+            "#/paths/~1tree/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/Tree",
+            "#/components/schemas/Tree/properties/children/$ref",
+            "#/paths/~1tree/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: BackwardIncompatible,
+        details: LessStrict,
+    },
     Change {
         message: "schema types changed",
         old_path: [

@@ -1,0 +1,35 @@
+--- ref-to-wrapper-nullable-added.json
++++ patched
+@@ -127,7 +127,12 @@
+             ]
+           },
+           "via_ref": {
+-            "$ref": "#/components/schemas/SubType"
++            "allOf": [
++              {
++                "$ref": "#/components/schemas/SubType"
++              }
++            ],
++            "nullable": true
+           }
+         },
+         "required": [
+
+
+Result for patch:
+[
+    Change {
+        message: "schema became nullable",
+        old_path: [
+            "#/components/schemas/GreetingResponse/properties/via_ref",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/GreetingResponse/properties/via_ref",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: BackwardIncompatible,
+        details: LessStrict,
+    },
+]

@@ -1,0 +1,15 @@
+[
+	{
+		"op": "replace",
+		"path": "/components/schemas/GreetingResponse/properties/nullable_via_ref",
+		"value": {
+			"nullable": true,
+			"description": "Wrapped with redundant nullable.",
+			"allOf": [
+				{
+					"$ref": "#/components/schemas/NullableSubType"
+				}
+			]
+		}
+	}
+]

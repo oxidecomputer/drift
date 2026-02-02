@@ -1,0 +1,31 @@
+--- input-wrapper-non-nullable-to-nullable.json
++++ patched
+@@ -39,7 +39,8 @@
+               {
+                 "$ref": "#/components/schemas/SubType"
+               }
+-            ]
++            ],
++            "nullable": true
+           },
+           "name": {
+             "type": "string"
+
+
+Result for patch:
+[
+    Change {
+        message: "schema became nullable",
+        old_path: [
+            "#/components/schemas/CreateItem/properties/metadata_ref",
+            "#/paths/~1items/post/request_body/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/CreateItem/properties/metadata_ref",
+            "#/paths/~1items/post/request_body/content/application~1json/schema/$ref",
+        ],
+        comparison: Input,
+        class: ForwardIncompatible,
+        details: LessStrict,
+    },
+]

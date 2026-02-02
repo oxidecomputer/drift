@@ -1,6 +1,6 @@
 --- not-inner-to-allof.json
 +++ patched
-@@ -54,7 +54,12 @@
+@@ -81,7 +81,12 @@
            },
            "not_a_number": {
              "not": {
@@ -13,7 +13,7 @@
 +              "description": "A number type"
              }
            },
-           "via_allof": {
+           "nullable_via_ref": {
 
 
 Result for patch:

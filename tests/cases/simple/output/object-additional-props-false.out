@@ -1,7 +1,7 @@
 --- object-additional-props-false.json
 +++ patched
-@@ -121,9 +121,7 @@
-         ]
+@@ -175,9 +175,7 @@
+         "type": "object"
        },
        "ObjectWithConstraints": {
 -        "additionalProperties": {

@@ -1,7 +1,7 @@
 --- allof-to-ref-with-type-change.json
 +++ patched
-@@ -58,12 +58,7 @@
-             }
+@@ -102,12 +102,7 @@
+             "nullable": true
            },
            "via_allof": {
 -            "allOf": [
@@ -14,7 +14,7 @@
            },
            "via_anyof": {
              "anyOf": [
-@@ -136,6 +131,9 @@
+@@ -208,6 +203,9 @@
        },
        "SubType": {
          "properties": {
@@ -55,6 +55,22 @@ Result for patch:
             "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
         ],
         comparison: Output,
+        class: Unhandled,
+        details: UnknownDifference,
+    },
+    Change {
+        message: "object properties changed",
+        old_path: [
+            "#/components/schemas/SubType",
+            "#/components/schemas/CreateItem/properties/metadata_nullable/0/$ref",
+            "#/paths/~1items/post/request_body/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/SubType",
+            "#/components/schemas/CreateItem/properties/metadata_nullable/0/$ref",
+            "#/paths/~1items/post/request_body/content/application~1json/schema/$ref",
+        ],
+        comparison: Input,
         class: Unhandled,
         details: UnknownDifference,
     },

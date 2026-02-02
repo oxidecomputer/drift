@@ -1,6 +1,6 @@
 --- param-schema-to-content.json
 +++ patched
-@@ -250,13 +250,17 @@
+@@ -324,13 +324,17 @@
              }
            },
            {

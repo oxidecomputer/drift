@@ -1,0 +1,50 @@
+--- wrapper-to-ref-nullable-removed.json
++++ patched
+@@ -110,13 +110,7 @@
+             "description": "Via allOf."
+           },
+           "via_anyof": {
+-            "anyOf": [
+-              {
+-                "$ref": "#/components/schemas/SubType"
+-              }
+-            ],
+-            "description": "Via anyOf.",
+-            "nullable": true
++            "$ref": "#/components/schemas/SubType"
+           },
+           "via_oneof": {
+             "description": "Via oneOf.",
+
+
+Result for patch:
+[
+    Change {
+        message: "schema became non-nullable",
+        old_path: [
+            "#/components/schemas/GreetingResponse/properties/via_anyof",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/GreetingResponse/properties/via_anyof",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: ForwardIncompatible,
+        details: MoreStrict,
+    },
+    Change {
+        message: "schema metadata removed",
+        old_path: [
+            "#/components/schemas/GreetingResponse/properties/via_anyof",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/GreetingResponse/properties/via_anyof",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: Trivial,
+        details: Metadata,
+    },
+]

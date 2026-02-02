@@ -1,0 +1,7 @@
+[
+	{
+		"op": "add",
+		"path": "/components/schemas/CreateItem/properties/name/nullable",
+		"value": true
+	}
+]

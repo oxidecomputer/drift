@@ -1,0 +1,16 @@
+--- redundant-wrapper-nullable-removed.json
++++ patched
+@@ -98,8 +98,7 @@
+                 "$ref": "#/components/schemas/NullableSubType"
+               }
+             ],
+-            "description": "Nullable wrapper around already-nullable type.",
+-            "nullable": true
++            "description": "Nullable wrapper around already-nullable type."
+           },
+           "via_allof": {
+             "allOf": [
+
+
+Result for patch:
+[]

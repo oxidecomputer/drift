@@ -1,0 +1,12 @@
+[
+	{
+		"op": "test",
+		"path": "/paths/~1hello~1{name}/get/parameters/1/name",
+		"value": "language"
+	},
+	{
+		"op": "add",
+		"path": "/paths/~1hello~1{name}/get/parameters/1/schema/nullable",
+		"value": true
+	}
+]

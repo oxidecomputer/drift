@@ -1,0 +1,29 @@
+--- non-nullable-to-nullable.json
++++ patched
+@@ -69,6 +69,7 @@
+         "properties": {
+           "message": {
+             "description": "The greeting message",
++            "nullable": true,
+             "type": "string"
+           },
+           "non_nullable_wrapper_of_nullable": {
+
+
+Result for patch:
+[
+    Change {
+        message: "schema became nullable",
+        old_path: [
+            "#/components/schemas/GreetingResponse/properties/message",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/GreetingResponse/properties/message",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: BackwardIncompatible,
+        details: LessStrict,
+    },
+]

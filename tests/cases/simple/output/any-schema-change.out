@@ -1,6 +1,6 @@
 --- any-schema-change.json
 +++ patched
-@@ -48,6 +48,7 @@
+@@ -67,6 +67,7 @@
        },
        "GreetingResponse": {
          "properties": {

@@ -1,0 +1,27 @@
+--- param-non-nullable-to-nullable.json
++++ patched
+@@ -329,6 +329,7 @@
+             "name": "language",
+             "required": false,
+             "schema": {
++              "nullable": true,
+               "type": "string"
+             }
+           }
+
+
+Result for patch:
+[
+    Change {
+        message: "schema became nullable",
+        old_path: [
+            "#/paths/~1hello~1{name}/get/parameters/1/schema",
+        ],
+        new_path: [
+            "#/paths/~1hello~1{name}/get/parameters/1/schema",
+        ],
+        comparison: Input,
+        class: ForwardIncompatible,
+        details: LessStrict,
+    },
+]

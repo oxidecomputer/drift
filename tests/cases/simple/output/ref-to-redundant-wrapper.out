@@ -1,0 +1,36 @@
+--- ref-to-redundant-wrapper.json
++++ patched
+@@ -85,7 +85,13 @@
+             }
+           },
+           "nullable_via_ref": {
+-            "$ref": "#/components/schemas/NullableSubType"
++            "allOf": [
++              {
++                "$ref": "#/components/schemas/NullableSubType"
++              }
++            ],
++            "description": "Wrapped with redundant nullable.",
++            "nullable": true
+           },
+           "optional_field": {
+             "description": "An optional nullable field",
+
+
+Result for patch:
+[
+    Change {
+        message: "schema metadata added",
+        old_path: [
+            "#/components/schemas/GreetingResponse/properties/nullable_via_ref",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/GreetingResponse/properties/nullable_via_ref",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: Trivial,
+        details: Metadata,
+    },
+]

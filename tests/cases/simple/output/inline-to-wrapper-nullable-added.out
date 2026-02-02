@@ -1,0 +1,64 @@
+--- inline-to-wrapper-nullable-added.json
++++ patched
+@@ -68,8 +68,13 @@
+       "GreetingResponse": {
+         "properties": {
+           "message": {
++            "allOf": [
++              {
++                "type": "string"
++              }
++            ],
+             "description": "The greeting message",
+-            "type": "string"
++            "nullable": true
+           },
+           "non_nullable_wrapper_of_nullable": {
+             "allOf": [
+
+
+Result for patch:
+[
+    Change {
+        message: "schema became nullable",
+        old_path: [
+            "#/components/schemas/GreetingResponse/properties/message",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/GreetingResponse/properties/message",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: BackwardIncompatible,
+        details: LessStrict,
+    },
+    Change {
+        message: "schema metadata added",
+        old_path: [
+            "#/components/schemas/GreetingResponse/properties/message",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/GreetingResponse/properties/message",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: Trivial,
+        details: Metadata,
+    },
+    Change {
+        message: "schema metadata changed",
+        old_path: [
+            "#/components/schemas/GreetingResponse/properties/message",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/GreetingResponse/properties/message/0",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: Trivial,
+        details: Metadata,
+    },
+]

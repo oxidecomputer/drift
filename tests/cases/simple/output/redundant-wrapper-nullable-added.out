@@ -1,0 +1,16 @@
+--- redundant-wrapper-nullable-added.json
++++ patched
+@@ -77,7 +77,8 @@
+                 "$ref": "#/components/schemas/NullableSubType"
+               }
+             ],
+-            "description": "Non-nullable wrapper around nullable type."
++            "description": "Non-nullable wrapper around nullable type.",
++            "nullable": true
+           },
+           "not_a_number": {
+             "not": {
+
+
+Result for patch:
+[]

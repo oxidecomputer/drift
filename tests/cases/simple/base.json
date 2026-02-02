@@ -307,6 +307,34 @@
           }
         }
       }
+    },
+    "/shared": {
+      "post": {
+        "operationId": "use_shared",
+        "summary": "Uses SharedType in both request and response",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SharedType"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SharedType"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -331,6 +359,7 @@
           },
           "via_anyof": {
             "description": "Via anyOf.",
+            "nullable": true,
             "anyOf": [
               {
                 "$ref": "#/components/schemas/SubType"
@@ -345,10 +374,35 @@
               }
             ]
           },
+          "redundant_nullable_wrapper": {
+            "description": "Nullable wrapper around already-nullable type.",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/NullableSubType"
+              }
+            ]
+          },
+          "nullable_via_ref": {
+            "$ref": "#/components/schemas/NullableSubType"
+          },
+          "non_nullable_wrapper_of_nullable": {
+            "description": "Non-nullable wrapper around nullable type.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/NullableSubType"
+              }
+            ]
+          },
           "not_a_number": {
             "not": {
               "type": "number"
             }
+          },
+          "optional_field": {
+            "type": "string",
+            "description": "An optional nullable field",
+            "nullable": true
           }
         },
         "required": [
@@ -363,8 +417,18 @@
           }
         }
       },
+      "NullableSubType": {
+        "type": "object",
+        "nullable": true,
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        }
+      },
       "Tree": {
         "type": "object",
+        "nullable": true,
         "properties": {
           "children": {
             "type": "array",
@@ -379,12 +443,32 @@
         "properties": {
           "name": {
             "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "metadata_ref": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SubType"
+              }
+            ]
+          },
+          "metadata_nullable": {
+            "nullable": true,
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SubType"
+              }
+            ]
           }
         },
         "required": ["name"]
       },
       "UpdateItem": {
         "type": "object",
+        "nullable": true,
         "properties": {
           "name": {
             "type": "string"
@@ -479,6 +563,22 @@
       },
       "RefChainB": {
         "$ref": "#/components/schemas/SubType"
+      },
+      "SharedType": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "data": {
+            "type": "string"
+          },
+          "optional_data": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": ["id"]
       }
     }
   }

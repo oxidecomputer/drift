@@ -1,6 +1,6 @@
 --- anyof-to-allof.json
 +++ patched
-@@ -66,12 +66,12 @@
+@@ -110,13 +110,12 @@
              "description": "Via allOf."
            },
            "via_anyof": {
@@ -10,7 +10,8 @@
                  "$ref": "#/components/schemas/SubType"
                }
              ],
--            "description": "Via anyOf."
+-            "description": "Via anyOf.",
+-            "nullable": true
 +            "description": "Via allOf."
            },
            "via_oneof": {
@@ -19,6 +20,20 @@
 
 Result for patch:
 [
+    Change {
+        message: "schema became non-nullable",
+        old_path: [
+            "#/components/schemas/GreetingResponse/properties/via_anyof",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/GreetingResponse/properties/via_anyof",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: ForwardIncompatible,
+        details: MoreStrict,
+    },
     Change {
         message: "schema metadata changed",
         old_path: [

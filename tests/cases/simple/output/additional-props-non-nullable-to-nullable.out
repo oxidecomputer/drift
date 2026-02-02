@@ -1,0 +1,29 @@
+--- additional-props-non-nullable-to-nullable.json
++++ patched
+@@ -176,6 +176,7 @@
+       },
+       "ObjectWithConstraints": {
+         "additionalProperties": {
++          "nullable": true,
+           "type": "string"
+         },
+         "maxProperties": 5,
+
+
+Result for patch:
+[
+    Change {
+        message: "schema became nullable",
+        old_path: [
+            "#/components/schemas/ObjectWithConstraints/additionalProperties",
+            "#/paths/~1objects/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/ObjectWithConstraints/additionalProperties",
+            "#/paths/~1objects/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: BackwardIncompatible,
+        details: LessStrict,
+    },
+]

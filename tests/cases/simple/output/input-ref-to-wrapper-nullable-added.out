@@ -1,0 +1,35 @@
+--- input-ref-to-wrapper-nullable-added.json
++++ patched
+@@ -42,7 +42,12 @@
+             ]
+           },
+           "name": {
+-            "type": "string"
++            "allOf": [
++              {
++                "type": "string"
++              }
++            ],
++            "nullable": true
+           }
+         },
+         "required": [
+
+
+Result for patch:
+[
+    Change {
+        message: "schema became nullable",
+        old_path: [
+            "#/components/schemas/CreateItem/properties/name",
+            "#/paths/~1items/post/request_body/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/CreateItem/properties/name",
+            "#/paths/~1items/post/request_body/content/application~1json/schema/$ref",
+        ],
+        comparison: Input,
+        class: ForwardIncompatible,
+        details: LessStrict,
+    },
+]

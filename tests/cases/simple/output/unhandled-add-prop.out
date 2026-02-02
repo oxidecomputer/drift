@@ -1,8 +1,8 @@
 --- unhandled-add-prop.json
 +++ patched
-@@ -57,6 +57,10 @@
-               "type": "number"
-             }
+@@ -101,6 +101,10 @@
+             "description": "Nullable wrapper around already-nullable type.",
+             "nullable": true
            },
 +          "source": {
 +            "description": "Where the greeting originated",
@@ -11,7 +11,7 @@
            "via_allof": {
              "allOf": [
                {
-@@ -86,7 +90,8 @@
+@@ -131,7 +135,8 @@
            }
          },
          "required": [

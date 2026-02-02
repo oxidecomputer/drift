@@ -1,6 +1,6 @@
 --- body-required-to-optional.json
 +++ patched
-@@ -285,7 +285,7 @@
+@@ -359,7 +359,7 @@
                }
              }
            },

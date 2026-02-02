@@ -1,0 +1,7 @@
+[
+	{
+		"op": "add",
+		"path": "/components/schemas/GreetingResponse/properties/message/nullable",
+		"value": true
+	}
+]

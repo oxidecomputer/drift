@@ -1,0 +1,29 @@
+--- input-non-nullable-to-nullable.json
++++ patched
+@@ -42,6 +42,7 @@
+             ]
+           },
+           "name": {
++            "nullable": true,
+             "type": "string"
+           }
+         },
+
+
+Result for patch:
+[
+    Change {
+        message: "schema became nullable",
+        old_path: [
+            "#/components/schemas/CreateItem/properties/name",
+            "#/paths/~1items/post/request_body/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/CreateItem/properties/name",
+            "#/paths/~1items/post/request_body/content/application~1json/schema/$ref",
+        ],
+        comparison: Input,
+        class: ForwardIncompatible,
+        details: LessStrict,
+    },
+]

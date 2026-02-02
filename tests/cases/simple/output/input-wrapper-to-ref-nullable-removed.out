@@ -1,0 +1,35 @@
+--- input-wrapper-to-ref-nullable-removed.json
++++ patched
+@@ -27,12 +27,7 @@
+             "type": "string"
+           },
+           "metadata_nullable": {
+-            "anyOf": [
+-              {
+-                "$ref": "#/components/schemas/SubType"
+-              }
+-            ],
+-            "nullable": true
++            "$ref": "#/components/schemas/SubType"
+           },
+           "metadata_ref": {
+             "allOf": [
+
+
+Result for patch:
+[
+    Change {
+        message: "schema became non-nullable",
+        old_path: [
+            "#/components/schemas/CreateItem/properties/metadata_nullable",
+            "#/paths/~1items/post/request_body/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/CreateItem/properties/metadata_nullable",
+            "#/paths/~1items/post/request_body/content/application~1json/schema/$ref",
+        ],
+        comparison: Input,
+        class: BackwardIncompatible,
+        details: MoreStrict,
+    },
+]

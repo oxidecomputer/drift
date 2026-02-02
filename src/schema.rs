@@ -93,7 +93,20 @@ impl Compare {
                 },
             ) => {
                 // Both old and new are single-element wrappers.
-                if old_meta != new_meta {
+                //
+                // Compare effective nullable (wrapper || inner) since nullable
+                // is a semantic property, not metadata.
+                let old_nullable = get_effective_nullable(old_schema)?;
+                let new_nullable = get_effective_nullable(new_schema)?;
+                let _ = self.compare_wrapper_nullable(
+                    dry_run,
+                    comparison,
+                    old_schema,
+                    new_schema,
+                    old_nullable,
+                    new_nullable,
+                )?;
+                if has_non_nullable_metadata_diff(old_meta, new_meta) {
                     self.push_change(
                         "schema metadata changed",
                         old_schema,
@@ -119,9 +132,19 @@ impl Compare {
                 // Old is a single-element wrapper, new is a bare ref or inline
                 // type.
                 //
-                // A bare ref or inline type does not have metadata, so if the
-                // old metadata is non-default, report a trivial change.
-                if has_meaningful_metadata(old_meta) {
+                // Compare effective nullable (wrapper || inner) since nullable
+                // is a semantic property, not metadata.
+                let old_nullable = get_effective_nullable(old_schema)?;
+                let new_nullable = get_effective_nullable(new_schema)?;
+                let _ = self.compare_wrapper_nullable(
+                    dry_run,
+                    comparison,
+                    old_schema,
+                    new_schema,
+                    old_nullable,
+                    new_nullable,
+                )?;
+                if has_meaningful_non_nullable_metadata(old_meta) {
                     self.push_change(
                         "schema metadata removed",
                         old_schema,
@@ -149,9 +172,19 @@ impl Compare {
                 // Old is a bare ref or inline type, new is a single-element
                 // wrapper.
                 //
-                // A bare ref or inline type does not have metadata, so if the
-                // new metadata is non-default, report a trivial change.
-                if has_meaningful_metadata(new_meta) {
+                // Compare effective nullable (wrapper || inner) since nullable
+                // is a semantic property, not metadata.
+                let old_nullable = get_effective_nullable(old_schema)?;
+                let new_nullable = get_effective_nullable(new_schema)?;
+                let _ = self.compare_wrapper_nullable(
+                    dry_run,
+                    comparison,
+                    old_schema,
+                    new_schema,
+                    old_nullable,
+                    new_nullable,
+                )?;
+                if has_meaningful_non_nullable_metadata(new_meta) {
                     self.push_change(
                         "schema metadata added",
                         old_schema,
@@ -177,6 +210,55 @@ impl Compare {
                 Ok(None)
             }
         }
+    }
+
+    /// Compare nullable flags from wrapper metadata, reporting appropriate
+    /// compatibility changes.
+    ///
+    /// This is used during wrapper flattening to ensure nullable changes at the
+    /// wrapper level are properly classified (not treated as trivial metadata).
+    fn compare_wrapper_nullable<T, U>(
+        &mut self,
+        dry_run: bool,
+        comparison: SchemaComparison,
+        old_schema: &Contextual<'_, T>,
+        new_schema: &Contextual<'_, U>,
+        old_nullable: bool,
+        new_nullable: bool,
+    ) -> anyhow::Result<bool> {
+        if old_nullable == new_nullable {
+            return Ok(true);
+        }
+
+        let (message, class, details) = if new_nullable {
+            // non-nullable → nullable
+            let class = match comparison {
+                SchemaComparison::Input => ChangeClass::ForwardIncompatible,
+                SchemaComparison::Output => ChangeClass::BackwardIncompatible,
+            };
+            ("schema became nullable", class, ChangeDetails::LessStrict)
+        } else {
+            // nullable → non-nullable
+            let class = match comparison {
+                SchemaComparison::Input => ChangeClass::BackwardIncompatible,
+                SchemaComparison::Output => ChangeClass::ForwardIncompatible,
+            };
+            (
+                "schema became non-nullable",
+                class,
+                ChangeDetails::MoreStrict,
+            )
+        };
+
+        self.schema_push_change(
+            dry_run,
+            message,
+            old_schema,
+            new_schema,
+            comparison,
+            class,
+            details,
+        )
     }
 
     fn compare_schema(
@@ -267,7 +349,56 @@ impl Compare {
             );
         }
 
-        let nullable_equal = old_nullable == new_nullable;
+        let nullable_equal = if old_nullable == new_nullable {
+            true
+        } else if *new_nullable {
+            // non-nullable → nullable: the schema now accepts/returns null.
+            //
+            // For outputs: old clients may receive null from new servers and
+            // break. New clients can handle null from old servers (which never
+            // send it). This is backward incompatible.
+            //
+            // For inputs: old clients send non-null to new servers, which
+            // accept it. New clients may send null to old servers, which
+            // reject it. This is forward incompatible.
+            let class = match comparison {
+                SchemaComparison::Input => ChangeClass::ForwardIncompatible,
+                SchemaComparison::Output => ChangeClass::BackwardIncompatible,
+            };
+            self.schema_push_change(
+                dry_run,
+                "schema became nullable",
+                &old_schema,
+                &new_schema,
+                comparison,
+                class,
+                ChangeDetails::LessStrict,
+            )?
+        } else {
+            // nullable → non-nullable: the schema no longer accepts/returns null.
+            //
+            // For outputs: old clients can handle non-null from new servers.
+            // New clients expect non-null but old servers may return null.
+            // This is forward incompatible.
+            //
+            // For inputs: old clients may send null to new servers, which
+            // reject it. New clients send non-null to old servers, which
+            // accept it. This is backward incompatible.
+            let class = match comparison {
+                SchemaComparison::Input => ChangeClass::BackwardIncompatible,
+                SchemaComparison::Output => ChangeClass::ForwardIncompatible,
+            };
+            self.schema_push_change(
+                dry_run,
+                "schema became non-nullable",
+                &old_schema,
+                &new_schema,
+                comparison,
+                class,
+                ChangeDetails::MoreStrict,
+            )?
+        };
+
         let schema_equal = self.compare_schema_kind(
             comparison,
             dry_run,
@@ -866,8 +997,118 @@ fn classify_schema_ref(schema_ref: &ReferenceOr<Schema>) -> SchemaRefKind<'_> {
     }
 }
 
-/// Check if schema_data has any non-default values that would constitute
-/// metadata worth preserving.
-fn has_meaningful_metadata(data: &SchemaData) -> bool {
-    *data != SchemaData::default()
+/// Compute the effective nullability of a schema reference.
+///
+/// For single-element wrappers, this is `wrapper.nullable || inner.nullable`.
+/// For bare refs and inline types, this is the schema's own nullable flag.
+fn get_effective_nullable(
+    schema_ref: &Contextual<'_, &ReferenceOr<Schema>>,
+) -> anyhow::Result<bool> {
+    match schema_ref.as_ref() {
+        ReferenceOr::Reference { .. } => {
+            // Bare ref: resolve and get the referenced schema's nullable.
+            let (resolved, _) = schema_ref.contextual_resolve()?;
+            Ok(resolved.schema_data.nullable)
+        }
+        ReferenceOr::Item(schema) => {
+            // For single-element wrappers, effective nullable is wrapper || inner.
+            // For everything else, use the schema's own nullable.
+            match &schema.schema_kind {
+                openapiv3::SchemaKind::AllOf { all_of } if all_of.len() == 1 => {
+                    let inner = all_of.first().expect("checked length is 1");
+                    let inner_ctx = schema_ref.append_deref(inner, "0");
+                    let inner_nullable = get_effective_nullable(&inner_ctx)?;
+                    Ok(schema.schema_data.nullable || inner_nullable)
+                }
+                openapiv3::SchemaKind::AnyOf { any_of } if any_of.len() == 1 => {
+                    let inner = any_of.first().expect("checked length is 1");
+                    let inner_ctx = schema_ref.append_deref(inner, "0");
+                    let inner_nullable = get_effective_nullable(&inner_ctx)?;
+                    Ok(schema.schema_data.nullable || inner_nullable)
+                }
+                openapiv3::SchemaKind::OneOf { one_of } if one_of.len() == 1 => {
+                    let inner = one_of.first().expect("checked length is 1");
+                    let inner_ctx = schema_ref.append_deref(inner, "0");
+                    let inner_nullable = get_effective_nullable(&inner_ctx)?;
+                    Ok(schema.schema_data.nullable || inner_nullable)
+                }
+                _ => Ok(schema.schema_data.nullable),
+            }
+        }
+    }
+}
+
+/// Check if schema_data has any non-default values other than nullable.
+///
+/// Nullable is a semantic property, not metadata, so it should be compared
+/// separately with proper compatibility classification.
+fn has_meaningful_non_nullable_metadata(data: &SchemaData) -> bool {
+    let SchemaData {
+        // Nullable is semantic, not metadata.
+        nullable: _,
+        read_only,
+        write_only,
+        deprecated,
+        external_docs,
+        example,
+        title,
+        description,
+        discriminator,
+        default,
+        extensions,
+    } = data;
+
+    *read_only
+        || *write_only
+        || *deprecated
+        || external_docs.is_some()
+        || example.is_some()
+        || title.is_some()
+        || description.is_some()
+        || discriminator.is_some()
+        || default.is_some()
+        || !extensions.is_empty()
+}
+
+/// Check if two schema_data values differ in any field other than nullable.
+fn has_non_nullable_metadata_diff(old: &SchemaData, new: &SchemaData) -> bool {
+    let SchemaData {
+        // Nullable is semantic, not metadata.
+        nullable: _,
+        read_only: old_read_only,
+        write_only: old_write_only,
+        deprecated: old_deprecated,
+        external_docs: old_external_docs,
+        example: old_example,
+        title: old_title,
+        description: old_description,
+        discriminator: old_discriminator,
+        default: old_default,
+        extensions: old_extensions,
+    } = old;
+
+    let SchemaData {
+        nullable: _,
+        read_only: new_read_only,
+        write_only: new_write_only,
+        deprecated: new_deprecated,
+        external_docs: new_external_docs,
+        example: new_example,
+        title: new_title,
+        description: new_description,
+        discriminator: new_discriminator,
+        default: new_default,
+        extensions: new_extensions,
+    } = new;
+
+    old_read_only != new_read_only
+        || old_write_only != new_write_only
+        || old_deprecated != new_deprecated
+        || old_external_docs != new_external_docs
+        || old_example != new_example
+        || old_title != new_title
+        || old_description != new_description
+        || old_discriminator != new_discriminator
+        || old_default != new_default
+        || old_extensions != new_extensions
 }

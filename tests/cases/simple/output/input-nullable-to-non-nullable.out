@@ -1,0 +1,29 @@
+--- input-nullable-to-non-nullable.json
++++ patched
+@@ -23,7 +23,6 @@
+       "CreateItem": {
+         "properties": {
+           "description": {
+-            "nullable": true,
+             "type": "string"
+           },
+           "metadata_nullable": {
+
+
+Result for patch:
+[
+    Change {
+        message: "schema became non-nullable",
+        old_path: [
+            "#/components/schemas/CreateItem/properties/description",
+            "#/paths/~1items/post/request_body/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/CreateItem/properties/description",
+            "#/paths/~1items/post/request_body/content/application~1json/schema/$ref",
+        ],
+        comparison: Input,
+        class: BackwardIncompatible,
+        details: MoreStrict,
+    },
+]
