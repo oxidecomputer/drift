@@ -253,6 +253,60 @@
           }
         }
       }
+    },
+    "/oneof": {
+      "get": {
+        "operationId": "get_oneof",
+        "summary": "Get oneOf schema",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MultiOneOf"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/anyof": {
+      "get": {
+        "operationId": "get_anyof",
+        "summary": "Get anyOf schema",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnyOfExample"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/allof": {
+      "get": {
+        "operationId": "get_allof",
+        "summary": "Get allOf schema",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MultiAllOf"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {

@@ -1,7 +1,7 @@
 --- remove-operation.json
 +++ patched
-@@ -307,18 +307,7 @@
-         "summary": "Get objects"
+@@ -361,18 +361,7 @@
+         "summary": "Get oneOf schema"
        }
      },
 -    "/ping": {

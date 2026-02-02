@@ -1,0 +1,31 @@
+--- multi-oneof-count-change.json
++++ patched
+@@ -117,6 +117,9 @@
+           },
+           {
+             "type": "integer"
++          },
++          {
++            "type": "boolean"
+           }
+         ]
+       },
+
+
+Result for patch:
+[
+    Change {
+        message: "oneOf schema count changed",
+        old_path: [
+            "#/components/schemas/MultiOneOf/oneOf",
+            "#/paths/~1oneof/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/MultiOneOf/oneOf",
+            "#/paths/~1oneof/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: Unhandled,
+        details: UnknownDifference,
+    },
+]

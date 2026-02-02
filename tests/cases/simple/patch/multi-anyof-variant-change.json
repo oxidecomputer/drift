@@ -1,0 +1,7 @@
+[
+  {
+    "op": "replace",
+    "path": "/components/schemas/AnyOfExample/anyOf/0/type",
+    "value": "integer"
+  }
+]

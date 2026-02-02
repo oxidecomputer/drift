@@ -1,0 +1,30 @@
+--- multi-allof-variant-change.json
++++ patched
+@@ -95,7 +95,7 @@
+           {
+             "properties": {
+               "id": {
+-                "type": "string"
++                "type": "integer"
+               }
+             },
+             "type": "object"
+
+
+Result for patch:
+[
+    Change {
+        message: "unhandled, 'allOf' schema",
+        old_path: [
+            "#/components/schemas/MultiAllOf/allOf",
+            "#/paths/~1allof/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/MultiAllOf/allOf",
+            "#/paths/~1allof/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: Unhandled,
+        details: UnknownDifference,
+    },
+]

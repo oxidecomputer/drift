@@ -9,7 +9,7 @@
          "properties": {
            "message": {
              "description": "The greeting message",
-@@ -228,7 +228,7 @@
+@@ -264,7 +264,7 @@
              "content": {
                "application/json": {
                  "schema": {

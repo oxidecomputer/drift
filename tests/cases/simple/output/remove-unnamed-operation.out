@@ -1,6 +1,6 @@
 --- remove-unnamed-operation.json
 +++ patched
-@@ -372,16 +372,6 @@
+@@ -426,16 +426,6 @@
          "summary": "Get typed properties"
        }
      },
