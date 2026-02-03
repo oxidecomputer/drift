@@ -1,6 +1,6 @@
 [
-	{
-		"op": "remove",
-		"path": "/components/schemas/GreetingResponse/properties/via_anyof/nullable"
-	}
+  {
+    "op": "remove",
+    "path": "/components/schemas/GreetingResponse/properties/via_anyof/nullable"
+  }
 ]

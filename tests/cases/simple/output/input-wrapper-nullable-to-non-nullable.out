@@ -15,7 +15,7 @@
 Result for patch:
 [
     Change {
-        message: "schema became non-nullable",
+        message: "nullable removed from wrapper",
         old_path: [
             "#/components/schemas/CreateItem/properties/metadata_nullable",
             "#/paths/~1items/post/request_body/content/application~1json/schema/$ref",

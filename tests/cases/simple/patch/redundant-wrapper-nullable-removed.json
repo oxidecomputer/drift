@@ -1,6 +1,6 @@
 [
-	{
-		"op": "remove",
-		"path": "/components/schemas/GreetingResponse/properties/redundant_nullable_wrapper/nullable"
-	}
+  {
+    "op": "remove",
+    "path": "/components/schemas/GreetingResponse/properties/redundant_nullable_wrapper/nullable"
+  }
 ]

@@ -1,6 +1,6 @@
 --- modify-cycle-type.json
 +++ patched
-@@ -218,10 +218,7 @@
+@@ -267,10 +267,7 @@
          "nullable": true,
          "properties": {
            "children": {
@@ -23,8 +23,7 @@ Result for patch:
             "#/paths/~1tree/get/responses/200/content/application~1json/schema/$ref",
         ],
         new_path: [
-            "#/components/schemas/Tree",
-            "#/components/schemas/Tree/properties/children/$ref",
+            "#/components/schemas/Tree/properties/children",
             "#/paths/~1tree/get/responses/200/content/application~1json/schema/$ref",
         ],
         comparison: Output,

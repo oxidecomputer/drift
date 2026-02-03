@@ -1,6 +1,6 @@
 [
-	{
-		"op": "remove",
-		"path": "/components/schemas/GreetingResponse/properties/optional_field/nullable"
-	}
+  {
+    "op": "remove",
+    "path": "/components/schemas/GreetingResponse/properties/optional_field/nullable"
+  }
 ]

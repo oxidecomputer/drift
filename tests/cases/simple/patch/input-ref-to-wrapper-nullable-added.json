@@ -1,14 +1,14 @@
 [
-	{
-		"op": "replace",
-		"path": "/components/schemas/CreateItem/properties/name",
-		"value": {
-			"nullable": true,
-			"allOf": [
-				{
-					"type": "string"
-				}
-			]
-		}
-	}
+  {
+    "op": "replace",
+    "path": "/components/schemas/CreateItem/properties/name",
+    "value": {
+      "nullable": true,
+      "allOf": [
+        {
+          "type": "string"
+        }
+      ]
+    }
+  }
 ]

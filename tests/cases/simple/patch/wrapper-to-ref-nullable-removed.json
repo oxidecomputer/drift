@@ -1,9 +1,9 @@
 [
-	{
-		"op": "replace",
-		"path": "/components/schemas/GreetingResponse/properties/via_anyof",
-		"value": {
-			"$ref": "#/components/schemas/SubType"
-		}
-	}
+  {
+    "op": "replace",
+    "path": "/components/schemas/GreetingResponse/properties/via_anyof",
+    "value": {
+      "$ref": "#/components/schemas/SubType"
+    }
+  }
 ]

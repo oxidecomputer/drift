@@ -1,6 +1,6 @@
 --- object-additional-props-schema-change.json
 +++ patched
-@@ -176,7 +176,7 @@
+@@ -225,7 +225,7 @@
        },
        "ObjectWithConstraints": {
          "additionalProperties": {

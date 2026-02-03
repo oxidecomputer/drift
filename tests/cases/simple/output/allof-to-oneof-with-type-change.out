@@ -16,7 +16,7 @@
            },
            "via_anyof": {
              "anyOf": [
-@@ -209,7 +209,7 @@
+@@ -258,7 +258,7 @@
        "SubType": {
          "properties": {
            "value": {

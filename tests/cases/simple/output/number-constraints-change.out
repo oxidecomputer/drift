@@ -1,6 +1,6 @@
 --- number-constraints-change.json
 +++ patched
-@@ -235,6 +235,7 @@
+@@ -284,6 +284,7 @@
              "type": "boolean"
            },
            "ratio": {

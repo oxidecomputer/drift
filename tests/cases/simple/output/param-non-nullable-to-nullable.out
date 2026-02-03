@@ -1,13 +1,13 @@
 --- param-non-nullable-to-nullable.json
 +++ patched
-@@ -329,6 +329,7 @@
+@@ -378,6 +378,7 @@
              "name": "language",
              "required": false,
              "schema": {
 +              "nullable": true,
                "type": "string"
              }
-           }
+           },
 
 
 Result for patch:

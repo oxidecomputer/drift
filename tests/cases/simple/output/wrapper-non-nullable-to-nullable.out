@@ -15,7 +15,7 @@
 Result for patch:
 [
     Change {
-        message: "schema became nullable",
+        message: "nullable added at wrapper",
         old_path: [
             "#/components/schemas/GreetingResponse/properties/via_allof",
             "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",

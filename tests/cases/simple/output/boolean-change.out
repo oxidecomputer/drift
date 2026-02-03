@@ -1,6 +1,6 @@
 --- boolean-change.json
 +++ patched
-@@ -232,6 +232,7 @@
+@@ -281,6 +281,7 @@
              "type": "integer"
            },
            "enabled": {

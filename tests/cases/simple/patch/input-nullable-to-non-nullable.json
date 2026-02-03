@@ -1,6 +1,6 @@
 [
-	{
-		"op": "remove",
-		"path": "/components/schemas/CreateItem/properties/description/nullable"
-	}
+  {
+    "op": "remove",
+    "path": "/components/schemas/CreateItem/properties/description/nullable"
+  }
 ]

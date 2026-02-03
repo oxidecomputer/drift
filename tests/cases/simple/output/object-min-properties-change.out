@@ -1,6 +1,6 @@
 --- object-min-properties-change.json
 +++ patched
-@@ -179,7 +179,7 @@
+@@ -228,7 +228,7 @@
            "type": "string"
          },
          "maxProperties": 5,

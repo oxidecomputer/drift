@@ -1,6 +1,6 @@
 --- additional-props-non-nullable-to-nullable.json
 +++ patched
-@@ -176,6 +176,7 @@
+@@ -225,6 +225,7 @@
        },
        "ObjectWithConstraints": {
          "additionalProperties": {

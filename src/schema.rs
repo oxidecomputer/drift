@@ -17,6 +17,21 @@ pub(crate) enum SchemaComparison {
     Output,
 }
 
+/// Controls whether effective nullability should be checked at this point.
+///
+/// Effective nullability is a property of the entire schema ref chain
+/// (wrapper.nullable || inner.effective_nullable). We check it once at
+/// comparison entry points (response schemas, request bodies, properties, etc.)
+/// but not when traversing through wrapper structures.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum EffectiveNullableCheck {
+    /// This is a comparison entry point; check effective nullability.
+    Entry,
+    /// We're traversing through a wrapper; effective nullability was already
+    /// checked at the entry point.
+    WrapperTraversal,
+}
+
 impl From<SchemaComparison> for ChangeComparison {
     fn from(value: SchemaComparison) -> Self {
         match value {
@@ -37,6 +52,11 @@ impl Compare {
         Ok(())
     }
 
+    /// Compare two schema references. This is the main entry point for schema
+    /// comparison, used for response schemas, request bodies, properties, array
+    /// items, etc.
+    ///
+    /// Always checks effective nullability at this level.
     fn compare_schema_ref_helper(
         &mut self,
         dry_run: bool,
@@ -44,6 +64,32 @@ impl Compare {
         old_schema: Contextual<'_, &ReferenceOr<Schema>>,
         new_schema: Contextual<'_, &ReferenceOr<Schema>>,
     ) -> anyhow::Result<bool> {
+        self.compare_schema_ref_inner(
+            dry_run,
+            comparison,
+            EffectiveNullableCheck::Entry,
+            old_schema,
+            new_schema,
+        )
+    }
+
+    /// Inner implementation of schema ref comparison with explicit nullable
+    /// check control.
+    fn compare_schema_ref_inner(
+        &mut self,
+        dry_run: bool,
+        comparison: SchemaComparison,
+        nullable_check: EffectiveNullableCheck,
+        old_schema: Contextual<'_, &ReferenceOr<Schema>>,
+        new_schema: Contextual<'_, &ReferenceOr<Schema>>,
+    ) -> anyhow::Result<bool> {
+        // At entry points, check effective nullability before any structural
+        // comparison. This handles nullable changes through wrapper chains.
+        if nullable_check == EffectiveNullableCheck::Entry {
+            let _ =
+                self.compare_effective_nullable(dry_run, comparison, &old_schema, &new_schema)?;
+        }
+
         // Handle single-element wrappers: allOf/anyOf/oneOf with one item.
         // These are semantically equivalent to their inner type.
         //
@@ -55,11 +101,11 @@ impl Compare {
             Ok(result)
         } else {
             // General path: resolve and compare.
-            let (old_schema, old_context) = old_schema.contextual_resolve()?;
-            let (new_schema, new_context) = new_schema.contextual_resolve()?;
+            let (old_resolved, old_context) = old_schema.contextual_resolve()?;
+            let (new_resolved, new_context) = new_schema.contextual_resolve()?;
 
-            let old_schema = Contextual::new(old_context, old_schema.as_ref());
-            let new_schema = Contextual::new(new_context, new_schema.as_ref());
+            let old_schema = Contextual::new(old_context, old_resolved.as_ref());
+            let new_schema = Contextual::new(new_context, new_resolved.as_ref());
 
             self.compare_schema(comparison, dry_run, old_schema, new_schema)
         }
@@ -93,8 +139,7 @@ impl Compare {
                 },
             ) => {
                 // Both old and new are single-element wrappers.
-                let _ =
-                    self.compare_wrapper_nullable(dry_run, comparison, old_schema, new_schema)?;
+                // Effective nullability is checked at the entry point, not here.
                 if has_non_nullable_metadata_diff(old_meta, new_meta) {
                     self.push_change(
                         "schema metadata changed",
@@ -107,8 +152,12 @@ impl Compare {
                 }
                 let old_inner = old_schema.append_deref(old_inner, "0");
                 let new_inner = new_schema.append_deref(new_inner, "0");
-                Ok(Some(self.compare_schema_ref_helper(
-                    dry_run, comparison, old_inner, new_inner,
+                Ok(Some(self.compare_schema_ref_inner(
+                    dry_run,
+                    comparison,
+                    EffectiveNullableCheck::WrapperTraversal,
+                    old_inner,
+                    new_inner,
                 )?))
             }
             (
@@ -119,9 +168,7 @@ impl Compare {
                 BareRef | InlineType,
             ) => {
                 // Old is a single-element wrapper, new is a bare ref or inline
-                // type.
-                let _ =
-                    self.compare_wrapper_nullable(dry_run, comparison, old_schema, new_schema)?;
+                // type. Effective nullability is checked at the entry point.
                 if has_meaningful_non_nullable_metadata(old_meta) {
                     self.push_change(
                         "schema metadata removed",
@@ -133,9 +180,10 @@ impl Compare {
                     );
                 }
                 let old_inner = old_schema.append_deref(old_inner, "0");
-                Ok(Some(self.compare_schema_ref_helper(
+                Ok(Some(self.compare_schema_ref_inner(
                     dry_run,
                     comparison,
+                    EffectiveNullableCheck::WrapperTraversal,
                     old_inner,
                     new_schema.clone(),
                 )?))
@@ -148,9 +196,7 @@ impl Compare {
                 },
             ) => {
                 // Old is a bare ref or inline type, new is a single-element
-                // wrapper.
-                let _ =
-                    self.compare_wrapper_nullable(dry_run, comparison, old_schema, new_schema)?;
+                // wrapper. Effective nullability is checked at the entry point.
                 if has_meaningful_non_nullable_metadata(new_meta) {
                     self.push_change(
                         "schema metadata added",
@@ -162,9 +208,10 @@ impl Compare {
                     );
                 }
                 let new_inner = new_schema.append_deref(new_inner, "0");
-                Ok(Some(self.compare_schema_ref_helper(
+                Ok(Some(self.compare_schema_ref_inner(
                     dry_run,
                     comparison,
+                    EffectiveNullableCheck::WrapperTraversal,
                     old_schema.clone(),
                     new_inner,
                 )?))
@@ -179,46 +226,55 @@ impl Compare {
         }
     }
 
-    /// Compare nullable flags from wrapper metadata, reporting appropriate
-    /// compatibility changes.
+    /// Compare effective nullability of two schema references.
     ///
-    /// This is used during wrapper flattening to ensure nullable changes at the
-    /// wrapper level are properly classified (not treated as trivial metadata).
+    /// Effective nullability is `wrapper.nullable || inner.effective_nullable`
+    /// for single-element wrappers, or just `schema.nullable` for terminal
+    /// schemas.
     ///
-    /// Computes the effective nullable for each schema (wrapper || inner for
-    /// single-element wrappers).
-    fn compare_wrapper_nullable(
+    /// This is called at comparison entry points (response schemas, request
+    /// bodies, properties, etc.) to detect nullable changes through wrapper
+    /// chains.
+    fn compare_effective_nullable(
         &mut self,
         dry_run: bool,
         comparison: SchemaComparison,
         old_schema: &Contextual<'_, &ReferenceOr<Schema>>,
         new_schema: &Contextual<'_, &ReferenceOr<Schema>>,
     ) -> anyhow::Result<bool> {
+        use EffectiveNullability::*;
+
         let old_nullable = get_effective_nullable(old_schema)?;
         let new_nullable = get_effective_nullable(new_schema)?;
 
-        if old_nullable == new_nullable {
-            return Ok(true);
-        }
-
-        let (message, class, details) = if new_nullable {
-            // non-nullable → nullable
-            let class = match comparison {
-                SchemaComparison::Input => ChangeClass::ForwardIncompatible,
-                SchemaComparison::Output => ChangeClass::BackwardIncompatible,
-            };
-            ("schema became nullable", class, ChangeDetails::LessStrict)
-        } else {
-            // nullable → non-nullable
-            let class = match comparison {
-                SchemaComparison::Input => ChangeClass::BackwardIncompatible,
-                SchemaComparison::Output => ChangeClass::ForwardIncompatible,
-            };
-            (
-                "schema became non-nullable",
-                class,
-                ChangeDetails::MoreStrict,
-            )
+        let (message, class, details) = match (old_nullable, new_nullable) {
+            (NotNullable, NotNullable) | (Nullable(_), Nullable(_)) => {
+                return Ok(true);
+            }
+            (NotNullable, Nullable(kind)) => {
+                // non-nullable → nullable
+                let message = match kind {
+                    NullabilityKind::Wrapper => "nullable added at wrapper",
+                    NullabilityKind::Direct => "schema became nullable",
+                };
+                let class = match comparison {
+                    SchemaComparison::Input => ChangeClass::ForwardIncompatible,
+                    SchemaComparison::Output => ChangeClass::BackwardIncompatible,
+                };
+                (message, class, ChangeDetails::LessStrict)
+            }
+            (Nullable(kind), NotNullable) => {
+                // nullable → non-nullable
+                let message = match kind {
+                    NullabilityKind::Wrapper => "nullable removed from wrapper",
+                    NullabilityKind::Direct => "schema became non-nullable",
+                };
+                let class = match comparison {
+                    SchemaComparison::Input => ChangeClass::BackwardIncompatible,
+                    SchemaComparison::Output => ChangeClass::ForwardIncompatible,
+                };
+                (message, class, ChangeDetails::MoreStrict)
+            }
         };
 
         self.schema_push_change(
@@ -253,54 +309,18 @@ impl Compare {
             return Ok(*equal);
         }
 
-        // We expand structures to ensure we don't accidentally fail to examine
-        // a field.
         let Schema {
-            schema_data:
-                SchemaData {
-                    nullable: old_nullable,
-                    read_only: old_read_only,
-                    write_only: old_write_only,
-                    deprecated: old_deprecated,
-                    external_docs: old_external_docs,
-                    example: old_example,
-                    title: old_title,
-                    description: old_description,
-                    discriminator: old_discriminator,
-                    default: old_default,
-                    extensions: old_extensions,
-                },
+            schema_data: old_schema_data,
             schema_kind: old_schema_kind,
         } = old_schema.as_ref();
         let Schema {
-            schema_data:
-                SchemaData {
-                    nullable: new_nullable,
-                    read_only: new_read_only,
-                    write_only: new_write_only,
-                    deprecated: new_deprecated,
-                    external_docs: new_external_docs,
-                    example: new_example,
-                    title: new_title,
-                    description: new_description,
-                    discriminator: new_discriminator,
-                    default: new_default,
-                    extensions: new_extensions,
-                },
+            schema_data: new_schema_data,
             schema_kind: new_schema_kind,
         } = new_schema.as_ref();
 
         // Examine properties that don't affect the serialized form.
-        let metadata_equal = old_read_only == new_read_only
-            && old_write_only == new_write_only
-            && old_deprecated == new_deprecated
-            && old_external_docs == new_external_docs
-            && old_example == new_example
-            && old_title == new_title
-            && old_description == new_description
-            && old_discriminator == new_discriminator
-            && old_default == new_default
-            && old_extensions == new_extensions;
+        // Nullability is checked at entry points via compare_effective_nullable.
+        let metadata_equal = !has_non_nullable_metadata_diff(old_schema_data, new_schema_data);
 
         if !metadata_equal {
             let _ = self.schema_push_change(
@@ -314,55 +334,12 @@ impl Compare {
             );
         }
 
-        let nullable_equal = if old_nullable == new_nullable {
-            true
-        } else if *new_nullable {
-            // non-nullable → nullable: the schema now accepts/returns null.
-            //
-            // For outputs: old clients may receive null from new servers and
-            // break. New clients can handle null from old servers (which never
-            // send it). This is backward incompatible.
-            //
-            // For inputs: old clients send non-null to new servers, which
-            // accept it. New clients may send null to old servers, which
-            // reject it. This is forward incompatible.
-            let class = match comparison {
-                SchemaComparison::Input => ChangeClass::ForwardIncompatible,
-                SchemaComparison::Output => ChangeClass::BackwardIncompatible,
-            };
-            self.schema_push_change(
-                dry_run,
-                "schema became nullable",
-                &old_schema,
-                &new_schema,
-                comparison,
-                class,
-                ChangeDetails::LessStrict,
-            )?
-        } else {
-            // nullable → non-nullable: the schema no longer accepts/returns null.
-            //
-            // For outputs: old clients can handle non-null from new servers.
-            // New clients expect non-null but old servers may return null.
-            // This is forward incompatible.
-            //
-            // For inputs: old clients may send null to new servers, which
-            // reject it. New clients send non-null to old servers, which
-            // accept it. This is backward incompatible.
-            let class = match comparison {
-                SchemaComparison::Input => ChangeClass::BackwardIncompatible,
-                SchemaComparison::Output => ChangeClass::ForwardIncompatible,
-            };
-            self.schema_push_change(
-                dry_run,
-                "schema became non-nullable",
-                &old_schema,
-                &new_schema,
-                comparison,
-                class,
-                ChangeDetails::MoreStrict,
-            )?
-        };
+        // Note: we do not report nullability changes here. They're instead
+        // reported in compare_schema_ref_inner (which knows how to perform
+        // recursion). But we use nullable_equal in the self.visited set. (To be
+        // honest, this seems a bit dubious. But does self.visited.insert even
+        // need to carry information about whether schemas are equal?)
+        let nullable_equal = old_schema_data.nullable == new_schema_data.nullable;
 
         let schema_equal = self.compare_schema_kind(
             comparison,
@@ -962,44 +939,100 @@ fn classify_schema_ref(schema_ref: &ReferenceOr<Schema>) -> SchemaRefKind<'_> {
     }
 }
 
-/// Compute the effective nullability of a schema reference.
+/// Result of computing effective nullability.
 ///
-/// For single-element wrappers, this is `wrapper.nullable || inner.nullable`.
-/// For bare refs and inline types, this is the schema's own nullable flag.
+/// For single-element wrappers, effective nullability is
+/// `wrapper.nullable || inner.effective_nullable`. For terminal schemas,
+/// it's just `schema.nullable`.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum EffectiveNullability {
+    /// The schema is not effectively nullable.
+    NotNullable,
+    /// The schema is effectively nullable, with the source indicating where
+    /// the nullability comes from (outermost source if multiple).
+    Nullable(NullabilityKind),
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum NullabilityKind {
+    /// Direct schema has `nullable: true` (e.g., `{ "type": "string", "nullable": true }`).
+    Direct,
+    /// Single-element wrapper has `nullable: true` in its metadata.
+    Wrapper,
+}
+
+/// Compute the effective nullability of a schema reference.
 fn get_effective_nullable(
     schema_ref: &Contextual<'_, &ReferenceOr<Schema>>,
-) -> anyhow::Result<bool> {
+) -> anyhow::Result<EffectiveNullability> {
     match schema_ref.as_ref() {
         ReferenceOr::Reference { .. } => {
-            // Bare ref: resolve and get the referenced schema's nullable.
-            let (resolved, _) = schema_ref.contextual_resolve()?;
-            Ok(resolved.schema_data.nullable)
+            // Bare ref: resolve and delegate to the schema handler.
+            let (resolved, context) = schema_ref.contextual_resolve()?;
+            let schema = Contextual::new(context, resolved.as_ref());
+            get_effective_nullable_for_schema(&schema)
         }
         ReferenceOr::Item(schema) => {
-            // For single-element wrappers, effective nullable is wrapper || inner.
-            // For everything else, use the schema's own nullable.
-            match &schema.schema_kind {
-                openapiv3::SchemaKind::AllOf { all_of } if all_of.len() == 1 => {
-                    let inner = all_of.first().expect("checked length is 1");
-                    let inner_ctx = schema_ref.append_deref(inner, "0");
-                    let inner_nullable = get_effective_nullable(&inner_ctx)?;
-                    Ok(schema.schema_data.nullable || inner_nullable)
-                }
-                openapiv3::SchemaKind::AnyOf { any_of } if any_of.len() == 1 => {
-                    let inner = any_of.first().expect("checked length is 1");
-                    let inner_ctx = schema_ref.append_deref(inner, "0");
-                    let inner_nullable = get_effective_nullable(&inner_ctx)?;
-                    Ok(schema.schema_data.nullable || inner_nullable)
-                }
-                openapiv3::SchemaKind::OneOf { one_of } if one_of.len() == 1 => {
-                    let inner = one_of.first().expect("checked length is 1");
-                    let inner_ctx = schema_ref.append_deref(inner, "0");
-                    let inner_nullable = get_effective_nullable(&inner_ctx)?;
-                    Ok(schema.schema_data.nullable || inner_nullable)
-                }
-                _ => Ok(schema.schema_data.nullable),
-            }
+            // Inline schema: delegate to the schema handler.
+            let schema = schema_ref.subcomponent(schema);
+            get_effective_nullable_for_schema(&schema)
         }
+    }
+}
+
+/// Compute effective nullability for a resolved Schema.
+///
+/// Handles recursion through single-element wrappers.
+fn get_effective_nullable_for_schema(
+    schema: &Contextual<'_, &Schema>,
+) -> anyhow::Result<EffectiveNullability> {
+    // Check for the single-element wrapper pattern.
+    let inner = match &schema.schema_kind {
+        openapiv3::SchemaKind::AllOf { all_of } if all_of.len() == 1 => {
+            Some(all_of.first().expect("checked length is 1"))
+        }
+        openapiv3::SchemaKind::AnyOf { any_of } if any_of.len() == 1 => {
+            Some(any_of.first().expect("checked length is 1"))
+        }
+        openapiv3::SchemaKind::OneOf { one_of } if one_of.len() == 1 => {
+            Some(one_of.first().expect("checked length is 1"))
+        }
+        _ => {
+            // This is either a multi-element wrapper or a non-wrapper schema.
+            // We do not handle the former case in too much depth (we treat any
+            // kind of difference as non-identical). For a non-wrapper schema,
+            // we have nowhere to recurse to. In both cases, None is fine.
+            None
+        }
+    };
+
+    // If this schema is nullable, return immediately. This check must come
+    // before the cycle check so that nullable schemas in a cycle are detected.
+    if schema.schema_data.nullable {
+        let kind = if inner.is_some() {
+            NullabilityKind::Wrapper
+        } else {
+            NullabilityKind::Direct
+        };
+        return Ok(EffectiveNullability::Nullable(kind));
+    }
+
+    // Guard against cycles (e.g., allOf: [$ref: self]).
+    //
+    // We only reach this point if the current schema is non-nullable. We only
+    // recurse (below) for non-nullable wrappers. Therefore, every schema in a
+    // cycle path is non-nullable, and returning NotNullable is correct.
+    if schema.context().stack().contains_cycle() {
+        return Ok(EffectiveNullability::NotNullable);
+    }
+
+    // If it's a wrapper, recurse into the inner schema.
+    match inner {
+        Some(inner) => {
+            let inner_ctx = Contextual::new(schema.context().clone(), inner);
+            get_effective_nullable(&inner_ctx)
+        }
+        None => Ok(EffectiveNullability::NotNullable),
     }
 }
 

@@ -1,7 +1,7 @@
 [
-	{
-		"op": "add",
-		"path": "/components/schemas/GreetingResponse/properties/via_allof/nullable",
-		"value": true
-	}
+  {
+    "op": "add",
+    "path": "/components/schemas/GreetingResponse/properties/via_allof/nullable",
+    "value": true
+  }
 ]

@@ -1,9 +1,9 @@
 [
-	{
-		"op": "replace",
-		"path": "/components/schemas/GreetingResponse/properties/redundant_nullable_wrapper",
-		"value": {
-			"$ref": "#/components/schemas/NullableSubType"
-		}
-	}
+  {
+    "op": "replace",
+    "path": "/components/schemas/GreetingResponse/properties/redundant_nullable_wrapper",
+    "value": {
+      "$ref": "#/components/schemas/NullableSubType"
+    }
+  }
 ]

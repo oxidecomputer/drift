@@ -1,12 +1,12 @@
 [
-	{
-		"op": "test",
-		"path": "/paths/~1hello~1{name}/get/parameters/1/name",
-		"value": "language"
-	},
-	{
-		"op": "replace",
-		"path": "/paths/~1hello~1{name}/get/parameters/1/schema/type",
-		"value": "integer"
-	}
+  {
+    "op": "test",
+    "path": "/paths/~1hello~1{name}/get/parameters/1/name",
+    "value": "language"
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1hello~1{name}/get/parameters/1/schema/type",
+    "value": "integer"
+  }
 ]

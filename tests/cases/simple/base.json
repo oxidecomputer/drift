@@ -26,6 +26,16 @@
             },
             "description": "Language for the greeting",
             "required": false
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "description": "Output format (nullable for testing)",
+            "required": false
           }
         ],
         "responses": {
@@ -335,6 +345,88 @@
           }
         }
       }
+    },
+    "/nested-wrapper": {
+      "get": {
+        "operationId": "get_nested_wrapper",
+        "summary": "Get nested wrapper via inline allOf (tests nullable through ref chain)",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Inline wrapper around nested chain.",
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/NestedWrapperA"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/nested-wrapper-bare-ref": {
+      "get": {
+        "operationId": "get_nested_wrapper_bare_ref",
+        "summary": "Get nested wrapper via bare ref (tests nullable through ref chain)",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NestedWrapperA"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/nested-nullable-wrapper": {
+      "get": {
+        "operationId": "get_nested_nullable_wrapper",
+        "summary": "Get nested nullable wrapper via inline allOf (tests nullable removal through ref chain)",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Inline wrapper around nullable nested chain.",
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/NestedNullableWrapperA"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/nested-nullable-wrapper-bare-ref": {
+      "get": {
+        "operationId": "get_nested_nullable_wrapper_bare_ref",
+        "summary": "Get nested nullable wrapper via bare ref (tests nullable removal through ref chain)",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NestedNullableWrapperA"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -579,6 +671,55 @@
           }
         },
         "required": ["id"]
+      },
+      "NestedWrapperA": {
+        "description": "Outer wrapper (non-nullable).",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/NestedWrapperB"
+          }
+        ]
+      },
+      "NestedWrapperB": {
+        "description": "Middle wrapper (non-nullable).",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/NestedWrapperC"
+          }
+        ]
+      },
+      "NestedWrapperC": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      "NestedNullableWrapperA": {
+        "description": "Outer wrapper for nullable chain.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/NestedNullableWrapperB"
+          }
+        ]
+      },
+      "NestedNullableWrapperB": {
+        "description": "Middle wrapper for nullable chain.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/NestedNullableWrapperC"
+          }
+        ]
+      },
+      "NestedNullableWrapperC": {
+        "type": "object",
+        "nullable": true,
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        }
       }
     }
   }

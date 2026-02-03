@@ -1,7 +1,7 @@
 [
-	{
-		"op": "add",
-		"path": "/components/schemas/ObjectWithConstraints/additionalProperties/nullable",
-		"value": true
-	}
+  {
+    "op": "add",
+    "path": "/components/schemas/ObjectWithConstraints/additionalProperties/nullable",
+    "value": true
+  }
 ]

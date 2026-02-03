@@ -1,6 +1,6 @@
 --- object-max-properties-change.json
 +++ patched
-@@ -178,7 +178,7 @@
+@@ -227,7 +227,7 @@
          "additionalProperties": {
            "type": "string"
          },

@@ -1,6 +1,6 @@
 [
-	{
-		"op": "remove",
-		"path": "/components/schemas/SharedType/properties/optional_data/nullable"
-	}
+  {
+    "op": "remove",
+    "path": "/components/schemas/SharedType/properties/optional_data/nullable"
+  }
 ]

@@ -1,7 +1,7 @@
 [
-	{
-		"op": "add",
-		"path": "/components/schemas/SharedType/properties/data/nullable",
-		"value": true
-	}
+  {
+    "op": "add",
+    "path": "/components/schemas/SharedType/properties/data/nullable",
+    "value": true
+  }
 ]

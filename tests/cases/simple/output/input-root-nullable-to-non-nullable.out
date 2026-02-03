@@ -1,6 +1,6 @@
 --- input-root-nullable-to-non-nullable.json
 +++ patched
-@@ -241,7 +241,6 @@
+@@ -290,7 +290,6 @@
          "type": "object"
        },
        "UpdateItem": {
@@ -15,12 +15,10 @@ Result for patch:
     Change {
         message: "schema became non-nullable",
         old_path: [
-            "#/components/schemas/UpdateItem",
-            "#/paths/~1items/put/request_body/content/application~1json/schema/$ref",
+            "#/paths/~1items/put/request_body/content/application~1json/schema",
         ],
         new_path: [
-            "#/components/schemas/UpdateItem",
-            "#/paths/~1items/put/request_body/content/application~1json/schema/$ref",
+            "#/paths/~1items/put/request_body/content/application~1json/schema",
         ],
         comparison: Input,
         class: BackwardIncompatible,

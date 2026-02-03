@@ -1,6 +1,6 @@
 --- inline-to-allof.json
 +++ patched
-@@ -320,7 +320,12 @@
+@@ -369,7 +369,12 @@
              "in": "path",
              "name": "name",
              "schema": {

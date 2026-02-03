@@ -20,7 +20,7 @@
 Result for patch:
 [
     Change {
-        message: "schema became non-nullable",
+        message: "nullable removed from wrapper",
         old_path: [
             "#/components/schemas/GreetingResponse/properties/via_anyof",
             "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",

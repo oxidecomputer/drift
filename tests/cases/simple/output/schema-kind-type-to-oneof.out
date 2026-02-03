@@ -1,6 +1,6 @@
 --- schema-kind-type-to-oneof.json
 +++ patched
-@@ -207,12 +207,14 @@
+@@ -256,12 +256,14 @@
          "type": "object"
        },
        "SubType": {

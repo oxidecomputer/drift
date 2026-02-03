@@ -1,6 +1,6 @@
 --- shared-nullable-to-non-nullable.json
 +++ patched
-@@ -197,7 +197,6 @@
+@@ -246,7 +246,6 @@
              "type": "string"
            },
            "optional_data": {

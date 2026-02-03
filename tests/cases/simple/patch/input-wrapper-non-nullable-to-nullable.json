@@ -1,7 +1,7 @@
 [
-	{
-		"op": "add",
-		"path": "/components/schemas/CreateItem/properties/metadata_ref/nullable",
-		"value": true
-	}
+  {
+    "op": "add",
+    "path": "/components/schemas/CreateItem/properties/metadata_ref/nullable",
+    "value": true
+  }
 ]

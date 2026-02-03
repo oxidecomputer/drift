@@ -1,6 +1,6 @@
 --- boolean-enum-change.json
 +++ patched
-@@ -232,6 +232,9 @@
+@@ -281,6 +281,9 @@
              "type": "integer"
            },
            "enabled": {
