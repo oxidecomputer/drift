@@ -1,0 +1,11 @@
+[
+  {
+    "op": "test",
+    "path": "/paths/~1hello~1{name}/get/parameters/2/name",
+    "value": "format"
+  },
+  {
+    "op": "remove",
+    "path": "/paths/~1hello~1{name}/get/parameters/2/schema/nullable"
+  }
+]

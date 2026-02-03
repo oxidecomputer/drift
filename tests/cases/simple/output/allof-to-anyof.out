@@ -1,7 +1,7 @@
 --- allof-to-anyof.json
 +++ patched
-@@ -58,12 +58,12 @@
-             }
+@@ -102,12 +102,12 @@
+             "nullable": true
            },
            "via_allof": {
 -            "allOf": [

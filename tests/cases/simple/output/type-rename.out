@@ -1,6 +1,6 @@
 --- type-rename.json
 +++ patched
-@@ -46,7 +46,7 @@
+@@ -65,7 +65,7 @@
          ],
          "type": "object"
        },
@@ -9,7 +9,7 @@
          "properties": {
            "message": {
              "description": "The greeting message",
-@@ -264,7 +264,7 @@
+@@ -397,7 +397,7 @@
              "content": {
                "application/json": {
                  "schema": {

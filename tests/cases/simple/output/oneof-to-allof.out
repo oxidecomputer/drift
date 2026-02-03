@@ -1,7 +1,7 @@
 --- oneof-to-allof.json
 +++ patched
-@@ -74,12 +74,12 @@
-             "description": "Via anyOf."
+@@ -119,12 +119,12 @@
+             "nullable": true
            },
            "via_oneof": {
 -            "description": "Via oneOf.",

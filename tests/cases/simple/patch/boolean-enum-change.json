@@ -2,6 +2,8 @@
   {
     "op": "add",
     "path": "/components/schemas/TypedProperties/properties/enabled/enum",
-    "value": [true]
+    "value": [
+      true
+    ]
   }
 ]

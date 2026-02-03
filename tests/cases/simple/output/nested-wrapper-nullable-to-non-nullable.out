@@ -1,0 +1,39 @@
+--- nested-wrapper-nullable-to-non-nullable.json
++++ patched
+@@ -182,7 +182,6 @@
+         "description": "Middle wrapper for nullable chain."
+       },
+       "NestedNullableWrapperC": {
+-        "nullable": true,
+         "properties": {
+           "value": {
+             "type": "string"
+
+
+Result for patch:
+[
+    Change {
+        message: "schema became non-nullable",
+        old_path: [
+            "#/paths/~1nested-nullable-wrapper/get/responses/200/content/application~1json/schema",
+        ],
+        new_path: [
+            "#/paths/~1nested-nullable-wrapper/get/responses/200/content/application~1json/schema",
+        ],
+        comparison: Output,
+        class: ForwardIncompatible,
+        details: MoreStrict,
+    },
+    Change {
+        message: "schema became non-nullable",
+        old_path: [
+            "#/paths/~1nested-nullable-wrapper-bare-ref/get/responses/200/content/application~1json/schema",
+        ],
+        new_path: [
+            "#/paths/~1nested-nullable-wrapper-bare-ref/get/responses/200/content/application~1json/schema",
+        ],
+        comparison: Output,
+        class: ForwardIncompatible,
+        details: MoreStrict,
+    },
+]

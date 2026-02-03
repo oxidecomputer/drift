@@ -1,0 +1,7 @@
+[
+  {
+    "op": "add",
+    "path": "/components/schemas/GreetingResponse/properties/non_nullable_wrapper_of_nullable/nullable",
+    "value": true
+  }
+]

@@ -1,0 +1,43 @@
+--- shared-non-nullable-to-nullable.json
++++ patched
+@@ -240,6 +240,7 @@
+       "SharedType": {
+         "properties": {
+           "data": {
++            "nullable": true,
+             "type": "string"
+           },
+           "id": {
+
+
+Result for patch:
+[
+    Change {
+        message: "schema became nullable",
+        old_path: [
+            "#/components/schemas/SharedType/properties/data",
+            "#/paths/~1shared/post/request_body/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/SharedType/properties/data",
+            "#/paths/~1shared/post/request_body/content/application~1json/schema/$ref",
+        ],
+        comparison: Input,
+        class: ForwardIncompatible,
+        details: LessStrict,
+    },
+    Change {
+        message: "schema became nullable",
+        old_path: [
+            "#/components/schemas/SharedType/properties/data",
+            "#/paths/~1shared/post/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/SharedType/properties/data",
+            "#/paths/~1shared/post/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: BackwardIncompatible,
+        details: LessStrict,
+    },
+]

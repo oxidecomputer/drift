@@ -1,7 +1,7 @@
 --- not-to-allof.json
 +++ patched
-@@ -53,9 +53,14 @@
-             "type": "string"
+@@ -80,9 +80,14 @@
+             "description": "Non-nullable wrapper around nullable type."
            },
            "not_a_number": {
 -            "not": {
@@ -16,8 +16,8 @@
 +            ],
 +            "description": "Not a number, wrapped in allOf"
            },
-           "via_allof": {
-             "allOf": [
+           "nullable_via_ref": {
+             "$ref": "#/components/schemas/NullableSubType"
 
 
 Result for patch:

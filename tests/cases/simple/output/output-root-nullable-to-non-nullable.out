@@ -1,0 +1,41 @@
+--- output-root-nullable-to-non-nullable.json
++++ patched
+@@ -264,7 +264,6 @@
+         "type": "object"
+       },
+       "Tree": {
+-        "nullable": true,
+         "properties": {
+           "children": {
+             "items": {
+
+
+Result for patch:
+[
+    Change {
+        message: "schema became non-nullable",
+        old_path: [
+            "#/paths/~1tree/get/responses/200/content/application~1json/schema",
+        ],
+        new_path: [
+            "#/paths/~1tree/get/responses/200/content/application~1json/schema",
+        ],
+        comparison: Output,
+        class: ForwardIncompatible,
+        details: MoreStrict,
+    },
+    Change {
+        message: "schema became non-nullable",
+        old_path: [
+            "#/components/schemas/Tree/properties/children/items",
+            "#/paths/~1tree/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/Tree/properties/children/items",
+            "#/paths/~1tree/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: ForwardIncompatible,
+        details: MoreStrict,
+    },
+]

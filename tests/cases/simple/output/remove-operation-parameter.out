@@ -1,11 +1,9 @@
 --- remove-operation-parameter.json
 +++ patched
-@@ -248,15 +248,6 @@
-             "schema": {
-               "type": "string"
+@@ -373,15 +373,6 @@
              }
--          },
--          {
+           },
+           {
 -            "description": "Language for the greeting",
 -            "in": "query",
 -            "name": "language",
@@ -13,9 +11,11 @@
 -            "schema": {
 -              "type": "string"
 -            }
-           }
-         ],
-         "responses": {
+-          },
+-          {
+             "description": "Output format (nullable for testing)",
+             "in": "query",
+             "name": "format",
 
 
 Result for patch:

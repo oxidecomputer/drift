@@ -26,6 +26,16 @@
             },
             "description": "Language for the greeting",
             "required": false
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "description": "Output format (nullable for testing)",
+            "required": false
           }
         ],
         "responses": {
@@ -307,6 +317,116 @@
           }
         }
       }
+    },
+    "/shared": {
+      "post": {
+        "operationId": "use_shared",
+        "summary": "Uses SharedType in both request and response",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SharedType"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SharedType"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/nested-wrapper": {
+      "get": {
+        "operationId": "get_nested_wrapper",
+        "summary": "Get nested wrapper via inline allOf (tests nullable through ref chain)",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Inline wrapper around nested chain.",
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/NestedWrapperA"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/nested-wrapper-bare-ref": {
+      "get": {
+        "operationId": "get_nested_wrapper_bare_ref",
+        "summary": "Get nested wrapper via bare ref (tests nullable through ref chain)",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NestedWrapperA"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/nested-nullable-wrapper": {
+      "get": {
+        "operationId": "get_nested_nullable_wrapper",
+        "summary": "Get nested nullable wrapper via inline allOf (tests nullable removal through ref chain)",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Inline wrapper around nullable nested chain.",
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/NestedNullableWrapperA"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/nested-nullable-wrapper-bare-ref": {
+      "get": {
+        "operationId": "get_nested_nullable_wrapper_bare_ref",
+        "summary": "Get nested nullable wrapper via bare ref (tests nullable removal through ref chain)",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NestedNullableWrapperA"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -331,6 +451,7 @@
           },
           "via_anyof": {
             "description": "Via anyOf.",
+            "nullable": true,
             "anyOf": [
               {
                 "$ref": "#/components/schemas/SubType"
@@ -345,10 +466,35 @@
               }
             ]
           },
+          "redundant_nullable_wrapper": {
+            "description": "Nullable wrapper around already-nullable type.",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/NullableSubType"
+              }
+            ]
+          },
+          "nullable_via_ref": {
+            "$ref": "#/components/schemas/NullableSubType"
+          },
+          "non_nullable_wrapper_of_nullable": {
+            "description": "Non-nullable wrapper around nullable type.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/NullableSubType"
+              }
+            ]
+          },
           "not_a_number": {
             "not": {
               "type": "number"
             }
+          },
+          "optional_field": {
+            "type": "string",
+            "description": "An optional nullable field",
+            "nullable": true
           }
         },
         "required": [
@@ -363,8 +509,18 @@
           }
         }
       },
+      "NullableSubType": {
+        "type": "object",
+        "nullable": true,
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        }
+      },
       "Tree": {
         "type": "object",
+        "nullable": true,
         "properties": {
           "children": {
             "type": "array",
@@ -379,12 +535,32 @@
         "properties": {
           "name": {
             "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "metadata_ref": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SubType"
+              }
+            ]
+          },
+          "metadata_nullable": {
+            "nullable": true,
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SubType"
+              }
+            ]
           }
         },
         "required": ["name"]
       },
       "UpdateItem": {
         "type": "object",
+        "nullable": true,
         "properties": {
           "name": {
             "type": "string"
@@ -479,6 +655,71 @@
       },
       "RefChainB": {
         "$ref": "#/components/schemas/SubType"
+      },
+      "SharedType": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "data": {
+            "type": "string"
+          },
+          "optional_data": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": ["id"]
+      },
+      "NestedWrapperA": {
+        "description": "Outer wrapper (non-nullable).",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/NestedWrapperB"
+          }
+        ]
+      },
+      "NestedWrapperB": {
+        "description": "Middle wrapper (non-nullable).",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/NestedWrapperC"
+          }
+        ]
+      },
+      "NestedWrapperC": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      "NestedNullableWrapperA": {
+        "description": "Outer wrapper for nullable chain.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/NestedNullableWrapperB"
+          }
+        ]
+      },
+      "NestedNullableWrapperB": {
+        "description": "Middle wrapper for nullable chain.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/NestedNullableWrapperC"
+          }
+        ]
+      },
+      "NestedNullableWrapperC": {
+        "type": "object",
+        "nullable": true,
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        }
       }
     }
   }

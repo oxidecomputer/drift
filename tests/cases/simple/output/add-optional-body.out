@@ -1,6 +1,6 @@
 --- add-optional-body.json
 +++ patched
-@@ -317,6 +317,21 @@
+@@ -532,6 +532,21 @@
      "/no-body": {
        "post": {
          "operationId": "no_body",

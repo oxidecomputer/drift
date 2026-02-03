@@ -1,6 +1,6 @@
 [
-	{
-		"op": "remove",
-		"path": "/paths/~1hello~1{name}/get/parameters/1"
-	}
+  {
+    "op": "remove",
+    "path": "/paths/~1hello~1{name}/get/parameters/1"
+  }
 ]

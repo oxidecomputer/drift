@@ -1,15 +1,15 @@
 [
-	{
-		"op": "add",
-		"path": "/components/schemas/GreetingResponse/properties/source",
-		"value": {
-			"type": "string",
-			"description": "Where the greeting originated"
-		}
-	},
-	{
-		"op": "add",
-		"path": "/components/schemas/GreetingResponse/required/-",
-		"value": "source"
-	}
+  {
+    "op": "add",
+    "path": "/components/schemas/GreetingResponse/properties/source",
+    "value": {
+      "type": "string",
+      "description": "Where the greeting originated"
+    }
+  },
+  {
+    "op": "add",
+    "path": "/components/schemas/GreetingResponse/required/-",
+    "value": "source"
+  }
 ]

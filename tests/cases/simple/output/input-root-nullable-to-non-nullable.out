@@ -1,0 +1,27 @@
+--- input-root-nullable-to-non-nullable.json
++++ patched
+@@ -290,7 +290,6 @@
+         "type": "object"
+       },
+       "UpdateItem": {
+-        "nullable": true,
+         "properties": {
+           "name": {
+             "type": "string"
+
+
+Result for patch:
+[
+    Change {
+        message: "schema became non-nullable",
+        old_path: [
+            "#/paths/~1items/put/request_body/content/application~1json/schema",
+        ],
+        new_path: [
+            "#/paths/~1items/put/request_body/content/application~1json/schema",
+        ],
+        comparison: Input,
+        class: BackwardIncompatible,
+        details: MoreStrict,
+    },
+]

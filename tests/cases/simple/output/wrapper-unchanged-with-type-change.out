@@ -1,6 +1,6 @@
 --- wrapper-unchanged-with-type-change.json
 +++ patched
-@@ -137,7 +137,7 @@
+@@ -258,7 +258,7 @@
        "SubType": {
          "properties": {
            "value": {
@@ -26,6 +26,22 @@ Result for patch:
             "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
         ],
         comparison: Output,
+        class: Incompatible,
+        details: UnknownDifference,
+    },
+    Change {
+        message: "schema types changed",
+        old_path: [
+            "#/components/schemas/SubType/properties/value",
+            "#/components/schemas/CreateItem/properties/metadata_nullable/0/$ref",
+            "#/paths/~1items/post/request_body/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/SubType/properties/value",
+            "#/components/schemas/CreateItem/properties/metadata_nullable/0/$ref",
+            "#/paths/~1items/post/request_body/content/application~1json/schema/$ref",
+        ],
+        comparison: Input,
         class: Incompatible,
         details: UnknownDifference,
     },

@@ -1,7 +1,7 @@
 --- add-operation-with-id.json
 +++ patched
-@@ -314,6 +314,17 @@
-         "summary": "Update an item"
+@@ -529,6 +529,17 @@
+         "summary": "Get nested wrapper via bare ref (tests nullable through ref chain)"
        }
      },
 +    "/new-endpoint": {

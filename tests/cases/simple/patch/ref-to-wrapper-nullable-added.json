@@ -1,0 +1,14 @@
+[
+  {
+    "op": "replace",
+    "path": "/components/schemas/GreetingResponse/properties/via_ref",
+    "value": {
+      "nullable": true,
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/SubType"
+        }
+      ]
+    }
+  }
+]

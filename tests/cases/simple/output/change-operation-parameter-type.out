@@ -1,14 +1,14 @@
 --- change-operation-parameter-type.json
 +++ patched
-@@ -255,7 +255,7 @@
+@@ -378,7 +378,7 @@
              "name": "language",
              "required": false,
              "schema": {
 -              "type": "string"
 +              "type": "integer"
              }
-           }
-         ],
+           },
+           {
 
 
 Result for patch:

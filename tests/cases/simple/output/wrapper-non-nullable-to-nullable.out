@@ -1,0 +1,31 @@
+--- wrapper-non-nullable-to-nullable.json
++++ patched
+@@ -107,7 +107,8 @@
+                 "$ref": "#/components/schemas/SubType"
+               }
+             ],
+-            "description": "Via allOf."
++            "description": "Via allOf.",
++            "nullable": true
+           },
+           "via_anyof": {
+             "anyOf": [
+
+
+Result for patch:
+[
+    Change {
+        message: "nullable added at wrapper",
+        old_path: [
+            "#/components/schemas/GreetingResponse/properties/via_allof",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/GreetingResponse/properties/via_allof",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: BackwardIncompatible,
+        details: LessStrict,
+    },
+]

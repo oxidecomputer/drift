@@ -1,0 +1,29 @@
+--- array-items-non-nullable-to-nullable.json
++++ patched
+@@ -13,6 +13,7 @@
+       },
+       "ArrayWithConstraints": {
+         "items": {
++          "nullable": true,
+           "type": "string"
+         },
+         "maxItems": 10,
+
+
+Result for patch:
+[
+    Change {
+        message: "schema became nullable",
+        old_path: [
+            "#/components/schemas/ArrayWithConstraints/items",
+            "#/paths/~1arrays/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/ArrayWithConstraints/items",
+            "#/paths/~1arrays/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: BackwardIncompatible,
+        details: LessStrict,
+    },
+]

@@ -1,7 +1,7 @@
 --- add-required-parameter.json
 +++ patched
-@@ -257,6 +257,15 @@
-             "schema": {
+@@ -390,6 +390,15 @@
+               "nullable": true,
                "type": "string"
              }
 +          },
@@ -21,15 +21,27 @@
 Result for patch:
 [
     Change {
-        message: "A new, required parameter 'format' was added",
+        message: "The parameter 'format' was optional and is now required",
         old_path: [
-            "#/paths/~1hello~1{name}/get",
+            "#/paths/~1hello~1{name}/get/parameters/2",
         ],
         new_path: [
-            "#/paths/~1hello~1{name}/get/parameters/2",
+            "#/paths/~1hello~1{name}/get/parameters/3",
         ],
         comparison: Input,
         class: BackwardIncompatible,
-        details: AddedRequired,
+        details: MoreStrict,
+    },
+    Change {
+        message: "schema became non-nullable",
+        old_path: [
+            "#/paths/~1hello~1{name}/get/parameters/2/schema",
+        ],
+        new_path: [
+            "#/paths/~1hello~1{name}/get/parameters/3/schema",
+        ],
+        comparison: Input,
+        class: BackwardIncompatible,
+        details: MoreStrict,
     },
 ]

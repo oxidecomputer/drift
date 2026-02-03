@@ -1,0 +1,15 @@
+[
+  {
+    "op": "replace",
+    "path": "/components/schemas/GreetingResponse/properties/message",
+    "value": {
+      "nullable": true,
+      "description": "The greeting message",
+      "allOf": [
+        {
+          "type": "string"
+        }
+      ]
+    }
+  }
+]

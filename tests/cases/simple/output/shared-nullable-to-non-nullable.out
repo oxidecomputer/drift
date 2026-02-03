@@ -1,0 +1,43 @@
+--- shared-nullable-to-non-nullable.json
++++ patched
+@@ -246,7 +246,6 @@
+             "type": "string"
+           },
+           "optional_data": {
+-            "nullable": true,
+             "type": "string"
+           }
+         },
+
+
+Result for patch:
+[
+    Change {
+        message: "schema became non-nullable",
+        old_path: [
+            "#/components/schemas/SharedType/properties/optional_data",
+            "#/paths/~1shared/post/request_body/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/SharedType/properties/optional_data",
+            "#/paths/~1shared/post/request_body/content/application~1json/schema/$ref",
+        ],
+        comparison: Input,
+        class: BackwardIncompatible,
+        details: MoreStrict,
+    },
+    Change {
+        message: "schema became non-nullable",
+        old_path: [
+            "#/components/schemas/SharedType/properties/optional_data",
+            "#/paths/~1shared/post/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/SharedType/properties/optional_data",
+            "#/paths/~1shared/post/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: ForwardIncompatible,
+        details: MoreStrict,
+    },
+]

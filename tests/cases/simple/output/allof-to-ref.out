@@ -1,7 +1,7 @@
 --- allof-to-ref.json
 +++ patched
-@@ -58,12 +58,7 @@
-             }
+@@ -102,12 +102,7 @@
+             "nullable": true
            },
            "via_allof": {
 -            "allOf": [

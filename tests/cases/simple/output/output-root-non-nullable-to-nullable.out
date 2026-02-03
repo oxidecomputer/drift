@@ -1,0 +1,27 @@
+--- output-root-non-nullable-to-nullable.json
++++ patched
+@@ -66,6 +66,7 @@
+         "type": "object"
+       },
+       "GreetingResponse": {
++        "nullable": true,
+         "properties": {
+           "message": {
+             "description": "The greeting message",
+
+
+Result for patch:
+[
+    Change {
+        message: "schema became nullable",
+        old_path: [
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema",
+        ],
+        new_path: [
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema",
+        ],
+        comparison: Output,
+        class: BackwardIncompatible,
+        details: LessStrict,
+    },
+]

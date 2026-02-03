@@ -1,6 +1,6 @@
 --- ref-to-inline-allof.json
 +++ patched
-@@ -82,7 +82,18 @@
+@@ -127,7 +127,18 @@
              ]
            },
            "via_ref": {

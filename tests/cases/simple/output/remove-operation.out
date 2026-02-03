@@ -1,6 +1,6 @@
 --- remove-operation.json
 +++ patched
-@@ -361,18 +361,7 @@
+@@ -576,18 +576,7 @@
          "summary": "Get oneOf schema"
        }
      },

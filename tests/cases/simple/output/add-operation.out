@@ -1,6 +1,6 @@
 --- add-operation.json
 +++ patched
-@@ -238,6 +238,16 @@
+@@ -361,6 +361,16 @@
          "summary": "Get arrays"
        }
      },
