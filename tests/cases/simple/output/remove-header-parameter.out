@@ -23,7 +23,7 @@ Result for patch:
         paths: [
             ChangePath {
                 old: [
-                    "#/paths/~1with-header/get/parameters/0",
+                    "#/paths/~1with-header/get",
                 ],
                 new: [
                     "#/paths/~1with-header/get",
@@ -33,7 +33,7 @@ Result for patch:
         ],
         changes: [
             ChangeInfo {
-                old_subpath: "",
+                old_subpath: "parameters/0",
                 new_subpath: "",
                 message: "The parameter 'X-Request-Id' was removed",
                 class: BackwardIncompatible,

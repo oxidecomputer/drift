@@ -48,6 +48,9 @@ pub fn operations(raw_openapi: &Value) -> anyhow::Result<Vec<(OperationKey, Oper
 
     for (path, ref_or_operation) in api.paths.paths.iter() {
         // Build a context at #/paths/<path> for resolving path item refs.
+        // This uses `for_path` (not `for_operation`), so the base is the
+        // path item, not a specific operation. Shared parameters resolved
+        // from this context will group changes at the path-item level.
         let path_endpoint = EndpointPath::for_path(path);
         let path_context = Context::for_endpoint(raw_openapi, path_endpoint);
         let (path_item, path_context) = ref_or_operation.resolve(&path_context)?;
@@ -59,7 +62,7 @@ pub fn operations(raw_openapi: &Value) -> anyhow::Result<Vec<(OperationKey, Oper
 
         for (method, operation) in path_item.iter() {
             // Build endpoint path for this operation: #/paths/<path>/<method>
-            let endpoint = EndpointPath::for_path(path).append(method);
+            let endpoint = EndpointPath::for_operation(path, method);
             let context = Context::for_endpoint(raw_openapi, endpoint);
 
             let op_key = OperationKey::new(path, method);

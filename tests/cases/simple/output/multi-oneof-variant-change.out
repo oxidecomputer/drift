@@ -17,11 +17,11 @@ Result for patch:
         paths: [
             ChangePath {
                 old: [
-                    "#/components/schemas/MultiOneOf/oneOf/0",
+                    "#/components/schemas/MultiOneOf",
                     "#/paths/~1oneof/get/responses/200/content/application~1json/schema/$ref",
                 ],
                 new: [
-                    "#/components/schemas/MultiOneOf/oneOf/0",
+                    "#/components/schemas/MultiOneOf",
                     "#/paths/~1oneof/get/responses/200/content/application~1json/schema/$ref",
                 ],
                 comparison: Output,
@@ -29,8 +29,8 @@ Result for patch:
         ],
         changes: [
             ChangeInfo {
-                old_subpath: "",
-                new_subpath: "",
+                old_subpath: "oneOf/0",
+                new_subpath: "oneOf/0",
                 message: "schema types changed",
                 class: Incompatible,
                 details: UnknownDifference,

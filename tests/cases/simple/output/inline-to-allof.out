@@ -22,18 +22,18 @@ Result for patch:
         paths: [
             ChangePath {
                 old: [
-                    "#/paths/~1hello~1{name}/get/parameters/0/schema",
+                    "#/paths/~1hello~1{name}/get",
                 ],
                 new: [
-                    "#/paths/~1hello~1{name}/get/parameters/0/schema",
+                    "#/paths/~1hello~1{name}/get",
                 ],
                 comparison: Input,
             },
         ],
         changes: [
             ChangeInfo {
-                old_subpath: "",
-                new_subpath: "",
+                old_subpath: "parameters/0/schema",
+                new_subpath: "parameters/0/schema",
                 message: "schema metadata added",
                 class: Trivial,
                 details: Metadata,

@@ -27,7 +27,7 @@ Result for patch:
                     "#/paths/~1hello~1{name}/get",
                 ],
                 new: [
-                    "#/paths/~1hello~1{name}/get/parameters/2",
+                    "#/paths/~1hello~1{name}/get",
                 ],
                 comparison: Input,
             },
@@ -35,7 +35,7 @@ Result for patch:
         changes: [
             ChangeInfo {
                 old_subpath: "",
-                new_subpath: "",
+                new_subpath: "parameters/2",
                 message: "A new, optional parameter 'limit' was added",
                 class: ForwardIncompatible,
                 details: Added,

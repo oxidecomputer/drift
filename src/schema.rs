@@ -94,7 +94,7 @@ impl Compare {
             ) => {
                 // Both old and new are single-element wrappers.
                 if old_meta != new_meta && !dry_run {
-                    self.push_change(
+                    self.record_change(
                         "schema metadata changed",
                         old_schema,
                         new_schema,
@@ -122,7 +122,7 @@ impl Compare {
                 // A bare ref or inline type does not have metadata, so if the
                 // old metadata is non-default, report a trivial change.
                 if has_meaningful_metadata(old_meta) && !dry_run {
-                    self.push_change(
+                    self.record_change(
                         "schema metadata removed",
                         old_schema,
                         new_schema,
@@ -152,7 +152,7 @@ impl Compare {
                 // A bare ref or inline type does not have metadata, so if the
                 // new metadata is non-default, report a trivial change.
                 if has_meaningful_metadata(new_meta) && !dry_run {
-                    self.push_change(
+                    self.record_change(
                         "schema metadata added",
                         old_schema,
                         new_schema,
@@ -186,6 +186,57 @@ impl Compare {
         old_schema: Contextual<'_, &Schema>,
         new_schema: Contextual<'_, &Schema>,
     ) -> anyhow::Result<bool> {
+        // Record the access path when either side is at the root before .append
+        // has been called (subpath is empty).
+        //
+        // This must happen before the `visited` check below. When a named
+        // schema is referenced from multiple endpoints, the first visit runs
+        // the full comparison and populates `visited`. Subsequent visits find
+        // the entry in `visited` and return early, never reaching
+        // `record_change`. This `record_path` call is the only opportunity
+        // to capture those later access paths.
+        //
+        // Why `||` and not `&&`? A schema can move between out-of-line
+        // (`$ref` to a named type) and inline across versions. When that
+        // happens, one side is at a component root (empty subpath) and the
+        // other is at a subpath within an endpoint or parent schema. With
+        // `&&` this path would not be recorded; with `||` it is.
+        //
+        // For a concrete example, see the `ref-vs-inline-type-change` test:
+        // SubType.value changes from string to integer, and via_ref is inlined.
+        //
+        // When comparing via_ref, the old side resolves the `$ref` to SubType
+        // (empty subpath), while the new side is inline within GreetingResponse
+        // (subpath = `properties/via_ref`). Meanwhile, via_allof, via_anyof,
+        // etc. still reference SubType via $ref on both sides.
+        //
+        // `visited` is keyed on full paths (`current_pointer`), so the
+        // ref-vs-inline pair has a different SchemaKey from the ref-vs-ref
+        // paths. The ref-vs-inline pair is not found in `visited`, and the
+        // full comparison runs independently, producing a separate Change
+        // with ChangeKey {SubType, GreetingResponse}. This is correct: the
+        // two Changes describe the same semantic change from different
+        // structural perspectives (one scoped to SubType, the other to
+        // GreetingResponse).
+        //
+        // Because ref-vs-inline always produces a unique SchemaKey (the
+        // full paths differ), `||` vs `&&` is moot today:
+        //
+        // * When changes are detected, `record_change` records the path via
+        //   `ensure_record`.
+        // * When no changes are detected, `compare()` discards empty
+        //   ChangeRecords.
+        //
+        // We use `||` as the correct, logical semantic: if `visited` were keyed
+        // on base paths instead, the `||` would become load-bearing.
+        if !dry_run {
+            let (_, old_subpath) = old_schema.context().stack().base_and_subpath();
+            let (_, new_subpath) = new_schema.context().stack().base_and_subpath();
+            if old_subpath.is_empty() || new_subpath.is_empty() {
+                self.record_path(&old_schema, &new_schema, comparison.into());
+            }
+        }
+
         // We wait for both new and old to contain a cycle; this ensures that
         // we consider "unrolled" cycles properly. There is a possibility of
         // getting stuck in an A->B->A / B->A->B cycle... we can address that
@@ -257,7 +308,7 @@ impl Compare {
             && old_extensions == new_extensions;
 
         if !metadata_equal {
-            let _ = self.schema_push_change(
+            let _ = self.schema_record_change(
                 dry_run,
                 "schema metadata changed".to_string(),
                 &old_schema,
@@ -320,7 +371,7 @@ impl Compare {
                 openapiv3::SchemaKind::AnyOf { any_of: new_any_of },
             ) => {
                 if old_any_of != new_any_of {
-                    self.schema_push_change(
+                    self.schema_record_change(
                         dry_run,
                         "unhandled, 'anyOf' schema",
                         &old_schema_kind,
@@ -345,7 +396,7 @@ impl Compare {
                 if old_any == new_any {
                     Ok(true)
                 } else {
-                    self.schema_push_change(
+                    self.schema_record_change(
                         dry_run,
                         "schema kind 'any' changed",
                         &old_schema_kind,
@@ -359,7 +410,7 @@ impl Compare {
             _ => {
                 let old_tag = SchemaKindTag::new(&old_schema_kind);
                 let new_tag = SchemaKindTag::new(&new_schema_kind);
-                self.schema_push_change(
+                self.schema_record_change(
                     dry_run,
                     format!("schema kind changed from {} to {}", old_tag, new_tag),
                     &old_schema_kind,
@@ -382,7 +433,7 @@ impl Compare {
         match (old_schema_type.as_ref(), new_schema_type.as_ref()) {
             (openapiv3::Type::String(old_string), openapiv3::Type::String(new_string)) => {
                 if old_string != new_string {
-                    self.schema_push_change(
+                    self.schema_record_change(
                         dry_run,
                         "string schema changed",
                         &old_schema_type,
@@ -397,7 +448,7 @@ impl Compare {
             }
             (openapiv3::Type::Number(old_number), openapiv3::Type::Number(new_number)) => {
                 if old_number != new_number {
-                    self.schema_push_change(
+                    self.schema_record_change(
                         dry_run,
                         "number schema changed",
                         &old_schema_type,
@@ -412,7 +463,7 @@ impl Compare {
             }
             (openapiv3::Type::Integer(old_integer), openapiv3::Type::Integer(new_integer)) => {
                 if old_integer != new_integer {
-                    self.schema_push_change(
+                    self.schema_record_change(
                         dry_run,
                         "integer schema changed",
                         &old_schema_type,
@@ -427,7 +478,7 @@ impl Compare {
             }
             (openapiv3::Type::Boolean(old_boolean), openapiv3::Type::Boolean(new_boolean)) => {
                 if old_boolean != new_boolean {
-                    self.schema_push_change(
+                    self.schema_record_change(
                         dry_run,
                         "boolean schema changed",
                         &old_schema_type,
@@ -454,7 +505,7 @@ impl Compare {
                     old_schema_type.subcomponent(old_object),
                     new_schema_type.subcomponent(new_object),
                 ),
-            _ => self.schema_push_change(
+            _ => self.schema_record_change(
                 dry_run,
                 "schema types changed",
                 &old_schema_type,
@@ -490,7 +541,7 @@ impl Compare {
 
         if old_min_items != new_min_items {
             ret = false;
-            let _ = self.schema_push_change(
+            let _ = self.schema_record_change(
                 dry_run,
                 "array minItems changed",
                 &old_array,
@@ -503,7 +554,7 @@ impl Compare {
 
         if old_max_items != new_max_items {
             ret = false;
-            let _ = self.schema_push_change(
+            let _ = self.schema_record_change(
                 dry_run,
                 "array maxItems changed",
                 &old_array,
@@ -516,7 +567,7 @@ impl Compare {
 
         if old_unique_items != new_unique_items {
             ret = false;
-            let _ = self.schema_push_change(
+            let _ = self.schema_record_change(
                 dry_run,
                 "array uniqueItems changed",
                 &old_array,
@@ -539,7 +590,7 @@ impl Compare {
             (None, None) => {}
             _ => {
                 ret = false;
-                let _ = self.schema_push_change(
+                let _ = self.schema_record_change(
                     dry_run,
                     "array items changed",
                     &old_array,
@@ -580,7 +631,7 @@ impl Compare {
 
         if old_required != new_required {
             ret = false;
-            let _ = self.schema_push_change(
+            let _ = self.schema_record_change(
                 dry_run,
                 "object required properties changed",
                 &old_object,
@@ -593,7 +644,7 @@ impl Compare {
 
         if old_min_properties != new_min_properties {
             ret = false;
-            let _ = self.schema_push_change(
+            let _ = self.schema_record_change(
                 dry_run,
                 "object minProperties changed",
                 &old_object,
@@ -606,7 +657,7 @@ impl Compare {
 
         if old_max_properties != new_max_properties {
             ret = false;
-            let _ = self.schema_push_change(
+            let _ = self.schema_record_change(
                 dry_run,
                 "object maxProperties changed",
                 &old_object,
@@ -646,7 +697,7 @@ impl Compare {
 
             _ => {
                 ret = false;
-                let _ = self.schema_push_change(
+                let _ = self.schema_record_change(
                     dry_run,
                     "object additionalProperties changed",
                     &old_object,
@@ -666,7 +717,7 @@ impl Compare {
 
         if !a_unique.is_empty() || !b_unique.is_empty() {
             ret = false;
-            let _ = self.schema_push_change(
+            let _ = self.schema_record_change(
                 dry_run,
                 "object properties changed",
                 &old_object,
@@ -701,7 +752,7 @@ impl Compare {
         let old_schemas = old_one_of.as_ref();
         let new_schemas = new_one_of.as_ref();
         if old_schemas.len() != new_schemas.len() {
-            return self.schema_push_change(
+            return self.schema_record_change(
                 dry_run,
                 "oneOf schema count changed",
                 &old_one_of,
@@ -738,7 +789,7 @@ impl Compare {
         new_all_of: Contextual<'_, &Vec<ReferenceOr<Schema>>>,
     ) -> anyhow::Result<bool> {
         if old_all_of.as_ref() != new_all_of.as_ref() {
-            self.schema_push_change(
+            self.schema_record_change(
                 dry_run,
                 "unhandled, 'allOf' schema",
                 &old_all_of,
@@ -753,7 +804,7 @@ impl Compare {
     }
 
     #[allow(clippy::too_many_arguments)]
-    fn schema_push_change(
+    fn schema_record_change(
         &mut self,
         dry_run: bool,
         message: impl ToString,
@@ -764,7 +815,7 @@ impl Compare {
         details: ChangeDetails,
     ) -> anyhow::Result<bool> {
         if !dry_run {
-            self.push_change(message, old, new, comparison.into(), class, details);
+            self.record_change(message, old, new, comparison.into(), class, details);
         }
         Ok(false)
     }

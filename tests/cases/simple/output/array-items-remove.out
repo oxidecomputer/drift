@@ -18,11 +18,22 @@ Result for patch:
             ChangePath {
                 old: [
                     "#/components/schemas/Tree",
+                    "#/paths/~1tree/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                new: [
+                    "#/components/schemas/Tree",
+                    "#/paths/~1tree/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                comparison: Output,
+            },
+            ChangePath {
+                old: [
+                    "#/components/schemas/Tree",
                     "#/components/schemas/Tree/properties/children/items/$ref",
                     "#/paths/~1tree/get/responses/200/content/application~1json/schema/$ref",
                 ],
                 new: [
-                    "#/components/schemas/Tree/properties/children/items",
+                    "#/components/schemas/Tree",
                     "#/paths/~1tree/get/responses/200/content/application~1json/schema/$ref",
                 ],
                 comparison: Output,
@@ -31,7 +42,7 @@ Result for patch:
         changes: [
             ChangeInfo {
                 old_subpath: "",
-                new_subpath: "",
+                new_subpath: "properties/children/items",
                 message: "schema types changed",
                 class: Incompatible,
                 details: UnknownDifference,

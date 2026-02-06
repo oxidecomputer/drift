@@ -47,23 +47,6 @@ Result for patch:
                 class: Unhandled,
                 details: UnknownDifference,
             },
-        ],
-    },
-    Change {
-        paths: [
-            ChangePath {
-                old: [
-                    "#/components/schemas/GreetingResponse",
-                    "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
-                ],
-                new: [
-                    "#/components/schemas/GreetingResponse",
-                    "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
-                ],
-                comparison: Output,
-            },
-        ],
-        changes: [
             ChangeInfo {
                 old_subpath: "",
                 new_subpath: "",

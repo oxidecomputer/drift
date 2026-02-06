@@ -31,13 +31,12 @@ Result for patch:
         paths: [
             ChangePath {
                 old: [
-                    "#/components/schemas/SubType/properties/value",
-                    "#/components/schemas/GreetingResponse/properties/via_allof/0/$ref",
+                    "#/components/schemas/SubType",
+                    "#/components/schemas/GreetingResponse/properties/via_ref/$ref",
                     "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
                 ],
                 new: [
-                    "#/components/schemas/SubType/properties/value",
-                    "#/components/schemas/GreetingResponse/properties/via_allof/0/$ref",
+                    "#/components/schemas/GreetingResponse",
                     "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
                 ],
                 comparison: Output,
@@ -45,8 +44,8 @@ Result for patch:
         ],
         changes: [
             ChangeInfo {
-                old_subpath: "",
-                new_subpath: "",
+                old_subpath: "properties/value",
+                new_subpath: "properties/via_ref/properties/value",
                 message: "schema types changed",
                 class: Incompatible,
                 details: UnknownDifference,
@@ -57,21 +56,63 @@ Result for patch:
         paths: [
             ChangePath {
                 old: [
-                    "#/components/schemas/SubType/properties/value",
-                    "#/components/schemas/GreetingResponse/properties/via_ref/$ref",
+                    "#/components/schemas/SubType",
+                    "#/components/schemas/GreetingResponse/properties/via_allof/0/$ref",
                     "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
                 ],
                 new: [
-                    "#/components/schemas/GreetingResponse/properties/via_ref/properties/value",
+                    "#/components/schemas/SubType",
+                    "#/components/schemas/GreetingResponse/properties/via_allof/0/$ref",
                     "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                comparison: Output,
+            },
+            ChangePath {
+                old: [
+                    "#/components/schemas/SubType",
+                    "#/components/schemas/GreetingResponse/properties/via_anyof/0/$ref",
+                    "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                new: [
+                    "#/components/schemas/SubType",
+                    "#/components/schemas/GreetingResponse/properties/via_anyof/0/$ref",
+                    "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                comparison: Output,
+            },
+            ChangePath {
+                old: [
+                    "#/components/schemas/SubType",
+                    "#/components/schemas/GreetingResponse/properties/via_oneof/0/$ref",
+                    "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                new: [
+                    "#/components/schemas/SubType",
+                    "#/components/schemas/GreetingResponse/properties/via_oneof/0/$ref",
+                    "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                comparison: Output,
+            },
+            ChangePath {
+                old: [
+                    "#/components/schemas/SubType",
+                    "#/components/schemas/RefChainB/$ref",
+                    "#/components/schemas/RefChainA/$ref",
+                    "#/paths/~1refs/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                new: [
+                    "#/components/schemas/SubType",
+                    "#/components/schemas/RefChainB/$ref",
+                    "#/components/schemas/RefChainA/$ref",
+                    "#/paths/~1refs/get/responses/200/content/application~1json/schema/$ref",
                 ],
                 comparison: Output,
             },
         ],
         changes: [
             ChangeInfo {
-                old_subpath: "",
-                new_subpath: "",
+                old_subpath: "properties/value",
+                new_subpath: "properties/value",
                 message: "schema types changed",
                 class: Incompatible,
                 details: UnknownDifference,

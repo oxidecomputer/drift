@@ -17,11 +17,11 @@ Result for patch:
         paths: [
             ChangePath {
                 old: [
-                    "#/components/schemas/MultiAllOf/allOf",
+                    "#/components/schemas/MultiAllOf",
                     "#/paths/~1allof/get/responses/200/content/application~1json/schema/$ref",
                 ],
                 new: [
-                    "#/components/schemas/MultiAllOf/allOf",
+                    "#/components/schemas/MultiAllOf",
                     "#/paths/~1allof/get/responses/200/content/application~1json/schema/$ref",
                 ],
                 comparison: Output,
@@ -29,8 +29,8 @@ Result for patch:
         ],
         changes: [
             ChangeInfo {
-                old_subpath: "",
-                new_subpath: "",
+                old_subpath: "allOf",
+                new_subpath: "allOf",
                 message: "unhandled, 'allOf' schema",
                 class: Unhandled,
                 details: UnknownDifference,

@@ -24,7 +24,7 @@ Result for patch:
         paths: [
             ChangePath {
                 old: [
-                    "#/paths/~1hello~1{name}/get/parameters/1",
+                    "#/paths/~1hello~1{name}/get",
                 ],
                 new: [
                     "#/paths/~1hello~1{name}/get",
@@ -34,7 +34,7 @@ Result for patch:
         ],
         changes: [
             ChangeInfo {
-                old_subpath: "",
+                old_subpath: "parameters/1",
                 new_subpath: "",
                 message: "The parameter 'language' was removed",
                 class: BackwardIncompatible,

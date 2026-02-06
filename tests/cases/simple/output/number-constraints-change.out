@@ -16,11 +16,11 @@ Result for patch:
         paths: [
             ChangePath {
                 old: [
-                    "#/components/schemas/TypedProperties/properties/ratio",
+                    "#/components/schemas/TypedProperties",
                     "#/paths/~1typed/get/responses/200/content/application~1json/schema/$ref",
                 ],
                 new: [
-                    "#/components/schemas/TypedProperties/properties/ratio",
+                    "#/components/schemas/TypedProperties",
                     "#/paths/~1typed/get/responses/200/content/application~1json/schema/$ref",
                 ],
                 comparison: Output,
@@ -28,8 +28,8 @@ Result for patch:
         ],
         changes: [
             ChangeInfo {
-                old_subpath: "",
-                new_subpath: "",
+                old_subpath: "properties/ratio",
+                new_subpath: "properties/ratio",
                 message: "number schema changed",
                 class: Unhandled,
                 details: UnknownDifference,

@@ -28,7 +28,7 @@ Result for patch:
                     "#/paths/~1ping/get",
                 ],
                 new: [
-                    "#/paths/~1ping/get/parameters/0",
+                    "#/paths/~1ping/get",
                 ],
                 comparison: Input,
             },
@@ -36,7 +36,7 @@ Result for patch:
         changes: [
             ChangeInfo {
                 old_subpath: "",
-                new_subpath: "",
+                new_subpath: "parameters/0",
                 message: "A new, optional parameter 'tracking' was added",
                 class: ForwardIncompatible,
                 details: Added,

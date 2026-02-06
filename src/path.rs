@@ -47,27 +47,86 @@ impl std::error::Error for InvalidComponentRef {}
 /// An endpoint path, guaranteed to start with `#/paths/`.
 ///
 /// This represents a location within the paths section of an OpenAPI document.
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub(crate) struct EndpointPath(String);
+///
+/// The `base_len` field stores the length of the path when first constructed
+/// (via `for_path` or `for_operation`), before any `append` calls. This allows
+/// retrieval of the endpoint base path after segments have been appended.
+///
+/// Note that `for_path` and `for_operation` produce different base lengths:
+/// `for_path("/users")` has base `#/paths/~1users`, while
+/// `for_operation("/users", "get")` has base `#/paths/~1users/get`. This
+/// distinction matters for change grouping: shared parameters (which live at
+/// the path-item level) group under the path-item base, while operation-level
+/// constructs group under the operation base.
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+pub(crate) struct EndpointPath {
+    path: String,
+    /// Length of the path at construction time, before any appends.
+    base_len: usize,
+}
 
 impl EndpointPath {
-    /// Create an endpoint path from a raw API path (like `/users/{id}`).
+    /// Create an endpoint path for a path item (without a specific operation).
     ///
-    /// This escapes the path according to JSON pointer rules (RFC 6901).
+    /// This is used for path-level constructs like shared parameters. (Oxide's
+    /// OpenAPI documents do not have path-level constructs.)
     pub(crate) fn for_path(api_path: &str) -> Self {
         let escaped = escape_json_pointer_segment(api_path);
-        Self(format!("#/paths/{}", escaped))
+        let path = format!("#/paths/{}", escaped);
+        Self {
+            base_len: path.len(),
+            path,
+        }
+    }
+
+    /// Create an endpoint path for an operation.
+    ///
+    /// The `api_path` is the raw API path (like `/users/{id}`) and `method` is
+    /// the HTTP method (like `get`). The `api_path` is escaped per JSON pointer
+    /// rules; `method` is expected to not need escaping, and is used as-is.
+    pub(crate) fn for_operation(api_path: &str, method: &str) -> Self {
+        let escaped_path = escape_json_pointer_segment(api_path);
+        let path = format!("#/paths/{}/{}", escaped_path, method);
+        Self {
+            base_len: path.len(),
+            path,
+        }
     }
 
     /// Append a path segment, escaping special characters per RFC 6901.
     pub(crate) fn append(&self, segment: &str) -> Self {
         let escaped = escape_json_pointer_segment(segment);
-        Self(format!("{}/{}", self.0, escaped))
+        Self {
+            path: format!("{}/{}", self.path, escaped),
+            base_len: self.base_len,
+        }
     }
 
     /// Get the JSON pointer string.
     fn as_str(&self) -> &str {
-        &self.0
+        &self.path
+    }
+
+    /// Get the base path (the path at construction time, before any appends).
+    fn base_path(&self) -> &str {
+        &self.path[..self.base_len]
+    }
+
+    /// Get the subpath (the portion appended after construction).
+    ///
+    /// Returns an empty string if no segments have been appended.
+    fn subpath(&self) -> &str {
+        let sub = &self.path[self.base_len..];
+        // Strip the leading '/' if present.
+        sub.strip_prefix('/').unwrap_or(sub)
+    }
+
+    /// Return a new EndpointPath with the subpath stripped.
+    fn without_subpath(&self) -> Self {
+        Self {
+            path: self.base_path().to_owned(),
+            base_len: self.base_len,
+        }
     }
 }
 
@@ -75,24 +134,64 @@ impl EndpointPath {
 ///
 /// This represents a location after following at least one `$ref`. It can point
 /// to any location in the document, not only components.
+///
+/// The `base_len` field stores the length of the path when first constructed
+/// (via `parse`), before any `append` calls. This allows retrieval of the
+/// original ref target (e.g., the named type) after path segments have been
+/// appended.
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
-struct RefTargetPath(String);
+struct RefTargetPath {
+    path: String,
+    /// Length of the path at construction time, before any appends.
+    base_len: usize,
+}
 
 impl RefTargetPath {
     /// Parse from a JSON pointer. Returns `None` if not a valid local ref.
     fn parse(pointer: &str) -> Option<Self> {
-        pointer.starts_with("#/").then(|| Self(pointer.to_string()))
+        pointer.starts_with("#/").then(|| Self {
+            base_len: pointer.len(),
+            path: pointer.to_string(),
+        })
     }
 
     /// Append a path segment, escaping special characters per RFC 6901.
     fn append(&self, segment: &str) -> Self {
         let escaped = escape_json_pointer_segment(segment);
-        Self(format!("{}/{}", self.0, escaped))
+        Self {
+            path: format!("{}/{}", self.path, escaped),
+            base_len: self.base_len,
+        }
     }
 
     /// Get the JSON pointer string.
     fn as_str(&self) -> &str {
-        &self.0
+        &self.path
+    }
+
+    /// Get the base path (the path at construction time, before any appends).
+    ///
+    /// For a path created from `#/components/schemas/User` and then appended
+    /// with `properties`, this returns `#/components/schemas/User`.
+    fn base_path(&self) -> &str {
+        &self.path[..self.base_len]
+    }
+
+    /// Get the subpath (the portion appended after construction).
+    ///
+    /// Returns an empty string if no segments have been appended.
+    fn subpath(&self) -> &str {
+        let sub = &self.path[self.base_len..];
+        // Strip the leading '/' if present.
+        sub.strip_prefix('/').unwrap_or(sub)
+    }
+
+    /// Return a new RefTargetPath with the subpath stripped.
+    fn without_subpath(&self) -> Self {
+        Self {
+            path: self.base_path().to_owned(),
+            base_len: self.base_len,
+        }
     }
 }
 
@@ -101,7 +200,7 @@ impl RefTargetPath {
 /// - If refs have been followed, the first was always from an endpoint.
 /// - All subsequent refs form a chain of intermediate locations.
 /// - Transitions: endpoint → ref target, or ref target → ref target.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 enum PathState {
     /// At the paths root (`#/paths`), used only for operation add/remove reporting.
     /// Cannot follow refs from this state.
@@ -126,7 +225,7 @@ enum PathState {
 ///
 /// The stack tracks the location while traversing an OpenAPI document,
 /// particularly when following `$ref` references.
-#[derive(Clone)]
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct JsonPathStack {
     state: PathState,
 }
@@ -177,6 +276,76 @@ impl JsonPathStack {
             PathState::PathsRoot => "#/paths",
             PathState::AtEndpoint(path) => path.as_str(),
             PathState::AtComponent { current, .. } => current.as_str(),
+        }
+    }
+
+    /// Get the base component path (the ref target before any appends).
+    ///
+    /// Returns `Some` when at a component (after following a `$ref`), containing
+    /// the original ref target. For example, if we followed a ref to
+    /// `#/components/schemas/User` and then appended `properties/name`, this
+    /// returns `Some("#/components/schemas/User")`.
+    ///
+    /// Returns `None` when at an endpoint or paths root (no ref followed).
+    pub fn component_base(&self) -> Option<&str> {
+        match &self.state {
+            PathState::PathsRoot | PathState::AtEndpoint(_) => None,
+            PathState::AtComponent { current, .. } => Some(current.base_path()),
+        }
+    }
+
+    /// Get the base path and subpath for this location.
+    ///
+    /// The base is the primary entity being tracked:
+    ///
+    /// - For `PathsRoot`: `#/paths` with empty subpath.
+    /// - For endpoints: the endpoint path (e.g., `#/paths/~1users/get`).
+    /// - For components: the component path (e.g., `#/components/schemas/User`).
+    ///
+    /// The subpath is the relative path from the base to the current location
+    /// (e.g., `parameters/0` or `properties/name`). Empty if at the base itself.
+    pub fn base_and_subpath(&self) -> (&str, &str) {
+        match &self.state {
+            PathState::PathsRoot => ("#/paths", ""),
+            PathState::AtEndpoint(path) => (path.base_path(), path.subpath()),
+            PathState::AtComponent { current, .. } => (current.base_path(), current.subpath()),
+        }
+    }
+
+    /// Return a new JsonPathStack with the subpath stripped from the current
+    /// location.
+    ///
+    /// This only affects the top of the stack (the current endpoint or
+    /// component); intermediate refs are preserved unchanged.
+    pub fn without_subpath(&self) -> Self {
+        let state = match &self.state {
+            PathState::PathsRoot => PathState::PathsRoot,
+            PathState::AtEndpoint(path) => PathState::AtEndpoint(path.without_subpath()),
+            PathState::AtComponent {
+                current,
+                origin_ref,
+                intermediate_refs,
+            } => PathState::AtComponent {
+                current: current.without_subpath(),
+                origin_ref: origin_ref.clone(),
+                intermediate_refs: intermediate_refs.clone(),
+            },
+        };
+        Self { state }
+    }
+
+    /// Return the endpoint path this stack is at or originated from as a JSON
+    /// pointer, including the leading `#/paths`, but not including subpaths
+    /// within the endpoint.
+    ///
+    /// This can be used to enumerate all endpoints that have changes in them.
+    ///
+    /// Returns `None` if an endpoint was added or removed on the other side.
+    pub fn endpoint_base(&self) -> Option<&str> {
+        match &self.state {
+            PathState::PathsRoot => None,
+            PathState::AtEndpoint(path) => Some(path.base_path()),
+            PathState::AtComponent { origin_ref, .. } => Some(origin_ref.base_path()),
         }
     }
 
@@ -352,6 +521,8 @@ mod tests {
     fn endpoint_path_for_path() {
         let path = EndpointPath::for_path("/users");
         assert_eq!(path.as_str(), "#/paths/~1users");
+        assert_eq!(path.base_path(), "#/paths/~1users");
+        assert_eq!(path.subpath(), "");
     }
 
     #[test]
@@ -362,19 +533,27 @@ mod tests {
     }
 
     #[test]
+    fn endpoint_path_for_operation() {
+        let path = EndpointPath::for_operation("/users", "get");
+        assert_eq!(path.as_str(), "#/paths/~1users/get");
+        assert_eq!(path.base_path(), "#/paths/~1users/get");
+        assert_eq!(path.subpath(), "");
+    }
+
+    #[test]
     fn endpoint_path_append() {
-        let path = EndpointPath::for_path("/users")
-            .append("get")
-            .append("responses");
+        let path = EndpointPath::for_operation("/users", "get").append("responses");
         assert_eq!(path.as_str(), "#/paths/~1users/get/responses");
+        assert_eq!(path.base_path(), "#/paths/~1users/get");
+        assert_eq!(path.subpath(), "responses");
     }
 
     #[test]
     fn endpoint_path_append_escapes() {
-        let path = EndpointPath::for_path("/users")
+        let path = EndpointPath::for_operation("/users", "get")
             .append("foo/bar")
             .append("a~b");
-        assert_eq!(path.as_str(), "#/paths/~1users/foo~1bar/a~0b");
+        assert_eq!(path.as_str(), "#/paths/~1users/get/foo~1bar/a~0b");
     }
 
     #[test]
@@ -411,8 +590,45 @@ mod tests {
     }
 
     #[test]
+    fn ref_target_path_base_and_subpath() {
+        let path = RefTargetPath::parse("#/components/schemas/User").unwrap();
+        assert_eq!(path.base_path(), "#/components/schemas/User");
+        assert_eq!(path.subpath(), "");
+
+        let appended = path.append("properties").append("name");
+        assert_eq!(appended.base_path(), "#/components/schemas/User");
+        assert_eq!(appended.subpath(), "properties/name");
+    }
+
+    #[test]
+    fn ref_target_path_without_subpath() {
+        let path = RefTargetPath::parse("#/components/schemas/User")
+            .unwrap()
+            .append("properties")
+            .append("name");
+
+        let base_only = path.without_subpath();
+        assert_eq!(base_only.as_str(), "#/components/schemas/User");
+        assert_eq!(base_only.base_path(), "#/components/schemas/User");
+        assert_eq!(base_only.subpath(), "");
+    }
+
+    #[test]
+    fn endpoint_path_without_subpath() {
+        let path = EndpointPath::for_operation("/users", "get")
+            .append("responses")
+            .append("200");
+        assert_eq!(path.subpath(), "responses/200");
+
+        let base_only = path.without_subpath();
+        assert_eq!(base_only.as_str(), "#/paths/~1users/get");
+        assert_eq!(base_only.base_path(), "#/paths/~1users/get");
+        assert_eq!(base_only.subpath(), "");
+    }
+
+    #[test]
     fn json_path_stack_for_endpoint() {
-        let endpoint = EndpointPath::for_path("/users").append("get");
+        let endpoint = EndpointPath::for_operation("/users", "get");
         let stack = JsonPathStack::for_endpoint(endpoint);
 
         assert_eq!(stack.current_pointer(), "#/paths/~1users/get");
@@ -430,7 +646,7 @@ mod tests {
 
     #[test]
     fn json_path_stack_append() {
-        let endpoint = EndpointPath::for_path("/users").append("get");
+        let endpoint = EndpointPath::for_operation("/users", "get");
         let stack = JsonPathStack::for_endpoint(endpoint)
             .append("responses")
             .append("200")
@@ -445,7 +661,7 @@ mod tests {
 
     #[test]
     fn json_path_stack_push() {
-        let endpoint = EndpointPath::for_path("/users").append("get");
+        let endpoint = EndpointPath::for_operation("/users", "get");
         let stack = JsonPathStack::for_endpoint(endpoint)
             .append("responses")
             .append("200")
@@ -464,7 +680,7 @@ mod tests {
 
     #[test]
     fn json_path_stack_cycle_detection() {
-        let endpoint = EndpointPath::for_path("/users").append("get");
+        let endpoint = EndpointPath::for_operation("/users", "get");
         let stack = JsonPathStack::for_endpoint(endpoint)
             .push("#/components/schemas/User")
             .unwrap()
@@ -484,7 +700,7 @@ mod tests {
     // they are different schemas.
     #[test]
     fn cycle_detection_no_false_positive_on_shared_prefix() {
-        let endpoint = EndpointPath::for_path("/users").append("get");
+        let endpoint = EndpointPath::for_operation("/users", "get");
 
         let stack = JsonPathStack::for_endpoint(endpoint)
             .push("#/components/schemas/User")
@@ -501,7 +717,7 @@ mod tests {
     fn cycle_detection_no_false_positive_on_shared_prefix_origin() {
         // The origin endpoint path could also be a string prefix of
         // the current location without being an ancestor.
-        let endpoint = EndpointPath::for_path("/users").append("get");
+        let endpoint = EndpointPath::for_operation("/users", "get");
 
         // Follow a ref to a schema whose path happens to start with
         // the same characters as the origin but at a different location.
@@ -518,7 +734,7 @@ mod tests {
     fn cycle_detection_true_positive_through_subpath() {
         // A cycle exists when the current schema is an ancestor of a
         // previously visited location (we'd descend into the same subtree).
-        let endpoint = EndpointPath::for_path("/users").append("get");
+        let endpoint = EndpointPath::for_operation("/users", "get");
         let stack = JsonPathStack::for_endpoint(endpoint)
             .push("#/components/schemas/User")
             .unwrap()
@@ -570,7 +786,7 @@ mod tests {
 
     #[test]
     fn json_path_stack_iter_order() {
-        let endpoint = EndpointPath::for_path("/users").append("get");
+        let endpoint = EndpointPath::for_operation("/users", "get");
         let stack = JsonPathStack::for_endpoint(endpoint)
             .push("#/components/schemas/A")
             .unwrap()
@@ -589,7 +805,7 @@ mod tests {
 
     #[test]
     fn json_path_stack_display() {
-        let endpoint = EndpointPath::for_path("/users").append("get");
+        let endpoint = EndpointPath::for_operation("/users", "get");
         let stack = JsonPathStack::for_endpoint(endpoint)
             .push("#/components/schemas/User")
             .unwrap();
@@ -603,7 +819,7 @@ mod tests {
 
     #[test]
     fn json_path_stack_push_invalid_ref_returns_error() {
-        let endpoint = EndpointPath::for_path("/users").append("get");
+        let endpoint = EndpointPath::for_operation("/users", "get");
         let stack = JsonPathStack::for_endpoint(endpoint);
 
         let err = stack
@@ -616,5 +832,119 @@ mod tests {
             "invalid reference \"not/a/json/pointer\": \
              expected JSON pointer starting with #/"
         );
+    }
+
+    #[test]
+    fn json_path_stack_base_and_subpath() {
+        // PathsRoot.
+        let stack = JsonPathStack::paths_root();
+        assert_eq!(stack.base_and_subpath(), ("#/paths", ""));
+
+        // Endpoint at base.
+        let endpoint = EndpointPath::for_operation("/users", "get");
+        let stack = JsonPathStack::for_endpoint(endpoint);
+        assert_eq!(stack.base_and_subpath(), ("#/paths/~1users/get", ""));
+
+        // Endpoint with appended segments.
+        let stack = stack.append("responses").append("200");
+        assert_eq!(
+            stack.base_and_subpath(),
+            ("#/paths/~1users/get", "responses/200")
+        );
+
+        // Component at base.
+        let stack = stack
+            .append("schema")
+            .push("#/components/schemas/User")
+            .unwrap();
+        assert_eq!(stack.base_and_subpath(), ("#/components/schemas/User", ""));
+
+        // Component with appended segments.
+        let stack = stack.append("properties").append("name");
+        assert_eq!(
+            stack.base_and_subpath(),
+            ("#/components/schemas/User", "properties/name")
+        );
+    }
+
+    #[test]
+    fn json_path_stack_without_subpath() {
+        // PathsRoot: no-op.
+        let stack = JsonPathStack::paths_root();
+        assert_eq!(stack.without_subpath().current_pointer(), "#/paths");
+
+        // Endpoint with appended segments: strips back to base.
+        let endpoint = EndpointPath::for_operation("/users", "get");
+        let stack = JsonPathStack::for_endpoint(endpoint)
+            .append("responses")
+            .append("200");
+        let stripped = stack.without_subpath();
+        assert_eq!(stripped.current_pointer(), "#/paths/~1users/get");
+        assert_eq!(stripped.base_and_subpath(), ("#/paths/~1users/get", ""));
+
+        // Component with appended segments: strips back to component base,
+        // preserving the reference chain.
+        let endpoint = EndpointPath::for_operation("/users", "get");
+        let stack = JsonPathStack::for_endpoint(endpoint)
+            .push("#/components/schemas/User")
+            .unwrap()
+            .append("properties")
+            .append("name");
+        let stripped = stack.without_subpath();
+        assert_eq!(stripped.current_pointer(), "#/components/schemas/User");
+        assert_eq!(
+            stripped.base_and_subpath(),
+            ("#/components/schemas/User", "")
+        );
+
+        // Reference chain is preserved after stripping.
+        let entries: Vec<_> = stripped.iter().collect();
+        assert_eq!(entries.len(), 2);
+        assert_eq!(entries[0], "#/components/schemas/User");
+        assert_eq!(entries[1], "#/paths/~1users/get/$ref");
+    }
+
+    #[test]
+    fn json_path_stack_component_base() {
+        // PathsRoot: no component base.
+        assert_eq!(JsonPathStack::paths_root().component_base(), None);
+
+        // Endpoint: no component base.
+        let endpoint = EndpointPath::for_operation("/users", "get");
+        let stack = JsonPathStack::for_endpoint(endpoint);
+        assert_eq!(stack.component_base(), None);
+
+        // Component at base: returns the ref target.
+        let stack = stack.push("#/components/schemas/User").unwrap();
+        assert_eq!(stack.component_base(), Some("#/components/schemas/User"));
+
+        // Component with appended segments: still returns the ref target base.
+        let stack = stack.append("properties").append("name");
+        assert_eq!(stack.component_base(), Some("#/components/schemas/User"));
+    }
+
+    #[test]
+    fn json_path_stack_endpoint() {
+        let stack = JsonPathStack::paths_root();
+        assert_eq!(stack.endpoint_base(), None);
+
+        let endpoint = EndpointPath::for_operation("/users", "get");
+        let stack = JsonPathStack::for_endpoint(endpoint);
+        assert_eq!(stack.endpoint_base(), Some("#/paths/~1users/get"));
+
+        let stack = stack.append("responses").append("200");
+        assert_eq!(stack.endpoint_base(), Some("#/paths/~1users/get"));
+
+        let stack = stack
+            .append("schema")
+            .push("#/components/schemas/User")
+            .unwrap();
+        assert_eq!(stack.endpoint_base(), Some("#/paths/~1users/get"));
+
+        let stack = stack
+            .append("properties")
+            .push("#/components/schemas/Address")
+            .unwrap();
+        assert_eq!(stack.endpoint_base(), Some("#/paths/~1users/get"));
     }
 }

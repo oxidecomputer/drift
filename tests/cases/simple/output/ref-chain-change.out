@@ -39,27 +39,6 @@ Result for patch:
                 class: Unhandled,
                 details: UnknownDifference,
             },
-        ],
-    },
-    Change {
-        paths: [
-            ChangePath {
-                old: [
-                    "#/components/schemas/SubType",
-                    "#/components/schemas/RefChainB/$ref",
-                    "#/components/schemas/RefChainA/$ref",
-                    "#/paths/~1refs/get/responses/200/content/application~1json/schema/$ref",
-                ],
-                new: [
-                    "#/components/schemas/ErrorResponse",
-                    "#/components/schemas/RefChainB/$ref",
-                    "#/components/schemas/RefChainA/$ref",
-                    "#/paths/~1refs/get/responses/200/content/application~1json/schema/$ref",
-                ],
-                comparison: Output,
-            },
-        ],
-        changes: [
             ChangeInfo {
                 old_subpath: "",
                 new_subpath: "",
