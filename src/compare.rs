@@ -1,7 +1,8 @@
-// Copyright 2025 Oxide Computer Company
+// Copyright 2026 Oxide Computer Company
 
 use std::collections::BTreeMap;
 
+use anyhow::Context as _;
 use indexmap::IndexMap;
 use openapiv3::{
     MediaType, Operation, Parameter, ParameterSchemaOrContent, ReferenceOr, RequestBody,
@@ -35,10 +36,12 @@ pub(crate) struct Compare {
 impl Compare {
     pub fn compare(&mut self, old: &Value, new: &Value) -> anyhow::Result<()> {
         let old_context = Context::new(old);
-        let old_operations = operations(&old_context)?;
+        let old_operations =
+            operations(&old_context).context("error deserializing old OpenAPI document")?;
 
         let new_context = Context::new(new);
-        let new_operations = operations(&new_context)?;
+        let new_operations =
+            operations(&new_context).context("error deserializing new OpenAPI document")?;
 
         let SetCompare {
             a_unique,
