@@ -1,0 +1,81 @@
+--- ref-vs-inline-type-change.json
++++ patched
+@@
+             ]
+           },
+           "via_ref": {
+-            "$ref": "#/components/schemas/SubType"
++            "properties": {
++              "value": {
++                "type": "integer"
++              }
++            },
++            "type": "object"
+           }
+         },
+         "required": [
+@@
+       "SubType": {
+         "properties": {
+           "value": {
+-            "type": "string"
++            "type": "integer"
+           }
+         },
+         "type": "object"
+
+
+Result for patch:
+[
+    Change {
+        paths: [
+            ChangePath {
+                old: [
+                    "#/components/schemas/SubType/properties/value",
+                    "#/components/schemas/GreetingResponse/properties/via_allof/0/$ref",
+                    "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                new: [
+                    "#/components/schemas/SubType/properties/value",
+                    "#/components/schemas/GreetingResponse/properties/via_allof/0/$ref",
+                    "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                comparison: Output,
+            },
+        ],
+        changes: [
+            ChangeInfo {
+                old_subpath: "",
+                new_subpath: "",
+                message: "schema types changed",
+                class: Incompatible,
+                details: UnknownDifference,
+            },
+        ],
+    },
+    Change {
+        paths: [
+            ChangePath {
+                old: [
+                    "#/components/schemas/SubType/properties/value",
+                    "#/components/schemas/GreetingResponse/properties/via_ref/$ref",
+                    "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                new: [
+                    "#/components/schemas/GreetingResponse/properties/via_ref/properties/value",
+                    "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                comparison: Output,
+            },
+        ],
+        changes: [
+            ChangeInfo {
+                old_subpath: "",
+                new_subpath: "",
+                message: "schema types changed",
+                class: Incompatible,
+                details: UnknownDifference,
+            },
+        ],
+    },
+]

@@ -307,6 +307,34 @@
           }
         }
       }
+    },
+    "/echo": {
+      "post": {
+        "operationId": "echo",
+        "summary": "Echo a shared type",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SharedType"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SharedType"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -479,6 +507,14 @@
       },
       "RefChainB": {
         "$ref": "#/components/schemas/SubType"
+      },
+      "SharedType": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        }
       }
     }
   }

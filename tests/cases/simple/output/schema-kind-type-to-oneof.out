@@ -1,7 +1,7 @@
 --- schema-kind-type-to-oneof.json
 +++ patched
 @@
-         "$ref": "#/components/schemas/SubType"
+         "type": "object"
        },
        "SubType": {
 -        "properties": {
