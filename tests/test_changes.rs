@@ -48,7 +48,7 @@ fn test_change() {
                         let diff = TextDiff::from_lines(&base_pretty, &patched_pretty);
                         let patch_name = patch_entry.file_name();
 
-                        // Format theq unified diff manually, replacing `@@ -N,M
+                        // Format the unified diff manually, replacing `@@ -N,M
                         // +N,M @@` hunk headers with bare `@@` to avoid churn
                         // when base.json changes shift line positions.
                         let mut out = String::new();
