@@ -1,6 +1,6 @@
 --- multi-oneof-variant-change.json
 +++ patched
-@@ -113,7 +113,7 @@
+@@
        "MultiOneOf": {
          "oneOf": [
            {

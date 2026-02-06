@@ -1,6 +1,6 @@
 --- array-items-add.json
 +++ patched
-@@ -12,9 +12,6 @@
+@@
          ]
        },
        "ArrayWithConstraints": {

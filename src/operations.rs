@@ -41,7 +41,7 @@ pub struct OperationInfo<'a> {
 pub fn operations<'a>(
     context: &Context<'a>,
 ) -> anyhow::Result<Vec<(OperationKey, OperationInfo<'a>)>> {
-    let api = OpenAPI::deserialize(context.raw_openapi).unwrap();
+    let api = OpenAPI::deserialize(context.raw_openapi)?;
 
     let mut out = Vec::new();
 
