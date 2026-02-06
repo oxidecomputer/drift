@@ -1,6 +1,6 @@
 --- anyof-to-ref.json
 +++ patched
-@@ -66,12 +66,7 @@
+@@
              "description": "Via allOf."
            },
            "via_anyof": {

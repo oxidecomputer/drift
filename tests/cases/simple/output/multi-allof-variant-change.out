@@ -1,6 +1,6 @@
 --- multi-allof-variant-change.json
 +++ patched
-@@ -95,7 +95,7 @@
+@@
            {
              "properties": {
                "id": {
