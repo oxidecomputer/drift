@@ -14,15 +14,25 @@
 Result for patch:
 [
     Change {
-        message: "the body parameter was required and is now optional",
-        old_path: [
-            "#/paths/~1items/post",
+        paths: [
+            ChangePath {
+                old: [
+                    "#/paths/~1items/post",
+                ],
+                new: [
+                    "#/paths/~1items/post",
+                ],
+                comparison: Input,
+            },
         ],
-        new_path: [
-            "#/paths/~1items/post",
+        changes: [
+            ChangeInfo {
+                old_subpath: "",
+                new_subpath: "",
+                message: "the body parameter was required and is now optional",
+                class: ForwardIncompatible,
+                details: LessStrict,
+            },
         ],
-        comparison: Input,
-        class: ForwardIncompatible,
-        details: LessStrict,
     },
 ]

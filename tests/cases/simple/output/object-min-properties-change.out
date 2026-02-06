@@ -14,17 +14,27 @@
 Result for patch:
 [
     Change {
-        message: "object minProperties changed",
-        old_path: [
-            "#/components/schemas/ObjectWithConstraints",
-            "#/paths/~1objects/get/responses/200/content/application~1json/schema/$ref",
+        paths: [
+            ChangePath {
+                old: [
+                    "#/components/schemas/ObjectWithConstraints",
+                    "#/paths/~1objects/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                new: [
+                    "#/components/schemas/ObjectWithConstraints",
+                    "#/paths/~1objects/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                comparison: Output,
+            },
         ],
-        new_path: [
-            "#/components/schemas/ObjectWithConstraints",
-            "#/paths/~1objects/get/responses/200/content/application~1json/schema/$ref",
+        changes: [
+            ChangeInfo {
+                old_subpath: "",
+                new_subpath: "",
+                message: "object minProperties changed",
+                class: Unhandled,
+                details: UnknownDifference,
+            },
         ],
-        comparison: Output,
-        class: Unhandled,
-        details: UnknownDifference,
     },
 ]

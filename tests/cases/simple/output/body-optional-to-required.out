@@ -14,15 +14,25 @@
 Result for patch:
 [
     Change {
-        message: "the body parameter was optional and is now required",
-        old_path: [
-            "#/paths/~1items/put",
+        paths: [
+            ChangePath {
+                old: [
+                    "#/paths/~1items/put",
+                ],
+                new: [
+                    "#/paths/~1items/put",
+                ],
+                comparison: Input,
+            },
         ],
-        new_path: [
-            "#/paths/~1items/put",
+        changes: [
+            ChangeInfo {
+                old_subpath: "",
+                new_subpath: "",
+                message: "the body parameter was optional and is now required",
+                class: BackwardIncompatible,
+                details: MoreStrict,
+            },
         ],
-        comparison: Input,
-        class: BackwardIncompatible,
-        details: MoreStrict,
     },
 ]
