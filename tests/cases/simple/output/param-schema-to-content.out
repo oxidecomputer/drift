@@ -1,6 +1,6 @@
 --- param-schema-to-content.json
 +++ patched
-@@ -250,13 +250,17 @@
+@@
              }
            },
            {
@@ -27,15 +27,25 @@
 Result for patch:
 [
     Change {
-        message: "Unhandled change to parameter schema or content",
-        old_path: [
-            "#/paths/~1hello~1{name}/get/parameters/1",
+        paths: [
+            ChangePath {
+                old: [
+                    "#/paths/~1hello~1{name}/get/parameters/1",
+                ],
+                new: [
+                    "#/paths/~1hello~1{name}/get/parameters/1",
+                ],
+                comparison: Input,
+            },
         ],
-        new_path: [
-            "#/paths/~1hello~1{name}/get/parameters/1",
+        changes: [
+            ChangeInfo {
+                old_subpath: "",
+                new_subpath: "",
+                message: "Unhandled change to parameter schema or content",
+                class: Unhandled,
+                details: UnknownDifference,
+            },
         ],
-        comparison: Input,
-        class: Unhandled,
-        details: UnknownDifference,
     },
 ]

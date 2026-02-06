@@ -1,6 +1,6 @@
 --- remove-optional-body.json
 +++ patched
-@@ -296,16 +296,6 @@
+@@
        },
        "put": {
          "operationId": "update_item",
@@ -22,15 +22,25 @@
 Result for patch:
 [
     Change {
-        message: "an optional body parameter was removed",
-        old_path: [
-            "#/paths/~1items/put",
+        paths: [
+            ChangePath {
+                old: [
+                    "#/paths/~1items/put",
+                ],
+                new: [
+                    "#/paths/~1items/put",
+                ],
+                comparison: Input,
+            },
         ],
-        new_path: [
-            "#/paths/~1items/put",
+        changes: [
+            ChangeInfo {
+                old_subpath: "",
+                new_subpath: "",
+                message: "an optional body parameter was removed",
+                class: ForwardIncompatible,
+                details: Removed,
+            },
         ],
-        comparison: Input,
-        class: ForwardIncompatible,
-        details: Removed,
     },
 ]

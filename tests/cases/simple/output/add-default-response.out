@@ -1,6 +1,6 @@
 --- add-default-response.json
 +++ patched
-@@ -368,6 +368,16 @@
+@@
          "responses": {
            "200": {
              "description": "Ping successful"
@@ -22,15 +22,25 @@
 Result for patch:
 [
     Change {
-        message: "operation added a default response",
-        old_path: [
-            "#/paths/~1ping/get",
+        paths: [
+            ChangePath {
+                old: [
+                    "#/paths/~1ping/get",
+                ],
+                new: [
+                    "#/paths/~1ping/get",
+                ],
+                comparison: Output,
+            },
         ],
-        new_path: [
-            "#/paths/~1ping/get",
+        changes: [
+            ChangeInfo {
+                old_subpath: "",
+                new_subpath: "",
+                message: "operation added a default response",
+                class: Unhandled,
+                details: Added,
+            },
         ],
-        comparison: Output,
-        class: Unhandled,
-        details: Added,
     },
 ]

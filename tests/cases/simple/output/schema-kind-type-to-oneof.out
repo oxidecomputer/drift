@@ -1,6 +1,6 @@
 --- schema-kind-type-to-oneof.json
 +++ patched
-@@ -135,12 +135,14 @@
+@@
          "$ref": "#/components/schemas/SubType"
        },
        "SubType": {
@@ -24,19 +24,29 @@
 Result for patch:
 [
     Change {
-        message: "schema kind changed from regular type to oneOf",
-        old_path: [
-            "#/components/schemas/SubType",
-            "#/components/schemas/GreetingResponse/properties/via_allof/0/$ref",
-            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        paths: [
+            ChangePath {
+                old: [
+                    "#/components/schemas/SubType",
+                    "#/components/schemas/GreetingResponse/properties/via_allof/0/$ref",
+                    "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                new: [
+                    "#/components/schemas/SubType",
+                    "#/components/schemas/GreetingResponse/properties/via_allof/0/$ref",
+                    "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                comparison: Output,
+            },
         ],
-        new_path: [
-            "#/components/schemas/SubType",
-            "#/components/schemas/GreetingResponse/properties/via_allof/0/$ref",
-            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        changes: [
+            ChangeInfo {
+                old_subpath: "",
+                new_subpath: "",
+                message: "schema kind changed from regular type to oneOf",
+                class: Incompatible,
+                details: Datatype,
+            },
         ],
-        comparison: Output,
-        class: Incompatible,
-        details: Datatype,
     },
 ]
