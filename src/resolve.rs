@@ -33,8 +33,7 @@ where
         };
 
         loop {
-            assert!(target.starts_with("#/"));
-            context = context.push(target.as_ref());
+            context = context.push(target.as_ref())?;
 
             let subtree = context
                 .raw_openapi

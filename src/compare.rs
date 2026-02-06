@@ -2,6 +2,7 @@
 
 use std::collections::BTreeMap;
 
+use anyhow::Context as _;
 use indexmap::IndexMap;
 use openapiv3::{
     MediaType, Operation, Parameter, ParameterSchemaOrContent, ReferenceOr, RequestBody,
@@ -9,7 +10,7 @@ use openapiv3::{
 use serde_json::Value;
 
 use crate::{
-    Change, ChangeClass, ChangeComparison, ChangeDetails,
+    Change, ChangeClass, ChangeComparison, ChangeDetails, JsonPathStack,
     context::{Context, Contextual, ToContext},
     operations::{all_params, operations},
     resolve::ReferenceOrResolver,
@@ -24,21 +25,58 @@ pub fn compare(old: &Value, new: &Value) -> anyhow::Result<Vec<Change>> {
     Ok(comp.changes)
 }
 
+/// The full current location in a document, including appended segments.
+///
+/// This is the path returned by `JsonPathStack::current_pointer()`, wrapped
+/// in a newtype to prevent confusion with other path-like strings (e.g. a
+/// future base path type that excludes appended segments).
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub(crate) struct CurrentPointer(String);
+
+impl CurrentPointer {
+    pub(crate) fn new(stack: &JsonPathStack) -> Self {
+        Self(stack.current_pointer().to_string())
+    }
+}
+
+/// Key for memoizing schema comparison results.
+///
+/// This uses the full schema path (including internal paths like
+/// `SubType/properties/value`) for accurate memoization. The comparison
+/// direction (Input vs Output) is included because compatibility semantics
+/// differ based on direction.
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub(crate) struct VisitedKey {
+    comparison: SchemaComparison,
+    old_path: CurrentPointer,
+    new_path: CurrentPointer,
+}
+
+impl VisitedKey {
+    pub(crate) fn new(
+        comparison: SchemaComparison,
+        old_stack: &JsonPathStack,
+        new_stack: &JsonPathStack,
+    ) -> Self {
+        Self {
+            comparison,
+            old_path: CurrentPointer::new(old_stack),
+            new_path: CurrentPointer::new(new_stack),
+        }
+    }
+}
+
 #[derive(Default)]
 pub(crate) struct Compare {
     pub changes: Vec<Change>,
-    /// Cache comparisons (type of comparison, old and new path to the schema)
-    /// and the boolean result (are the schemas backward-compatible?).
-    pub visited: BTreeMap<(SchemaComparison, String, String), bool>,
+    /// Memoization of schema comparison results, keyed by full path pair.
+    pub visited: BTreeMap<VisitedKey, bool>,
 }
 
 impl Compare {
     pub fn compare(&mut self, old: &Value, new: &Value) -> anyhow::Result<()> {
-        let old_context = Context::new(old);
-        let old_operations = operations(&old_context)?;
-
-        let new_context = Context::new(new);
-        let new_operations = operations(&new_context)?;
+        let old_operations = operations(old).context("error deserializing old OpenAPI document")?;
+        let new_operations = operations(new).context("error deserializing new OpenAPI document")?;
 
         let SetCompare {
             a_unique,
@@ -52,10 +90,11 @@ impl Compare {
                 Some(name) => name.as_str(),
                 None => "<unnamed>",
             };
+            let new_paths_root = Context::for_paths_root(new);
             self.push_change(
                 format!("The operation {op_name} was removed"),
                 &op_info.operation,
-                &new_context.append("paths"),
+                &new_paths_root,
                 ChangeComparison::Structural,
                 ChangeClass::BackwardIncompatible,
                 ChangeDetails::Removed,
@@ -68,10 +107,10 @@ impl Compare {
                 Some(name) => name.as_str(),
                 None => "<unnamed>",
             };
-
+            let old_paths_root = Context::for_paths_root(old);
             self.push_change(
                 format!("The operation {op_name} was added"),
-                &old_context.append("paths"),
+                &old_paths_root,
                 &op_info.operation,
                 ChangeComparison::Structural,
                 ChangeClass::ForwardIncompatible,

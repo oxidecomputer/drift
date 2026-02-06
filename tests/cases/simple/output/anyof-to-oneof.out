@@ -1,6 +1,6 @@
 --- anyof-to-oneof.json
 +++ patched
-@@ -66,12 +66,12 @@
+@@
              "description": "Via allOf."
            },
            "via_anyof": {
@@ -21,17 +21,27 @@
 Result for patch:
 [
     Change {
-        message: "schema metadata changed",
-        old_path: [
-            "#/components/schemas/GreetingResponse/properties/via_anyof",
-            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        paths: [
+            ChangePath {
+                old: [
+                    "#/components/schemas/GreetingResponse/properties/via_anyof",
+                    "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                new: [
+                    "#/components/schemas/GreetingResponse/properties/via_anyof",
+                    "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                comparison: Output,
+            },
         ],
-        new_path: [
-            "#/components/schemas/GreetingResponse/properties/via_anyof",
-            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        changes: [
+            ChangeInfo {
+                old_subpath: "",
+                new_subpath: "",
+                message: "schema metadata changed",
+                class: Trivial,
+                details: Metadata,
+            },
         ],
-        comparison: Output,
-        class: Trivial,
-        details: Metadata,
     },
 ]

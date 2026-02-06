@@ -1,9 +1,10 @@
 // Copyright 2025 Oxide Computer Company
 
+use std::fmt;
+
 use crate::JsonPathStack;
 
 // Describes any change detected between two OpenAPI documents.
-#[derive(Debug)]
 pub struct Change {
     /// Human-readable message describing the nature of the change.
     pub message: String,
@@ -18,8 +19,69 @@ pub struct Change {
     /// Classification of the change compatibility.
     pub class: ChangeClass,
 
-    /// Details on the kind of change
+    /// Details on the kind of change.
     pub details: ChangeDetails,
+}
+
+// Format `Change` in the nested `paths`/`changes` layout that will be
+// introduced when the type is restructured into `Change`, `ChangePath`, and
+// `ChangeInfo`. Doing this ahead of time keeps the restructuring commit free
+// of test-output noise.
+impl fmt::Debug for Change {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        /// Wrapper that formats as `ChangePath { old, new, comparison }`.
+        struct PathFmt<'a> {
+            old: &'a JsonPathStack,
+            new: &'a JsonPathStack,
+            comparison: &'a ChangeComparison,
+        }
+
+        impl fmt::Debug for PathFmt<'_> {
+            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+                f.debug_struct("ChangePath")
+                    .field("old", self.old)
+                    .field("new", self.new)
+                    .field("comparison", self.comparison)
+                    .finish()
+            }
+        }
+
+        /// Wrapper that formats as `ChangeInfo { old_subpath, new_subpath,
+        /// message, class, details }`.
+        struct InfoFmt<'a> {
+            message: &'a str,
+            class: &'a ChangeClass,
+            details: &'a ChangeDetails,
+        }
+
+        impl fmt::Debug for InfoFmt<'_> {
+            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+                f.debug_struct("ChangeInfo")
+                    .field("old_subpath", &"")
+                    .field("new_subpath", &"")
+                    .field("message", &self.message)
+                    .field("class", self.class)
+                    .field("details", self.details)
+                    .finish()
+            }
+        }
+
+        let path = PathFmt {
+            old: &self.old_path,
+            new: &self.new_path,
+            comparison: &self.comparison,
+        };
+        let info = InfoFmt {
+            message: &self.message,
+            class: &self.class,
+            details: &self.details,
+        };
+
+        f.debug_struct("Change")
+            .field("paths", &[path])
+            .field("changes", &[info])
+            .finish()
+    }
 }
 
 impl Change {

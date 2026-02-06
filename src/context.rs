@@ -6,7 +6,10 @@ use openapiv3::ReferenceOr;
 use serde::de::DeserializeOwned;
 use serde_json::Value;
 
-use crate::{JsonPathStack, resolve::ReferenceOrResolver};
+use crate::{
+    path::{EndpointPath, InvalidComponentRef, JsonPathStack},
+    resolve::ReferenceOrResolver,
+};
 
 #[derive(Clone, Debug)]
 pub struct Context<'a> {
@@ -15,31 +18,40 @@ pub struct Context<'a> {
 }
 
 impl<'a> Context<'a> {
-    pub fn new(raw_openapi: &'a Value) -> Self {
+    /// Create a context at a specific endpoint.
+    ///
+    /// This is the normal way to create a context for schema comparison.
+    pub fn for_endpoint(raw_openapi: &'a Value, endpoint: EndpointPath) -> Self {
         Self {
             raw_openapi,
-            stack: JsonPathStack::new(),
+            stack: JsonPathStack::for_endpoint(endpoint),
+        }
+    }
+
+    /// Create a context at `#/paths`.
+    ///
+    /// This is used only when reporting that an operation was added or removed,
+    /// where one side doesn't have the operation. In normal use, prefer
+    /// `for_endpoint()`.
+    pub fn for_paths_root(raw_openapi: &'a Value) -> Self {
+        Self {
+            raw_openapi,
+            stack: JsonPathStack::paths_root(),
         }
     }
 
     pub fn append(&self, segment: &str) -> Context<'a> {
-        let stack = self
-            .stack
-            .append(&segment.replace("~", "~0").replace("/", "~1"));
-
         Self {
             raw_openapi: self.raw_openapi,
-            stack,
+            stack: self.stack.append(segment),
         }
     }
 
-    pub(crate) fn push(&self, path: &str) -> Context<'a> {
-        let stack = self.stack.push(path);
-
-        Self {
+    pub(crate) fn push(&self, path: &str) -> Result<Context<'a>, InvalidComponentRef> {
+        Ok(Self {
             raw_openapi: self.raw_openapi,
-            stack,
-        }
+            stack: self.stack.push(path)?,
+        })
     }
 
     pub fn stack(&self) -> &JsonPathStack {

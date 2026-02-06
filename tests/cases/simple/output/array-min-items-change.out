@@ -1,6 +1,6 @@
 --- array-min-items-change.json
 +++ patched
-@@ -16,7 +16,7 @@
+@@
            "type": "string"
          },
          "maxItems": 10,
@@ -14,17 +14,27 @@
 Result for patch:
 [
     Change {
-        message: "array minItems changed",
-        old_path: [
-            "#/components/schemas/ArrayWithConstraints",
-            "#/paths/~1arrays/get/responses/200/content/application~1json/schema/$ref",
+        paths: [
+            ChangePath {
+                old: [
+                    "#/components/schemas/ArrayWithConstraints",
+                    "#/paths/~1arrays/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                new: [
+                    "#/components/schemas/ArrayWithConstraints",
+                    "#/paths/~1arrays/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                comparison: Output,
+            },
         ],
-        new_path: [
-            "#/components/schemas/ArrayWithConstraints",
-            "#/paths/~1arrays/get/responses/200/content/application~1json/schema/$ref",
+        changes: [
+            ChangeInfo {
+                old_subpath: "",
+                new_subpath: "",
+                message: "array minItems changed",
+                class: Unhandled,
+                details: UnknownDifference,
+            },
         ],
-        comparison: Output,
-        class: Unhandled,
-        details: UnknownDifference,
     },
 ]

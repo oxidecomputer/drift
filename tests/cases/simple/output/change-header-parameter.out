@@ -1,6 +1,6 @@
 --- change-header-parameter.json
 +++ patched
-@@ -466,7 +466,7 @@
+@@
              "name": "X-Request-Id",
              "required": true,
              "schema": {
@@ -14,15 +14,25 @@
 Result for patch:
 [
     Change {
-        message: "schema types changed",
-        old_path: [
-            "#/paths/~1with-header/get/parameters/0/schema",
+        paths: [
+            ChangePath {
+                old: [
+                    "#/paths/~1with-header/get/parameters/0/schema",
+                ],
+                new: [
+                    "#/paths/~1with-header/get/parameters/0/schema",
+                ],
+                comparison: Input,
+            },
         ],
-        new_path: [
-            "#/paths/~1with-header/get/parameters/0/schema",
+        changes: [
+            ChangeInfo {
+                old_subpath: "",
+                new_subpath: "",
+                message: "schema types changed",
+                class: Incompatible,
+                details: UnknownDifference,
+            },
         ],
-        comparison: Input,
-        class: Incompatible,
-        details: UnknownDifference,
     },
 ]
