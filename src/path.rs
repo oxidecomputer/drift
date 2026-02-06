@@ -341,7 +341,7 @@ fn is_path_ancestor_of(ancestor: &str, path: &str) -> bool {
         && path
             .as_bytes()
             .get(ancestor.len())
-            .map_or(true, |&b| b == b'/')
+            .is_none_or(|&b| b == b'/')
 }
 
 #[cfg(test)]
