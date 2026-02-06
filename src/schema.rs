@@ -93,7 +93,7 @@ impl Compare {
                 },
             ) => {
                 // Both old and new are single-element wrappers.
-                if old_meta != new_meta {
+                if old_meta != new_meta && !dry_run {
                     self.push_change(
                         "schema metadata changed",
                         old_schema,
@@ -121,7 +121,7 @@ impl Compare {
                 //
                 // A bare ref or inline type does not have metadata, so if the
                 // old metadata is non-default, report a trivial change.
-                if has_meaningful_metadata(old_meta) {
+                if has_meaningful_metadata(old_meta) && !dry_run {
                     self.push_change(
                         "schema metadata removed",
                         old_schema,
@@ -151,7 +151,7 @@ impl Compare {
                 //
                 // A bare ref or inline type does not have metadata, so if the
                 // new metadata is non-default, report a trivial change.
-                if has_meaningful_metadata(new_meta) {
+                if has_meaningful_metadata(new_meta) && !dry_run {
                     self.push_change(
                         "schema metadata added",
                         old_schema,
