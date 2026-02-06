@@ -1,25 +1,28 @@
---- ref-to-inline-allof.json
+--- ref-vs-inline-type-change.json
 +++ patched
 @@
              ]
            },
            "via_ref": {
 -            "$ref": "#/components/schemas/SubType"
-+            "allOf": [
-+              {
-+                "description": "Greeting response type",
-+                "properties": {
-+                  "value": {
-+                    "type": "string"
-+                  }
-+                },
-+                "type": "object"
++            "properties": {
++              "value": {
++                "type": "integer"
 +              }
-+            ],
-+            "description": "A greeting response"
++            },
++            "type": "object"
            }
          },
          "required": [
+@@
+       "SubType": {
+         "properties": {
+           "value": {
+-            "type": "string"
++            "type": "integer"
+           }
+         },
+         "type": "object"
 
 
 Result for patch:
@@ -28,11 +31,13 @@ Result for patch:
         paths: [
             ChangePath {
                 old: [
-                    "#/components/schemas/GreetingResponse/properties/via_ref",
+                    "#/components/schemas/SubType/properties/value",
+                    "#/components/schemas/GreetingResponse/properties/via_allof/0/$ref",
                     "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
                 ],
                 new: [
-                    "#/components/schemas/GreetingResponse/properties/via_ref",
+                    "#/components/schemas/SubType/properties/value",
+                    "#/components/schemas/GreetingResponse/properties/via_allof/0/$ref",
                     "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
                 ],
                 comparison: Output,
@@ -42,9 +47,9 @@ Result for patch:
             ChangeInfo {
                 old_subpath: "",
                 new_subpath: "",
-                message: "schema metadata added",
-                class: Trivial,
-                details: Metadata,
+                message: "schema types changed",
+                class: Incompatible,
+                details: UnknownDifference,
             },
         ],
     },
@@ -52,12 +57,12 @@ Result for patch:
         paths: [
             ChangePath {
                 old: [
-                    "#/components/schemas/SubType",
+                    "#/components/schemas/SubType/properties/value",
                     "#/components/schemas/GreetingResponse/properties/via_ref/$ref",
                     "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
                 ],
                 new: [
-                    "#/components/schemas/GreetingResponse/properties/via_ref/0",
+                    "#/components/schemas/GreetingResponse/properties/via_ref/properties/value",
                     "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
                 ],
                 comparison: Output,
@@ -67,9 +72,9 @@ Result for patch:
             ChangeInfo {
                 old_subpath: "",
                 new_subpath: "",
-                message: "schema metadata changed",
-                class: Trivial,
-                details: Metadata,
+                message: "schema types changed",
+                class: Incompatible,
+                details: UnknownDifference,
             },
         ],
     },

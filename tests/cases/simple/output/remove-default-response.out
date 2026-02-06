@@ -1,6 +1,6 @@
 --- remove-default-response.json
 +++ patched
-@@ -442,16 +442,6 @@
+@@
          "responses": {
            "200": {
              "description": "Success"
@@ -22,15 +22,25 @@
 Result for patch:
 [
     Change {
-        message: "operation removed a default response",
-        old_path: [
-            "#/paths/~1with-default/get",
+        paths: [
+            ChangePath {
+                old: [
+                    "#/paths/~1with-default/get",
+                ],
+                new: [
+                    "#/paths/~1with-default/get",
+                ],
+                comparison: Output,
+            },
         ],
-        new_path: [
-            "#/paths/~1with-default/get",
+        changes: [
+            ChangeInfo {
+                old_subpath: "",
+                new_subpath: "",
+                message: "operation removed a default response",
+                class: Unhandled,
+                details: Removed,
+            },
         ],
-        comparison: Output,
-        class: Unhandled,
-        details: Removed,
     },
 ]

@@ -1,6 +1,6 @@
 --- remove-header-parameter.json
 +++ patched
-@@ -462,14 +462,6 @@
+@@
          "operationId": "with_header",
          "parameters": [
            {
@@ -20,15 +20,25 @@
 Result for patch:
 [
     Change {
-        message: "The parameter 'X-Request-Id' was removed",
-        old_path: [
-            "#/paths/~1with-header/get/parameters/0",
+        paths: [
+            ChangePath {
+                old: [
+                    "#/paths/~1with-header/get/parameters/0",
+                ],
+                new: [
+                    "#/paths/~1with-header/get",
+                ],
+                comparison: Input,
+            },
         ],
-        new_path: [
-            "#/paths/~1with-header/get",
+        changes: [
+            ChangeInfo {
+                old_subpath: "",
+                new_subpath: "",
+                message: "The parameter 'X-Request-Id' was removed",
+                class: BackwardIncompatible,
+                details: Removed,
+            },
         ],
-        comparison: Input,
-        class: BackwardIncompatible,
-        details: Removed,
     },
 ]
