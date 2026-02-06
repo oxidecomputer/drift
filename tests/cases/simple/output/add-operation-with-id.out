@@ -1,6 +1,6 @@
 --- add-operation-with-id.json
 +++ patched
-@@ -314,6 +314,17 @@
+@@
          "summary": "Update an item"
        }
      },
@@ -23,15 +23,25 @@
 Result for patch:
 [
     Change {
-        message: "The operation new_endpoint was added",
-        old_path: [
-            "#/paths",
+        paths: [
+            ChangePath {
+                old: [
+                    "#/paths",
+                ],
+                new: [
+                    "#/paths/~1new-endpoint/get",
+                ],
+                comparison: Structural,
+            },
         ],
-        new_path: [
-            "#/paths/~1new-endpoint/get",
+        changes: [
+            ChangeInfo {
+                old_subpath: "",
+                new_subpath: "",
+                message: "The operation new_endpoint was added",
+                class: ForwardIncompatible,
+                details: Added,
+            },
         ],
-        comparison: Structural,
-        class: ForwardIncompatible,
-        details: Added,
     },
 ]

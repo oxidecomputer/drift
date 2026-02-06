@@ -1,6 +1,6 @@
 --- body-extension-change.json
 +++ patched
-@@ -285,7 +285,8 @@
+@@
                }
              }
            },
@@ -15,15 +15,25 @@
 Result for patch:
 [
     Change {
-        message: "the body metadata (description or extensions) changed",
-        old_path: [
-            "#/paths/~1items/post",
+        paths: [
+            ChangePath {
+                old: [
+                    "#/paths/~1items/post",
+                ],
+                new: [
+                    "#/paths/~1items/post",
+                ],
+                comparison: Input,
+            },
         ],
-        new_path: [
-            "#/paths/~1items/post",
+        changes: [
+            ChangeInfo {
+                old_subpath: "",
+                new_subpath: "",
+                message: "the body metadata (description or extensions) changed",
+                class: Trivial,
+                details: Metadata,
+            },
         ],
-        comparison: Input,
-        class: Trivial,
-        details: Metadata,
     },
 ]
