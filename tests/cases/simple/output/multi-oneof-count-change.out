@@ -1,6 +1,6 @@
 --- multi-oneof-count-change.json
 +++ patched
-@@ -117,6 +117,9 @@
+@@
            },
            {
              "type": "integer"
@@ -15,17 +15,27 @@
 Result for patch:
 [
     Change {
-        message: "oneOf schema count changed",
-        old_path: [
-            "#/components/schemas/MultiOneOf/oneOf",
-            "#/paths/~1oneof/get/responses/200/content/application~1json/schema/$ref",
+        paths: [
+            ChangePath {
+                old: [
+                    "#/components/schemas/MultiOneOf/oneOf",
+                    "#/paths/~1oneof/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                new: [
+                    "#/components/schemas/MultiOneOf/oneOf",
+                    "#/paths/~1oneof/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                comparison: Output,
+            },
         ],
-        new_path: [
-            "#/components/schemas/MultiOneOf/oneOf",
-            "#/paths/~1oneof/get/responses/200/content/application~1json/schema/$ref",
+        changes: [
+            ChangeInfo {
+                old_subpath: "",
+                new_subpath: "",
+                message: "oneOf schema count changed",
+                class: Unhandled,
+                details: UnknownDifference,
+            },
         ],
-        comparison: Output,
-        class: Unhandled,
-        details: UnknownDifference,
     },
 ]

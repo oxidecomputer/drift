@@ -1,4 +1,4 @@
-// Copyright 2025 Oxide Computer Company
+// Copyright 2026 Oxide Computer Company
 
 use std::fmt;
 
@@ -6,7 +6,7 @@ use openapiv3::{AdditionalProperties, ArrayType, ObjectType, ReferenceOr, Schema
 
 use crate::{
     ChangeClass, ChangeComparison, ChangeDetails,
-    compare::Compare,
+    compare::{Compare, VisitedKey},
     context::{Contextual, ToContext},
     setops::SetCompare,
 };
@@ -198,11 +198,12 @@ impl Compare {
 
         // Return the cached compatibility of these schemas so that we don't
         // generate redundant notes.
-        if let Some(equal) = self.visited.get(&(
+        let key = VisitedKey::new(
             comparison,
-            old_schema.context().stack().top.clone(),
-            new_schema.context().stack().top.clone(),
-        )) {
+            old_schema.context().stack(),
+            new_schema.context().stack(),
+        );
+        if let Some(equal) = self.visited.get(&key) {
             return Ok(*equal);
         }
 
@@ -276,14 +277,7 @@ impl Compare {
         )?;
 
         // Cache the result.
-        self.visited.insert(
-            (
-                comparison,
-                old_schema.context().stack().top.clone(),
-                new_schema.context().stack().top.clone(),
-            ),
-            nullable_equal && schema_equal,
-        );
+        self.visited.insert(key, nullable_equal && schema_equal);
 
         Ok(nullable_equal && schema_equal)
     }
