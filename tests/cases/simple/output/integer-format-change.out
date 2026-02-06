@@ -1,6 +1,6 @@
 --- integer-format-change.json
 +++ patched
-@@ -156,6 +156,7 @@
+@@
        "TypedProperties": {
          "properties": {
            "count": {

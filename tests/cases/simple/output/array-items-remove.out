@@ -1,6 +1,6 @@
 --- array-items-remove.json
 +++ patched
-@@ -146,7 +146,7 @@
+@@
          "properties": {
            "children": {
              "items": {

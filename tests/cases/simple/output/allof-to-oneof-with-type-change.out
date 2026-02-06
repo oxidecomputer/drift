@@ -1,6 +1,6 @@
 --- allof-to-oneof-with-type-change.json
 +++ patched
-@@ -58,12 +58,12 @@
+@@
              }
            },
            "via_allof": {
@@ -16,7 +16,7 @@
            },
            "via_anyof": {
              "anyOf": [
-@@ -137,7 +137,7 @@
+@@
        "SubType": {
          "properties": {
            "value": {

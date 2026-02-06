@@ -1,6 +1,6 @@
 --- array-max-items-change.json
 +++ patched
-@@ -15,7 +15,7 @@
+@@
          "items": {
            "type": "string"
          },
