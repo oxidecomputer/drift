@@ -1,6 +1,6 @@
 --- ref-chain-change.json
 +++ patched
-@@ -132,7 +132,7 @@
+@@
          "$ref": "#/components/schemas/RefChainB"
        },
        "RefChainB": {

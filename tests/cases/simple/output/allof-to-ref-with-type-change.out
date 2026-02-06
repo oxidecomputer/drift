@@ -1,6 +1,6 @@
 --- allof-to-ref-with-type-change.json
 +++ patched
-@@ -58,12 +58,7 @@
+@@
              }
            },
            "via_allof": {
@@ -14,7 +14,7 @@
            },
            "via_anyof": {
              "anyOf": [
-@@ -136,6 +131,9 @@
+@@
        },
        "SubType": {
          "properties": {

@@ -1,6 +1,6 @@
 --- add-cookie-parameter.json
 +++ patched
-@@ -365,6 +365,16 @@
+@@
        "get": {
          "description": "A simple ping endpoint that does nothing.",
          "operationId": "ping",

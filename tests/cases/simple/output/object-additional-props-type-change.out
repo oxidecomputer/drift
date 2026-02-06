@@ -1,6 +1,6 @@
 --- object-additional-props-type-change.json
 +++ patched
-@@ -121,9 +121,7 @@
+@@
          ]
        },
        "ObjectWithConstraints": {
