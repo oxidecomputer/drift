@@ -1,6 +1,6 @@
 --- remove-operation.json
 +++ patched
-@@ -361,18 +361,7 @@
+@@
          "summary": "Get oneOf schema"
        }
      },
@@ -25,15 +25,25 @@
 Result for patch:
 [
     Change {
-        message: "The operation ping was removed",
-        old_path: [
-            "#/paths/~1ping/get",
+        paths: [
+            ChangePath {
+                old: [
+                    "#/paths/~1ping/get",
+                ],
+                new: [
+                    "#/paths",
+                ],
+                comparison: Structural,
+            },
         ],
-        new_path: [
-            "#/paths",
+        changes: [
+            ChangeInfo {
+                old_subpath: "",
+                new_subpath: "",
+                message: "The operation ping was removed",
+                class: BackwardIncompatible,
+                details: Removed,
+            },
         ],
-        comparison: Structural,
-        class: BackwardIncompatible,
-        details: Removed,
     },
 ]

@@ -1,15 +1,16 @@
-// Copyright 2025 Oxide Computer Company
+// Copyright 2026 Oxide Computer Company
 
 use std::collections::BTreeMap;
 
-use indexmap::IndexMap;
+use anyhow::Context as _;
+use indexmap::{IndexMap, IndexSet};
 use openapiv3::{
     MediaType, Operation, Parameter, ParameterSchemaOrContent, ReferenceOr, RequestBody,
 };
 use serde_json::Value;
 
 use crate::{
-    Change, ChangeClass, ChangeComparison, ChangeDetails,
+    Change, ChangeClass, ChangeComparison, ChangeDetails, ChangeInfo, ChangePath, JsonPathStack,
     context::{Context, Contextual, ToContext},
     operations::{all_params, operations},
     resolve::ReferenceOrResolver,
@@ -21,24 +22,147 @@ pub fn compare(old: &Value, new: &Value) -> anyhow::Result<Vec<Change>> {
     let mut comp = Compare::default();
     comp.compare(old, new)?;
 
-    Ok(comp.changes)
+    let mut changes = Vec::new();
+
+    for record in comp.records.into_values() {
+        if !record.changes.is_empty() {
+            assert!(
+                !record.paths.is_empty(),
+                "ChangeRecord has changes so it should have paths"
+            );
+            changes.push(Change {
+                paths: record.paths.into_iter().collect(),
+                changes: record.changes.into_iter().collect(),
+            });
+        }
+    }
+
+    Ok(changes)
 }
 
+/// The base path of a location in a document, excluding appended segments.
+///
+/// For a `JsonPathStack` at `#/components/schemas/User/properties/name`, this
+/// captures `#/components/schemas/User`. Wrapped in a newtype to prevent
+/// confusion with `CurrentPointer` (which includes appended segments).
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub(crate) struct BasePath(String);
+
+impl BasePath {
+    pub(crate) fn new(stack: &JsonPathStack) -> Self {
+        let (base, _) = stack.base_and_subpath();
+        Self(base.to_string())
+    }
+}
+
+/// Key identifying a change location in both documents.
+///
+/// This key identifies a pair of corresponding base paths (one from each
+/// document), such as endpoints or named schemas in `#/components/schemas/`.
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Debug)]
+pub(crate) struct ChangeKey {
+    old: BasePath,
+    new: BasePath,
+}
+
+/// The full current location in a document, including appended segments.
+///
+/// This is the path returned by `JsonPathStack::current_pointer()`, wrapped
+/// in a newtype to prevent confusion with `BasePath` (which excludes appended
+/// segments).
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub(crate) struct CurrentPointer(String);
+
+impl CurrentPointer {
+    pub(crate) fn new(stack: &JsonPathStack) -> Self {
+        Self(stack.current_pointer().to_string())
+    }
+}
+
+/// Key for memoizing schema comparison results.
+///
+/// This uses the full schema path (including internal paths like
+/// `SubType/properties/value`) for accurate memoization. The comparison
+/// direction (Input vs Output) is included because compatibility semantics
+/// differ based on direction.
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub(crate) struct VisitedKey {
+    comparison: SchemaComparison,
+    old_path: CurrentPointer,
+    new_path: CurrentPointer,
+}
+
+impl VisitedKey {
+    pub(crate) fn new(
+        comparison: SchemaComparison,
+        old_stack: &JsonPathStack,
+        new_stack: &JsonPathStack,
+    ) -> Self {
+        Self {
+            comparison,
+            old_path: CurrentPointer::new(old_stack),
+            new_path: CurrentPointer::new(new_stack),
+        }
+    }
+}
+
+/// Tracks all paths reaching a change location and detected changes within it.
+#[derive(Debug)]
+pub(crate) struct ChangeRecord {
+    paths: IndexSet<ChangePath>,
+    // Use an IndexSet here to dedup change info. For types shared between
+    // requests and responses, we run through them twice: once with Input and
+    // once with Output. Those could potentially produce the same change, which
+    // is technically correct but confusing to the user.
+    //
+    // In the future, we can also do a post-processing step: if the same change
+    // is reported as both ForwardIncompatible and BackwardIncompatible, we mark
+    // it as (bidirectionally) Incompatible.
+    changes: IndexSet<ChangeInfo>,
+}
+
+/// Tracks state across the comparison of two OpenAPI documents.
+///
+/// This struct uses two maps with deliberately different keying strategies:
+///
+/// - `visited` is keyed by **full path** (`current_pointer`), e.g.,
+///   `(SubType/properties/value, SubType/properties/value)`. This memoizes
+///   individual node comparisons: "have we already compared these exact
+///   schema nodes?" Full paths are required because comparing a schema at
+///   its root is a different operation from comparing one of its children.
+///   If `visited` used base paths, recursing into `SubType/properties/value`
+///   would find the entry for `SubType` and return early, silently skipping
+///   the entire subtree.
+///
+/// - `records` is keyed by **base path** (`base_and_subpath().0`), e.g.,
+///   `{SubType, SubType}`. This groups changes by the component or endpoint
+///   that owns them. A type change at `SubType/properties/value` belongs to
+///   the `SubType` change record alongside root-level metadata changes.
+///   Multiple `visited` entries (root + children) feed into a single
+///   `records` entry.
+///
+/// `visited` also includes the comparison direction (Input vs Output) because
+/// that changes compatibility: adding an optional field is backward-compatible
+/// for output but forward-incompatible for input. `records` omits direction; a
+/// single Change groups all changes to a schema regardless of direction, with
+/// the direction preserved in each ChangePath's `comparison` field.
+///
+/// When a schema moves between `$ref` (out-of-line) and inline across
+/// versions, the full paths diverge, producing distinct `visited` entries
+/// and potentially distinct `records` entries. See the comment in
+/// `compare_schema` and the `ref-vs-inline-type-change` test for details.
 #[derive(Default)]
 pub(crate) struct Compare {
-    pub changes: Vec<Change>,
-    /// Cache comparisons (type of comparison, old and new path to the schema)
-    /// and the boolean result (are the schemas backward-compatible?).
-    pub visited: BTreeMap<(SchemaComparison, String, String), bool>,
+    /// Memoization of schema comparison results, keyed by full path pair.
+    pub(crate) visited: BTreeMap<VisitedKey, bool>,
+    /// Change records grouped by base path pair (component or endpoint).
+    records: BTreeMap<ChangeKey, ChangeRecord>,
 }
 
 impl Compare {
     pub fn compare(&mut self, old: &Value, new: &Value) -> anyhow::Result<()> {
-        let old_context = Context::new(old);
-        let old_operations = operations(&old_context)?;
-
-        let new_context = Context::new(new);
-        let new_operations = operations(&new_context)?;
+        let old_operations = operations(old).context("error deserializing old OpenAPI document")?;
+        let new_operations = operations(new).context("error deserializing new OpenAPI document")?;
 
         let SetCompare {
             a_unique,
@@ -52,10 +176,11 @@ impl Compare {
                 Some(name) => name.as_str(),
                 None => "<unnamed>",
             };
-            self.push_change(
+            let new_paths_root = Context::for_paths_root(new);
+            self.record_change(
                 format!("The operation {op_name} was removed"),
                 &op_info.operation,
-                &new_context.append("paths"),
+                &new_paths_root,
                 ChangeComparison::Structural,
                 ChangeClass::BackwardIncompatible,
                 ChangeDetails::Removed,
@@ -68,10 +193,10 @@ impl Compare {
                 Some(name) => name.as_str(),
                 None => "<unnamed>",
             };
-
-            self.push_change(
+            let old_paths_root = Context::for_paths_root(old);
+            self.record_change(
                 format!("The operation {op_name} was added"),
-                &old_context.append("paths"),
+                &old_paths_root,
                 &op_info.operation,
                 ChangeComparison::Structural,
                 ChangeClass::ForwardIncompatible,
@@ -124,7 +249,7 @@ impl Compare {
         // incompatible.
         for old_param in a_unique.values() {
             let param_name = &old_param.parameter_data_ref().name;
-            self.push_change(
+            self.record_change(
                 format!("The parameter '{param_name}' was removed"),
                 old_param,
                 &new_operation.operation,
@@ -140,7 +265,7 @@ impl Compare {
         for new_param in b_unique.values() {
             let param_name = &new_param.parameter_data_ref().name;
             if new_param.parameter_data_ref().required {
-                self.push_change(
+                self.record_change(
                     format!("A new, required parameter '{param_name}' was added"),
                     &old_operation.operation,
                     new_param,
@@ -149,7 +274,7 @@ impl Compare {
                     ChangeDetails::AddedRequired,
                 );
             } else {
-                self.push_change(
+                self.record_change(
                     format!("A new, optional parameter '{param_name}' was added"),
                     &old_operation.operation,
                     new_param,
@@ -167,7 +292,7 @@ impl Compare {
 
             // A parameter that is "more" required is backward incompatible.
             if !old_param_data.required && new_param_data.required {
-                self.push_change(
+                self.record_change(
                     format!("The parameter '{param_name}' was optional and is now required"),
                     old_param,
                     new_param,
@@ -179,7 +304,7 @@ impl Compare {
 
             // A parameter that is "less" required is forward incompatible.
             if old_param_data.required && !new_param_data.required {
-                self.push_change(
+                self.record_change(
                     format!("The parameter '{param_name}' was required and is now optional"),
                     old_param,
                     new_param,
@@ -204,7 +329,7 @@ impl Compare {
                 (old, new) if old == new => {}
 
                 _ => {
-                    self.push_change(
+                    self.record_change(
                         "Unhandled change to parameter schema or content",
                         old_param,
                         new_param,
@@ -241,7 +366,7 @@ impl Compare {
                 if old_body.required {
                     // Old clients will send a required body that new servers
                     // don't expect.
-                    self.push_change(
+                    self.record_change(
                         "a required body parameter was removed",
                         old_operation,
                         new_operation,
@@ -252,7 +377,7 @@ impl Compare {
                 } else {
                     // Old clients may send an optional body that new servers
                     // don't expect.
-                    self.push_change(
+                    self.record_change(
                         "an optional body parameter was removed",
                         old_operation,
                         new_operation,
@@ -272,7 +397,7 @@ impl Compare {
                     // This is very much like changing the type of a parameter:
                     // previously the body was "nothing" and now it must be
                     // "something".
-                    self.push_change(
+                    self.record_change(
                         "no body parameter was specified and now one is required",
                         old_operation,
                         new_operation,
@@ -285,7 +410,7 @@ impl Compare {
                     // clients will not send the body; it is
                     // forward-incompatible because new clients might try to
                     // send a body to an old server.
-                    self.push_change(
+                    self.record_change(
                         "no body parameter was specified and now one is accepted",
                         old_operation,
                         new_operation,
@@ -317,7 +442,7 @@ impl Compare {
 
                 // Description and extension changes are trivial metadata changes.
                 if old_description != new_description || old_extensions != new_extensions {
-                    self.push_change(
+                    self.record_change(
                         "the body metadata (description or extensions) changed",
                         old_operation,
                         new_operation,
@@ -328,7 +453,7 @@ impl Compare {
                 }
 
                 if !*old_required && *new_required {
-                    self.push_change(
+                    self.record_change(
                         "the body parameter was optional and is now required",
                         old_operation,
                         new_operation,
@@ -337,7 +462,7 @@ impl Compare {
                         ChangeDetails::MoreStrict,
                     );
                 } else if *old_required && !*new_required {
-                    self.push_change(
+                    self.record_change(
                         "the body parameter was required and is now optional",
                         old_operation,
                         new_operation,
@@ -376,7 +501,7 @@ impl Compare {
                 // Considering the impact of a default response is complex and
                 // requires us to consider other responses... and to perhaps
                 // apply heuristic knowledge.
-                self.push_change(
+                self.record_change(
                     "operation added a default response",
                     old_operation,
                     new_operation,
@@ -388,7 +513,7 @@ impl Compare {
             (Some(_), None) => {
                 // Fewer responses is always backward-compatible, but
                 // considering the full impact is, again, complex.
-                self.push_change(
+                self.record_change(
                     "operation removed a default response",
                     old_operation,
                     new_operation,
@@ -430,7 +555,7 @@ impl Compare {
         // It's forward-incompatible for an operation to have responses it no
         // longer sends
         for old_status in a_unique.keys() {
-            self.push_change(
+            self.record_change(
                 format!("operation no longer responds with status {old_status}"),
                 old_operation,
                 new_operation,
@@ -443,7 +568,7 @@ impl Compare {
         // Adding a new response would break old clients that don't expect it
         // and is therefore backward-incompatible.
         for new_status in b_unique.keys() {
-            self.push_change(
+            self.record_change(
                 format!("operation added a new response code {new_status}"),
                 old_operation,
                 new_operation,
@@ -534,7 +659,58 @@ impl Compare {
         Ok(())
     }
 
-    pub(crate) fn push_change(
+    /// Get or create a `ChangeRecord` for the given path stacks, inserting
+    /// the base path into the record's path set.
+    fn ensure_record(
+        &mut self,
+        old_path: &JsonPathStack,
+        new_path: &JsonPathStack,
+        comparison: ChangeComparison,
+    ) -> &mut ChangeRecord {
+        let key = ChangeKey {
+            old: BasePath::new(old_path),
+            new: BasePath::new(new_path),
+        };
+
+        let record = self.records.entry(key).or_insert_with(|| ChangeRecord {
+            paths: IndexSet::new(),
+            changes: IndexSet::new(),
+        });
+
+        // Store base-only paths (subpath stripped). IndexSet handles
+        // deduplication.
+        record.paths.insert(ChangePath {
+            old: old_path.without_subpath(),
+            new: new_path.without_subpath(),
+            comparison,
+        });
+
+        record
+    }
+
+    /// Record a path reaching a change location without recording a new change.
+    ///
+    /// This is used when entering a named type to ensure all paths to the type
+    /// are recorded, even if we hit the memoization cache and don't record
+    /// the change again.
+    pub(crate) fn record_path(
+        &mut self,
+        old: &dyn ToContext<'_>,
+        new: &dyn ToContext<'_>,
+        comparison: ChangeComparison,
+    ) {
+        let old_path = old.to_context().stack();
+        let new_path = new.to_context().stack();
+        self.ensure_record(old_path, new_path, comparison);
+    }
+
+    /// Record a change at the given paths.
+    ///
+    /// This is the unified change recording method. It extracts the base path
+    /// from each path stack and uses it as a key to group related changes.
+    /// The path (truncated to base) is added to the record's path set, and the
+    /// change info is added to the record's changes list.
+    pub(crate) fn record_change(
         &mut self,
         message: impl ToString,
         old: &dyn ToContext<'_>,
@@ -543,15 +719,19 @@ impl Compare {
         class: ChangeClass,
         details: ChangeDetails,
     ) {
-        let change = Change::new(
-            message,
-            old.to_context().stack.clone(),
-            new.to_context().stack.clone(),
-            comparison,
+        let old_path = old.to_context().stack();
+        let new_path = new.to_context().stack();
+        let (_, old_subpath) = old_path.base_and_subpath();
+        let (_, new_subpath) = new_path.base_and_subpath();
+
+        let record = self.ensure_record(old_path, new_path, comparison);
+
+        record.changes.insert(ChangeInfo {
+            old_subpath: old_subpath.to_string(),
+            new_subpath: new_subpath.to_string(),
+            message: message.to_string(),
             class,
             details,
-        );
-
-        self.changes.push(change);
+        });
     }
 }

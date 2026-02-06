@@ -1,6 +1,6 @@
 --- inline-to-allof.json
 +++ patched
-@@ -246,7 +246,12 @@
+@@
              "in": "path",
              "name": "name",
              "schema": {
@@ -19,15 +19,25 @@
 Result for patch:
 [
     Change {
-        message: "schema metadata added",
-        old_path: [
-            "#/paths/~1hello~1{name}/get/parameters/0/schema",
+        paths: [
+            ChangePath {
+                old: [
+                    "#/paths/~1hello~1{name}/get",
+                ],
+                new: [
+                    "#/paths/~1hello~1{name}/get",
+                ],
+                comparison: Input,
+            },
         ],
-        new_path: [
-            "#/paths/~1hello~1{name}/get/parameters/0/schema",
+        changes: [
+            ChangeInfo {
+                old_subpath: "parameters/0/schema",
+                new_subpath: "parameters/0/schema",
+                message: "schema metadata added",
+                class: Trivial,
+                details: Metadata,
+            },
         ],
-        comparison: Input,
-        class: Trivial,
-        details: Metadata,
     },
 ]

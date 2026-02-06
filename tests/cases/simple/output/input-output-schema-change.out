@@ -1,0 +1,51 @@
+--- input-output-schema-change.json
++++ patched
+@@
+       "SharedType": {
+         "properties": {
+           "value": {
+-            "type": "string"
++            "type": "integer"
+           }
+         },
+         "type": "object"
+
+
+Result for patch:
+[
+    Change {
+        paths: [
+            ChangePath {
+                old: [
+                    "#/components/schemas/SharedType",
+                    "#/paths/~1echo/post/request_body/content/application~1json/schema/$ref",
+                ],
+                new: [
+                    "#/components/schemas/SharedType",
+                    "#/paths/~1echo/post/request_body/content/application~1json/schema/$ref",
+                ],
+                comparison: Input,
+            },
+            ChangePath {
+                old: [
+                    "#/components/schemas/SharedType",
+                    "#/paths/~1echo/post/responses/200/content/application~1json/schema/$ref",
+                ],
+                new: [
+                    "#/components/schemas/SharedType",
+                    "#/paths/~1echo/post/responses/200/content/application~1json/schema/$ref",
+                ],
+                comparison: Output,
+            },
+        ],
+        changes: [
+            ChangeInfo {
+                old_subpath: "properties/value",
+                new_subpath: "properties/value",
+                message: "schema types changed",
+                class: Incompatible,
+                details: UnknownDifference,
+            },
+        ],
+    },
+]

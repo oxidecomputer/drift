@@ -1,6 +1,6 @@
 --- object-additional-props-type-change.json
 +++ patched
-@@ -121,9 +121,7 @@
+@@
          ]
        },
        "ObjectWithConstraints": {
@@ -16,17 +16,27 @@
 Result for patch:
 [
     Change {
-        message: "object additionalProperties changed",
-        old_path: [
-            "#/components/schemas/ObjectWithConstraints",
-            "#/paths/~1objects/get/responses/200/content/application~1json/schema/$ref",
+        paths: [
+            ChangePath {
+                old: [
+                    "#/components/schemas/ObjectWithConstraints",
+                    "#/paths/~1objects/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                new: [
+                    "#/components/schemas/ObjectWithConstraints",
+                    "#/paths/~1objects/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                comparison: Output,
+            },
         ],
-        new_path: [
-            "#/components/schemas/ObjectWithConstraints",
-            "#/paths/~1objects/get/responses/200/content/application~1json/schema/$ref",
+        changes: [
+            ChangeInfo {
+                old_subpath: "",
+                new_subpath: "",
+                message: "object additionalProperties changed",
+                class: Unhandled,
+                details: UnknownDifference,
+            },
         ],
-        comparison: Output,
-        class: Unhandled,
-        details: UnknownDifference,
     },
 ]

@@ -1,21 +1,19 @@
---- allof-to-oneof-with-type-change.json
+--- ref-vs-inline-type-change.json
 +++ patched
 @@
-             }
+             ]
            },
-           "via_allof": {
--            "allOf": [
-+            "description": "Via oneOf.",
-+            "oneOf": [
-               {
-                 "$ref": "#/components/schemas/SubType"
-               }
--            ],
--            "description": "Via allOf."
-+            ]
-           },
-           "via_anyof": {
-             "anyOf": [
+           "via_ref": {
+-            "$ref": "#/components/schemas/SubType"
++            "properties": {
++              "value": {
++                "type": "integer"
++              }
++            },
++            "type": "object"
+           }
+         },
+         "required": [
 @@
        "SubType": {
          "properties": {
@@ -33,7 +31,8 @@ Result for patch:
         paths: [
             ChangePath {
                 old: [
-                    "#/components/schemas/GreetingResponse",
+                    "#/components/schemas/SubType",
+                    "#/components/schemas/GreetingResponse/properties/via_ref/$ref",
                     "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
                 ],
                 new: [
@@ -45,11 +44,11 @@ Result for patch:
         ],
         changes: [
             ChangeInfo {
-                old_subpath: "properties/via_allof",
-                new_subpath: "properties/via_allof",
-                message: "schema metadata changed",
-                class: Trivial,
-                details: Metadata,
+                old_subpath: "properties/value",
+                new_subpath: "properties/via_ref/properties/value",
+                message: "schema types changed",
+                class: Incompatible,
+                details: UnknownDifference,
             },
         ],
     },
@@ -90,19 +89,6 @@ Result for patch:
                 new: [
                     "#/components/schemas/SubType",
                     "#/components/schemas/GreetingResponse/properties/via_oneof/0/$ref",
-                    "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
-                ],
-                comparison: Output,
-            },
-            ChangePath {
-                old: [
-                    "#/components/schemas/SubType",
-                    "#/components/schemas/GreetingResponse/properties/via_ref/$ref",
-                    "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
-                ],
-                new: [
-                    "#/components/schemas/SubType",
-                    "#/components/schemas/GreetingResponse/properties/via_ref/$ref",
                     "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
                 ],
                 comparison: Output,

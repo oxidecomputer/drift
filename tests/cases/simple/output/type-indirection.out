@@ -1,6 +1,6 @@
 --- type-indirection.json
 +++ patched
-@@ -49,8 +49,7 @@
+@@
        "GreetingResponse": {
          "properties": {
            "message": {
@@ -10,7 +10,7 @@
            },
            "not_a_number": {
              "not": {
-@@ -90,6 +89,13 @@
+@@
          ],
          "type": "object"
        },
@@ -29,18 +29,28 @@
 Result for patch:
 [
     Change {
-        message: "schema metadata changed",
-        old_path: [
-            "#/components/schemas/GreetingResponse/properties/message",
-            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        paths: [
+            ChangePath {
+                old: [
+                    "#/components/schemas/GreetingResponse",
+                    "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                new: [
+                    "#/components/schemas/GreetingResponseMessage",
+                    "#/components/schemas/GreetingResponse/properties/message/$ref",
+                    "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                comparison: Output,
+            },
         ],
-        new_path: [
-            "#/components/schemas/GreetingResponseMessage",
-            "#/components/schemas/GreetingResponse/properties/message/$ref",
-            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        changes: [
+            ChangeInfo {
+                old_subpath: "properties/message",
+                new_subpath: "",
+                message: "schema metadata changed",
+                class: Trivial,
+                details: Metadata,
+            },
         ],
-        comparison: Output,
-        class: Trivial,
-        details: Metadata,
     },
 ]
