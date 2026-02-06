@@ -1,6 +1,6 @@
 --- add-header-parameter.json
 +++ patched
-@@ -365,6 +365,16 @@
+@@
        "get": {
          "description": "A simple ping endpoint that does nothing.",
          "operationId": "ping",
@@ -22,15 +22,25 @@
 Result for patch:
 [
     Change {
-        message: "A new, optional parameter 'X-Trace-Id' was added",
-        old_path: [
-            "#/paths/~1ping/get",
+        paths: [
+            ChangePath {
+                old: [
+                    "#/paths/~1ping/get",
+                ],
+                new: [
+                    "#/paths/~1ping/get/parameters/0",
+                ],
+                comparison: Input,
+            },
         ],
-        new_path: [
-            "#/paths/~1ping/get/parameters/0",
+        changes: [
+            ChangeInfo {
+                old_subpath: "",
+                new_subpath: "",
+                message: "A new, optional parameter 'X-Trace-Id' was added",
+                class: ForwardIncompatible,
+                details: Added,
+            },
         ],
-        comparison: Input,
-        class: ForwardIncompatible,
-        details: Added,
     },
 ]

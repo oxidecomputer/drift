@@ -1,6 +1,6 @@
 --- multi-oneof-variant-change.json
 +++ patched
-@@ -113,7 +113,7 @@
+@@
        "MultiOneOf": {
          "oneOf": [
            {
@@ -14,17 +14,27 @@
 Result for patch:
 [
     Change {
-        message: "schema types changed",
-        old_path: [
-            "#/components/schemas/MultiOneOf/oneOf/0",
-            "#/paths/~1oneof/get/responses/200/content/application~1json/schema/$ref",
+        paths: [
+            ChangePath {
+                old: [
+                    "#/components/schemas/MultiOneOf/oneOf/0",
+                    "#/paths/~1oneof/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                new: [
+                    "#/components/schemas/MultiOneOf/oneOf/0",
+                    "#/paths/~1oneof/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                comparison: Output,
+            },
         ],
-        new_path: [
-            "#/components/schemas/MultiOneOf/oneOf/0",
-            "#/paths/~1oneof/get/responses/200/content/application~1json/schema/$ref",
+        changes: [
+            ChangeInfo {
+                old_subpath: "",
+                new_subpath: "",
+                message: "schema types changed",
+                class: Incompatible,
+                details: UnknownDifference,
+            },
         ],
-        comparison: Output,
-        class: Incompatible,
-        details: UnknownDifference,
     },
 ]
