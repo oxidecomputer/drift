@@ -1,6 +1,6 @@
 --- string-format-change.json
 +++ patched
-@@ -50,6 +50,7 @@
+@@
          "properties": {
            "message": {
              "description": "The greeting message",

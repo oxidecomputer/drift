@@ -1,6 +1,6 @@
 --- multi-oneof-count-change.json
 +++ patched
-@@ -117,6 +117,9 @@
+@@
            },
            {
              "type": "integer"

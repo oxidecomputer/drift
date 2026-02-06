@@ -1,6 +1,6 @@
 --- add-required-body.json
 +++ patched
-@@ -317,6 +317,21 @@
+@@
      "/no-body": {
        "post": {
          "operationId": "no_body",
