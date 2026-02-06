@@ -1,5 +1,7 @@
 // Copyright 2025 Oxide Computer Company
 
+use std::fmt::Write;
+
 use drift::compare;
 use similar::TextDiff;
 
@@ -39,19 +41,31 @@ fn test_change() {
                     json_patch::patch(&mut patched, &patch_value).unwrap();
 
                     let udiff = {
-                        // Suppress the observation regarding the lack of a
-                        // terminating newline.
                         let mut base_pretty = serde_json::to_string_pretty(&base_value).unwrap();
                         base_pretty.push('\n');
                         let mut patched_pretty = serde_json::to_string_pretty(&patched).unwrap();
                         patched_pretty.push('\n');
                         let diff = TextDiff::from_lines(&base_pretty, &patched_pretty);
-                        diff.unified_diff()
-                            .header(
-                                patch_entry.file_name().to_string_lossy().as_ref(),
-                                "patched",
-                            )
-                            .to_string()
+                        let patch_name = patch_entry.file_name();
+
+                        // Format the unified diff manually, replacing `@@ -N,M
+                        // +N,M @@` hunk headers with bare `@@` to avoid churn
+                        // when base.json changes shift line positions.
+                        let mut out = String::new();
+                        let mut first = true;
+                        for hunk in diff.unified_diff().iter_hunks() {
+                            if first {
+                                writeln!(out, "--- {}", patch_name.to_string_lossy()).unwrap();
+                                writeln!(out, "+++ patched").unwrap();
+                                first = false;
+                            }
+                            writeln!(out, "@@").unwrap();
+                            for change in hunk.iter_changes() {
+                                write!(out, "{}{}", change.tag(), change.to_string_lossy())
+                                    .unwrap();
+                            }
+                        }
+                        out
                     };
 
                     let result =

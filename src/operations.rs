@@ -7,8 +7,11 @@ use openapiv3::{OpenAPI, Operation, Parameter, ParameterData, ReferenceOr};
 use regex::Regex;
 use serde::Deserialize;
 
+use serde_json::Value;
+
 use crate::{
     context::{Context, Contextual},
+    path::EndpointPath,
     resolve::ReferenceOrResolver,
 };
 
@@ -38,24 +41,27 @@ pub struct OperationInfo<'a> {
     pub shared_parameters: Contextual<'a, Vec<ReferenceOr<Parameter>>>,
 }
 
-pub fn operations<'a>(
-    context: &Context<'a>,
-) -> anyhow::Result<Vec<(OperationKey, OperationInfo<'a>)>> {
-    let api = OpenAPI::deserialize(context.raw_openapi).unwrap();
+pub fn operations(raw_openapi: &Value) -> anyhow::Result<Vec<(OperationKey, OperationInfo<'_>)>> {
+    let api = OpenAPI::deserialize(raw_openapi)?;
 
     let mut out = Vec::new();
 
-    let context = context.append("paths");
-
     for (path, ref_or_operation) in api.paths.paths.iter() {
-        let context = context.append(path);
-        let (path_item, context) = ref_or_operation.resolve(&context)?;
+        // Build a context at #/paths/<path> for resolving path item refs.
+        let path_endpoint = EndpointPath::for_path(path);
+        let path_context = Context::for_endpoint(raw_openapi, path_endpoint);
+        let (path_item, path_context) = ref_or_operation.resolve(&path_context)?;
 
-        let shared_parameters =
-            Contextual::new(context.append("parameters"), path_item.parameters.clone());
+        let shared_parameters = Contextual::new(
+            path_context.append("parameters"),
+            path_item.parameters.clone(),
+        );
 
         for (method, operation) in path_item.iter() {
-            let context = context.append(method);
+            // Build endpoint path for this operation: #/paths/<path>/<method>
+            let endpoint = EndpointPath::for_path(path).append(method);
+            let context = Context::for_endpoint(raw_openapi, endpoint);
+
             let op_key = OperationKey::new(path, method);
             let op_info = OperationInfo {
                 path: path.clone(),

@@ -1,6 +1,6 @@
 --- array-min-items-change.json
 +++ patched
-@@ -16,7 +16,7 @@
+@@
            "type": "string"
          },
          "maxItems": 10,
