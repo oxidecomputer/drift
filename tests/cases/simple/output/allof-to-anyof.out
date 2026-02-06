@@ -1,6 +1,6 @@
 --- allof-to-anyof.json
 +++ patched
-@@ -58,12 +58,12 @@
+@@
              }
            },
            "via_allof": {

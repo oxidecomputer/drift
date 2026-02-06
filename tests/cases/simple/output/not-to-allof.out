@@ -1,6 +1,6 @@
 --- not-to-allof.json
 +++ patched
-@@ -53,9 +53,14 @@
+@@
              "type": "string"
            },
            "not_a_number": {

@@ -1,6 +1,6 @@
 --- add-type-extension.json
 +++ patched
-@@ -88,7 +88,10 @@
+@@
          "required": [
            "message"
          ],
