@@ -895,6 +895,9 @@ fn has_meaningful_metadata(data: &SchemaData) -> bool {
     *data != SchemaData::default()
 }
 
+/// For a schema that is **exclusively** enumerated values, this returns a Some
+/// of those enumerated values. Note that this will never return Some of an
+/// empty Vec--there must always be at least a single enumerated value.
 fn extract_enum_values(context: &Context<'_>, kind: &SchemaKind) -> Option<Vec<serde_json::Value>> {
     match kind {
         // For untyped schemas, we can use the enum field as-is.
@@ -941,8 +944,9 @@ fn extract_enum_values(context: &Context<'_>, kind: &SchemaKind) -> Option<Vec<s
         ),
 
         // A oneOf may be composed exclusively of enums in which case we can
-        // flatten them into a single collection.
-        SchemaKind::OneOf { one_of } => Some(
+        // flatten them into a single collection. A oneOf isn't supposed to be
+        // empty... but we'll still check.
+        SchemaKind::OneOf { one_of } if !one_of.is_empty() => Some(
             one_of
                 .iter()
                 .map(|schema_ref| {
