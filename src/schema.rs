@@ -363,7 +363,7 @@ impl Compare {
             _ => {
                 // Consider the case where both old and new are -- effectively
                 // -- an enum of values. This might be an enum (with or without
-                // a type), or a oneOf where each subschema is a enum (again,
+                // a type), or a oneOf where each subschema is an enum (again,
                 // with or without a type).
                 if let (Some(old_enum), Some(new_enum)) = (
                     extract_enum_values(old_schema_kind.context(), old_schema_kind.as_ref()),
