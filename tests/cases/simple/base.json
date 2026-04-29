@@ -379,9 +379,17 @@
         "properties": {
           "name": {
             "type": "string"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/ItemKind"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ItemType"
           }
         },
-        "required": ["name"]
+        "required": [
+          "name"
+        ]
       },
       "UpdateItem": {
         "type": "object",
@@ -401,7 +409,10 @@
             "type": "integer"
           }
         },
-        "required": ["message", "code"]
+        "required": [
+          "message",
+          "code"
+        ]
       },
       "ArrayWithConstraints": {
         "type": "array",
@@ -479,6 +490,39 @@
       },
       "RefChainB": {
         "$ref": "#/components/schemas/SubType"
+      },
+      "ItemKind": {
+        "enum": [
+          "compassionate",
+          "thoughtful",
+          "caring",
+          "considerate"
+        ]
+      },
+      "ItemType": {
+        "oneOf": [
+          {
+            "description": "verb; to enter (data, text, etc.) by means of a keyboard",
+            "type": "string",
+            "enum": [
+              "keyboard"
+            ]
+          },
+          {
+            "description": "verb; to enter (data) into a computer or data processing system",
+            "type": "string",
+            "enum": [
+              "input"
+            ]
+          },
+          {
+            "description": "verb; the act of forming letters, words, or symbols on a surface (such as paper or a screen) using an instrument like a pen, pencil, or keyboard to communicate, record information, or create literature",
+            "type": "string",
+            "enum": [
+              "write"
+            ]
+          }
+        ]
       }
     }
   }
