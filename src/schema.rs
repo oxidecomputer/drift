@@ -2,12 +2,15 @@
 
 use std::fmt;
 
-use openapiv3::{AdditionalProperties, ArrayType, ObjectType, ReferenceOr, Schema, SchemaData};
+use openapiv3::{
+    AdditionalProperties, ArrayType, ObjectType, ReferenceOr, Schema, SchemaData, SchemaKind,
+};
 
 use crate::{
     ChangeClass, ChangeComparison, ChangeDetails,
     compare::Compare,
-    context::{Contextual, ToContext},
+    context::{Context, Contextual, ToContext},
+    resolve::ReferenceOrResolver,
     setops::SetCompare,
 };
 
@@ -292,29 +295,27 @@ impl Compare {
         &mut self,
         comparison: SchemaComparison,
         dry_run: bool,
-        old_schema_kind: Contextual<'_, &openapiv3::SchemaKind>,
-        new_schema_kind: Contextual<'_, &openapiv3::SchemaKind>,
+        old_schema_kind: Contextual<'_, &SchemaKind>,
+        new_schema_kind: Contextual<'_, &SchemaKind>,
     ) -> anyhow::Result<bool> {
         match (old_schema_kind.as_ref(), new_schema_kind.as_ref()) {
-            (&openapiv3::SchemaKind::Type(old_type), &openapiv3::SchemaKind::Type(new_type)) => {
-                self.compare_schema_type(
-                    comparison,
-                    dry_run,
-                    old_schema_kind.subcomponent(old_type),
-                    new_schema_kind.subcomponent(new_type),
-                )
-            }
+            (&SchemaKind::Type(old_type), &SchemaKind::Type(new_type)) => self.compare_schema_type(
+                comparison,
+                dry_run,
+                old_schema_kind.subcomponent(old_type),
+                new_schema_kind.subcomponent(new_type),
+            ),
             (
-                openapiv3::SchemaKind::OneOf { one_of: old_one_of },
-                openapiv3::SchemaKind::OneOf { one_of: new_one_of },
+                SchemaKind::OneOf { one_of: old_one_of },
+                SchemaKind::OneOf { one_of: new_one_of },
             ) => {
                 let old_one_of = old_schema_kind.append_deref(old_one_of, "oneOf");
                 let new_one_of = new_schema_kind.append_deref(new_one_of, "oneOf");
                 self.compare_schema_type_one_of(comparison, dry_run, old_one_of, new_one_of)
             }
             (
-                openapiv3::SchemaKind::AllOf { all_of: old_all_of },
-                openapiv3::SchemaKind::AllOf { all_of: new_all_of },
+                SchemaKind::AllOf { all_of: old_all_of },
+                SchemaKind::AllOf { all_of: new_all_of },
             ) => {
                 let old_all_of = old_schema_kind.append_deref(old_all_of, "allOf");
                 let new_all_of = new_schema_kind.append_deref(new_all_of, "allOf");
@@ -322,8 +323,8 @@ impl Compare {
             }
 
             (
-                openapiv3::SchemaKind::AnyOf { any_of: old_any_of },
-                openapiv3::SchemaKind::AnyOf { any_of: new_any_of },
+                SchemaKind::AnyOf { any_of: old_any_of },
+                SchemaKind::AnyOf { any_of: new_any_of },
             ) => {
                 if old_any_of != new_any_of {
                     self.schema_push_change(
@@ -339,15 +340,12 @@ impl Compare {
                     Ok(true)
                 }
             }
-            (
-                openapiv3::SchemaKind::Not { not: old_not },
-                openapiv3::SchemaKind::Not { not: new_not },
-            ) => {
+            (SchemaKind::Not { not: old_not }, SchemaKind::Not { not: new_not }) => {
                 let old_not = old_schema_kind.append_deref(old_not.as_ref(), "not");
                 let new_not = new_schema_kind.append_deref(new_not.as_ref(), "not");
                 self.compare_schema_ref_helper(dry_run, comparison, old_not, new_not)
             }
-            (&openapiv3::SchemaKind::Any(old_any), &openapiv3::SchemaKind::Any(new_any)) => {
+            (&SchemaKind::Any(old_any), &SchemaKind::Any(new_any)) => {
                 if old_any == new_any {
                     Ok(true)
                 } else {
@@ -363,6 +361,37 @@ impl Compare {
                 }
             }
             _ => {
+                // Consider the case where both old and new are -- effectively
+                // -- an enum of values. This might be an enum (with or without
+                // a type), or a oneOf where each subschema is a enum (again,
+                // with or without a type).
+                if let (Some(old_enum), Some(new_enum)) = (
+                    extract_enum_values(old_schema_kind.context(), old_schema_kind.as_ref()),
+                    extract_enum_values(new_schema_kind.context(), new_schema_kind.as_ref()),
+                ) {
+                    // We don't care about the order of enumerated values; yes,
+                    // this is an inefficient way to check, but with
+                    // serde_json::Value not implementing Hash or Ord... meh.
+                    if old_enum.len() == new_enum.len()
+                        && old_enum.iter().all(|v| new_enum.contains(v))
+                    {
+                        let old_tag = SchemaKindTag::new(&old_schema_kind);
+                        let new_tag = SchemaKindTag::new(&new_schema_kind);
+                        return self.schema_push_change(
+                            dry_run,
+                            format!(
+                                "schema kind changed from {} to {} with equivalent enum values",
+                                old_tag, new_tag
+                            ),
+                            &old_schema_kind,
+                            &new_schema_kind,
+                            comparison,
+                            ChangeClass::Trivial,
+                            ChangeDetails::Metadata,
+                        );
+                    }
+                }
+
                 let old_tag = SchemaKindTag::new(&old_schema_kind);
                 let new_tag = SchemaKindTag::new(&new_schema_kind);
                 self.schema_push_change(
@@ -800,14 +829,14 @@ impl fmt::Display for SchemaKindTag {
 }
 
 impl SchemaKindTag {
-    fn new(kind: &openapiv3::SchemaKind) -> Self {
+    fn new(kind: &SchemaKind) -> Self {
         match kind {
-            openapiv3::SchemaKind::Type(_) => Self::Type,
-            openapiv3::SchemaKind::OneOf { .. } => Self::OneOf,
-            openapiv3::SchemaKind::AllOf { .. } => Self::AllOf,
-            openapiv3::SchemaKind::AnyOf { .. } => Self::AnyOf,
-            openapiv3::SchemaKind::Not { .. } => Self::Not,
-            openapiv3::SchemaKind::Any { .. } => Self::Any,
+            SchemaKind::Type(_) => Self::Type,
+            SchemaKind::OneOf { .. } => Self::OneOf,
+            SchemaKind::AllOf { .. } => Self::AllOf,
+            SchemaKind::AnyOf { .. } => Self::AnyOf,
+            SchemaKind::Not { .. } => Self::Not,
+            SchemaKind::Any { .. } => Self::Any,
         }
     }
 }
@@ -837,31 +866,25 @@ fn classify_schema_ref(schema_ref: &ReferenceOr<Schema>) -> SchemaRefKind<'_> {
     match schema_ref {
         ReferenceOr::Reference { .. } => SchemaRefKind::BareRef,
         ReferenceOr::Item(schema) => match &schema.schema_kind {
-            openapiv3::SchemaKind::Type(_)
-            | openapiv3::SchemaKind::Not { .. }
-            | openapiv3::SchemaKind::Any(_) => SchemaRefKind::InlineType,
-            openapiv3::SchemaKind::AllOf { all_of } if all_of.len() == 1 => {
-                SchemaRefKind::SingleElement {
-                    inner: all_of.first().unwrap(),
-                    metadata: &schema.schema_data,
-                }
+            SchemaKind::Type(_) | SchemaKind::Not { .. } | SchemaKind::Any(_) => {
+                SchemaRefKind::InlineType
             }
-            openapiv3::SchemaKind::AnyOf { any_of } if any_of.len() == 1 => {
-                SchemaRefKind::SingleElement {
-                    inner: any_of.first().unwrap(),
-                    metadata: &schema.schema_data,
-                }
-            }
-            openapiv3::SchemaKind::OneOf { one_of } if one_of.len() == 1 => {
-                SchemaRefKind::SingleElement {
-                    inner: one_of.first().unwrap(),
-                    metadata: &schema.schema_data,
-                }
-            }
+            SchemaKind::AllOf { all_of } if all_of.len() == 1 => SchemaRefKind::SingleElement {
+                inner: all_of.first().unwrap(),
+                metadata: &schema.schema_data,
+            },
+            SchemaKind::AnyOf { any_of } if any_of.len() == 1 => SchemaRefKind::SingleElement {
+                inner: any_of.first().unwrap(),
+                metadata: &schema.schema_data,
+            },
+            SchemaKind::OneOf { one_of } if one_of.len() == 1 => SchemaRefKind::SingleElement {
+                inner: one_of.first().unwrap(),
+                metadata: &schema.schema_data,
+            },
             // Multi-element wrappers - not semantically equivalent to single schemas.
-            openapiv3::SchemaKind::AllOf { .. }
-            | openapiv3::SchemaKind::AnyOf { .. }
-            | openapiv3::SchemaKind::OneOf { .. } => SchemaRefKind::MultiElement,
+            SchemaKind::AllOf { .. } | SchemaKind::AnyOf { .. } | SchemaKind::OneOf { .. } => {
+                SchemaRefKind::MultiElement
+            }
         },
     }
 }
@@ -870,4 +893,68 @@ fn classify_schema_ref(schema_ref: &ReferenceOr<Schema>) -> SchemaRefKind<'_> {
 /// metadata worth preserving.
 fn has_meaningful_metadata(data: &SchemaData) -> bool {
     *data != SchemaData::default()
+}
+
+fn extract_enum_values(context: &Context<'_>, kind: &SchemaKind) -> Option<Vec<serde_json::Value>> {
+    match kind {
+        // For untyped schemas, we can use the enum field as-is.
+        SchemaKind::Any(any) if !any.enumeration.is_empty() => Some(any.enumeration.clone()),
+
+        // For typed schemas, convert them to Values of the appropriate type.
+        SchemaKind::Type(openapiv3::Type::String(s)) if !s.enumeration.is_empty() => Some(
+            s.enumeration
+                .iter()
+                .map(|v| match v {
+                    Some(s) => serde_json::Value::String(s.clone()),
+                    None => serde_json::Value::Null,
+                })
+                .collect(),
+        ),
+        SchemaKind::Type(openapiv3::Type::Integer(i)) if !i.enumeration.is_empty() => Some(
+            i.enumeration
+                .iter()
+                .map(|v| match v {
+                    Some(n) => serde_json::Value::Number((*n).into()),
+                    None => serde_json::Value::Null,
+                })
+                .collect(),
+        ),
+        SchemaKind::Type(openapiv3::Type::Number(n)) if !n.enumeration.is_empty() => Some(
+            n.enumeration
+                .iter()
+                .map(|v| match v {
+                    Some(f) => serde_json::Number::from_f64(*f)
+                        .map(serde_json::Value::Number)
+                        .unwrap_or(serde_json::Value::Null),
+                    None => serde_json::Value::Null,
+                })
+                .collect(),
+        ),
+        SchemaKind::Type(openapiv3::Type::Boolean(b)) if !b.enumeration.is_empty() => Some(
+            b.enumeration
+                .iter()
+                .map(|v| match v {
+                    Some(b) => serde_json::Value::Bool(*b),
+                    None => serde_json::Value::Null,
+                })
+                .collect(),
+        ),
+
+        // A oneOf may be composed exclusively of enums in which case we can
+        // flatten them into a single collection.
+        SchemaKind::OneOf { one_of } => Some(
+            one_of
+                .iter()
+                .map(|schema_ref| {
+                    let (schema, _) = schema_ref.resolve(context).ok()?;
+                    extract_enum_values(context, &schema.schema_kind)
+                })
+                .collect::<Option<Vec<_>>>()?
+                .into_iter()
+                .flatten()
+                .collect(),
+        ),
+
+        _ => None,
+    }
 }

@@ -516,7 +516,7 @@
             ]
           },
           {
-            "description": "verb; the act of forming letters, words, or symbols on a surface (such as paper or a screen) using an instrument like a pen, pencil, or keyboard to communicate, record information, or create literature",
+            "description": "verb; to form letters, words, or symbols on a surface (such as paper or a screen) using an instrument like a pen, pencil, or keyboard to communicate, record information, or create literature",
             "type": "string",
             "enum": [
               "write"
