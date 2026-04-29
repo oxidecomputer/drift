@@ -29,6 +29,7 @@ fn test_change() {
             // Iterate through every file in the "patch" subdirectory.
             let patch_dir = path.join("patch");
             let output_dir = path.join("output");
+            let mut aok = true;
             for patch_entry in std::fs::read_dir(&patch_dir).unwrap() {
                 let patch_entry = patch_entry.unwrap();
                 println!("  Considering patch {:?}", patch_entry.file_name());
@@ -74,8 +75,18 @@ fn test_change() {
                     let output = format!("{udiff}\n\nResult for patch:\n{:#?}\n", result);
                     let mut output_path = output_dir.join(patch_entry.file_name());
                     output_path.set_extension("out");
-                    expectorate::assert_contents(output_path, &output);
+
+                    if std::panic::catch_unwind(|| {
+                        expectorate::assert_contents(output_path, &output)
+                    })
+                    .is_err()
+                    {
+                        aok = false;
+                    }
                 }
+            }
+            if !aok {
+                panic!("One or more patches didn't match their output files; see above");
             }
         }
     }

@@ -1,0 +1,34 @@
+[
+  {
+    "op": "replace",
+    "path": "/components/schemas/ItemKind",
+    "value": {
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "compassionate"
+          ]
+        },
+        {
+          "type": "string",
+          "enum": [
+            "thoughtful"
+          ]
+        },
+        {
+          "type": "string",
+          "enum": [
+            "caring"
+          ]
+        },
+        {
+          "type": "string",
+          "enum": [
+            "considerate"
+          ]
+        }
+      ]
+    }
+  }
+]
