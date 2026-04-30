@@ -745,7 +745,7 @@ impl Compare {
         if old_schemas.len() != new_schemas.len() {
             return self.schema_push_change(
                 dry_run,
-                "oneOf schema count changed",
+                "allOf schema count changed",
                 &old_all_of,
                 &new_all_of,
                 comparison,
