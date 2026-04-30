@@ -345,6 +345,14 @@
               }
             ]
           },
+          "via_clone": {
+            "description": "Via clone of SubType using allOf.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SubTypeClone"
+              }
+            ]
+          },
           "not_a_number": {
             "not": {
               "type": "number"
@@ -362,6 +370,14 @@
             "type": "string"
           }
         }
+      },
+      "SubTypeClone": {
+        "description": "...",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SubType"
+          }
+        ]
       },
       "Tree": {
         "type": "object",
@@ -381,7 +397,9 @@
             "type": "string"
           }
         },
-        "required": ["name"]
+        "required": [
+          "name"
+        ]
       },
       "UpdateItem": {
         "type": "object",
@@ -401,7 +419,10 @@
             "type": "integer"
           }
         },
-        "required": ["message", "code"]
+        "required": [
+          "message",
+          "code"
+        ]
       },
       "ArrayWithConstraints": {
         "type": "array",
