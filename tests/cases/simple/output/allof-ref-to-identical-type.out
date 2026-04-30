@@ -1,0 +1,44 @@
+--- allof-ref-to-identical-type.json
++++ patched
+@@
+       "SubTypeClone": {
+         "allOf": [
+           {
+-            "$ref": "#/components/schemas/SubType"
++            "$ref": "#/components/schemas/SubTypeV2"
+           }
+         ],
+         "description": "..."
+       },
++      "SubTypeV2": {
++        "properties": {
++          "value": {
++            "type": "string"
++          }
++        },
++        "type": "object"
++      },
+       "Tree": {
+         "properties": {
+           "children": {
+
+
+Result for patch:
+[
+    Change {
+        message: "unhandled, 'allOf' schema",
+        old_path: [
+            "#/components/schemas/SubTypeClone/allOf",
+            "#/components/schemas/GreetingResponse/properties/via_clone/0/$ref",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/SubTypeClone/allOf",
+            "#/components/schemas/GreetingResponse/properties/via_clone/0/$ref",
+            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: Unhandled,
+        details: UnknownDifference,
+    },
+]
