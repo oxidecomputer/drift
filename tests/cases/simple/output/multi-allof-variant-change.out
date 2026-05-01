@@ -14,7 +14,7 @@
 Result for patch:
 [
     Change {
-        message: "unhandled, 'allOf' schema",
+        message: "allOf with multiple schemas is unhandled",
         old_path: [
             "#/components/schemas/MultiAllOf/allOf",
             "#/paths/~1allof/get/responses/200/content/application~1json/schema/$ref",
