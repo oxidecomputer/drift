@@ -24,7 +24,12 @@ fn test_change() {
             // Start by making sure that the base compares cleanly against
             // itself.
             let result = compare(&base_value, &base_value).expect("fatal failure in comparison");
-            assert!(result.is_empty());
+            if !result.is_empty() {
+                panic!(
+                    "base.json does not compare cleanly against itself: {:#?}",
+                    result
+                );
+            }
 
             // Iterate through every file in the "patch" subdirectory.
             let patch_dir = path.join("patch");

@@ -1,7 +1,7 @@
 --- oneof-to-anyof.json
 +++ patched
 @@
-             "description": "Via anyOf."
+             "description": "Via clone of SubType using allOf."
            },
            "via_oneof": {
 -            "description": "Via oneOf.",

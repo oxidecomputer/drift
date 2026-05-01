@@ -762,9 +762,6 @@ impl Compare {
         Ok(ret)
     }
 
-    // NOTE: Single-element allOf schemas are flattened by `try_compare_flattened`
-    // before reaching this function. Multi-element allOf would require semantic
-    // merging for proper comparison, so we just do an equality check.
     fn compare_schema_type_all_of(
         &mut self,
         comparison: SchemaComparison,
@@ -772,18 +769,42 @@ impl Compare {
         old_all_of: Contextual<'_, &Vec<ReferenceOr<Schema>>>,
         new_all_of: Contextual<'_, &Vec<ReferenceOr<Schema>>>,
     ) -> anyhow::Result<bool> {
-        if old_all_of.as_ref() != new_all_of.as_ref() {
+        let old_schemas = old_all_of.as_ref();
+        let new_schemas = new_all_of.as_ref();
+        if old_schemas.len() != new_schemas.len() {
+            return self.schema_push_change(
+                dry_run,
+                "allOf schema count changed",
+                &old_all_of,
+                &new_all_of,
+                comparison,
+                ChangeClass::Unhandled,
+                ChangeDetails::UnknownDifference,
+            );
+        }
+
+        if old_schemas.len() == 1 {
+            let old_single_schema = old_all_of.append_deref(old_all_of.first().unwrap(), "0");
+            let new_single_schema = new_all_of.append_deref(new_all_of.first().unwrap(), "0");
+
+            self.compare_schema_ref_helper(
+                dry_run,
+                comparison,
+                old_single_schema,
+                new_single_schema,
+            )
+        } else if old_schemas == new_schemas {
+            Ok(true)
+        } else {
             self.schema_push_change(
                 dry_run,
-                "unhandled, 'allOf' schema",
+                "allOf with multiple schemas is unhandled",
                 &old_all_of,
                 &new_all_of,
                 comparison,
                 ChangeClass::Unhandled,
                 ChangeDetails::UnknownDifference,
             )
-        } else {
-            Ok(true)
         }
     }
 
@@ -842,6 +863,7 @@ impl SchemaKindTag {
 }
 
 /// Classification of a schema reference for flattening purposes.
+#[derive(Debug)]
 enum SchemaRefKind<'a> {
     /// A bare $ref.
     BareRef,
