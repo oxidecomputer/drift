@@ -1,0 +1,56 @@
+--- oneof-to-enum.json
++++ patched
+@@
+         ]
+       },
+       "ItemType": {
+-        "oneOf": [
+-          {
+-            "description": "verb; to enter (data, text, etc.) by means of a keyboard",
+-            "enum": [
+-              "keyboard"
+-            ],
+-            "type": "string"
+-          },
+-          {
+-            "description": "verb; to enter (data) into a computer or data processing system",
+-            "enum": [
+-              "input"
+-            ],
+-            "type": "string"
+-          },
+-          {
+-            "description": "verb; to form letters, words, or symbols on a surface (such as paper or a screen) using an instrument like a pen, pencil, or keyboard to communicate, record information, or create literature",
+-            "enum": [
+-              "write"
+-            ],
+-            "type": "string"
+-          }
++        "enum": [
++          "keyboard",
++          "input",
++          "write"
+         ]
+       },
+       "MultiAllOf": {
+
+
+Result for patch:
+[
+    Change {
+        message: "schema kind changed from oneOf to any with equivalent enum values",
+        old_path: [
+            "#/components/schemas/ItemType",
+            "#/components/schemas/CreateItem/properties/type/$ref",
+            "#/paths/~1items/post/request_body/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/ItemType",
+            "#/components/schemas/CreateItem/properties/type/$ref",
+            "#/paths/~1items/post/request_body/content/application~1json/schema/$ref",
+        ],
+        comparison: Input,
+        class: Trivial,
+        details: Metadata,
+    },
+]

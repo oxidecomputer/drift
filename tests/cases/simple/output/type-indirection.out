@@ -21,9 +21,9 @@
 +          "jank": true
 +        }
 +      },
-       "MultiAllOf": {
-         "allOf": [
-           {
+       "ItemKind": {
+         "enum": [
+           "compassionate",
 
 
 Result for patch:
