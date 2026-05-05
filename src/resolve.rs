@@ -1,4 +1,4 @@
-// Copyright 2025 Oxide Computer Company
+// Copyright 2026 Oxide Computer Company
 
 use std::borrow::Cow;
 
@@ -33,8 +33,7 @@ where
         };
 
         loop {
-            assert!(target.starts_with("#/"));
-            context = context.push(target.as_ref());
+            context = context.push(target.as_ref())?;
 
             let subtree = context
                 .raw_openapi

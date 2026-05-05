@@ -1,0 +1,54 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Shared-prefix cycle bug",
+    "version": "1.0.0",
+    "description": "Demonstrates a false-positive cycle in `contains_cycle` when one schema name is a string prefix of another in the same reference chain. Mirrors the omicron `AuditLogEntry` / `AuditLogEntryResultsPage` shape."
+  },
+  "paths": {
+    "/items": {
+      "get": {
+        "operationId": "list_items",
+        "responses": {
+          "200": {
+            "description": "A page of items",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ItemPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ItemPage": {
+        "description": "A page of items",
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Item"
+            }
+          }
+        },
+        "required": ["items"]
+      },
+      "Item": {
+        "description": "An item",
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": ["value"]
+      }
+    }
+  }
+}
