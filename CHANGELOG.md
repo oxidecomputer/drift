@@ -3,6 +3,11 @@
 <!-- next-header -->
 ## Unreleased - ReleaseDate
 
+## [0.1.4] - 2026-05-06
+
+- evaluate oneOf <-> enum equivalency
+- fix an error in cycle detection that would cause subtrees to be ignored
+
 ## [0.1.3] - 2026-01-26
 
 Fixed a few missing cases:
