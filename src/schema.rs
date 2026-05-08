@@ -8,7 +8,7 @@ use openapiv3::{
 
 use crate::{
     ChangeClass, ChangeComparison, ChangeDetails,
-    compare::{Compare, VisitedKey},
+    compare::{Compare, VisitState, VisitedKey},
     context::{Context, Contextual, ToContext},
     resolve::ReferenceOrResolver,
     setops::SetCompare,
@@ -189,25 +189,26 @@ impl Compare {
         old_schema: Contextual<'_, &Schema>,
         new_schema: Contextual<'_, &Schema>,
     ) -> anyhow::Result<bool> {
-        // We wait for both new and old to contain a cycle; this ensures that
-        // we consider "unrolled" cycles properly. There is a possibility of
-        // getting stuck in an A->B->A / B->A->B cycle... we can address that
-        // should that construction arise.
-        if old_schema.context().stack().contains_cycle()
-            && new_schema.context().stack().contains_cycle()
-        {
-            return Ok(true);
-        }
-
-        // Return the cached compatibility of these schemas so that we don't
-        // generate redundant notes.
         let key = VisitedKey::new(
             comparison,
             old_schema.context().stack(),
             new_schema.context().stack(),
         );
-        if let Some(equal) = self.visited.get(&key) {
-            return Ok(*equal);
+
+        // Look up where this comparison sits in its lifecycle:
+        //
+        // - `Visiting`: the same key is in flight up the call stack -- the
+        //   schema graph has cycled back. Treat as compatible to break the
+        //   recursion; any genuine difference will be reported by the
+        //   in-flight expansion that put us here. We don't write to
+        //   `visit_state` on this branch: the in-flight visitor that put us
+        //   here will replace `Visiting` with `Completed` when it pops.
+        // - `Completed`: we've already compared this pair; reuse the result
+        //   so we don't generate redundant notes.
+        match self.visit_state.get(&key) {
+            Some(VisitState::Visiting) => return Ok(true),
+            Some(VisitState::Completed { equal }) => return Ok(*equal),
+            None => {}
         }
 
         // We expand structures to ensure we don't accidentally fail to examine
@@ -272,17 +273,25 @@ impl Compare {
         }
 
         let nullable_equal = old_nullable == new_nullable;
+
+        // Mark the key as in flight while we recurse; replace with the
+        // completed result on success.
+        self.visit_state.insert(key.clone(), VisitState::Visiting);
         let schema_equal = self.compare_schema_kind(
             comparison,
             dry_run,
             Contextual::new(old_schema.context().clone(), old_schema_kind),
             Contextual::new(new_schema.context().clone(), new_schema_kind),
         )?;
+        let equal = nullable_equal && schema_equal;
+        self.visit_state.insert(
+            key,
+            VisitState::Completed {
+                equal: nullable_equal && schema_equal,
+            },
+        );
 
-        // Cache the result.
-        self.visited.insert(key, nullable_equal && schema_equal);
-
-        Ok(nullable_equal && schema_equal)
+        Ok(equal)
     }
 
     pub(crate) fn compare_schema_kind(

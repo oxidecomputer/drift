@@ -1,0 +1,27 @@
+[
+  {
+    "op": "replace",
+    "path": "/components/schemas/DirectLoop/properties/value/type",
+    "value": "integer"
+  },
+  {
+    "op": "replace",
+    "path": "/components/schemas/DirectLoop/properties/next",
+    "value": {
+      "$ref": "#/components/schemas/LoopIndirect"
+    }
+  },
+  {
+    "op": "add",
+    "path": "/components/schemas/LoopIndirect",
+    "value": {
+      "description": "Intermediate schema introduced to unroll DirectLoop's self-cycle by one level.",
+      "type": "object",
+      "properties": {
+        "next": {
+          "$ref": "#/components/schemas/DirectLoop"
+        }
+      }
+    }
+  }
+]

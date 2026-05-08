@@ -66,11 +66,25 @@ impl VisitedKey {
     }
 }
 
+/// Lifecycle of a schema comparison, keyed by `VisitedKey` in
+/// [`Compare::visit_state`].
+#[derive(Clone, Debug)]
+pub(crate) enum VisitState {
+    /// Comparison is in progress somewhere up the call stack. Re-entering a
+    /// key in this state means the schema graph has a cycle.
+    Visiting,
+    /// Comparison has completed.
+    Completed {
+        /// Whether the two schemas were determined to be equal.
+        equal: bool,
+    },
+}
+
 #[derive(Default)]
 pub(crate) struct Compare {
     pub changes: Vec<Change>,
-    /// Memoization of schema comparison results, keyed by full path pair.
-    pub visited: BTreeMap<VisitedKey, bool>,
+    /// State of every schema comparison we've started.
+    pub visit_state: BTreeMap<VisitedKey, VisitState>,
 }
 
 impl Compare {
