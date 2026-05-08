@@ -1,0 +1,82 @@
+--- asymmetric-unroll-with-property-change.json
++++ patched
+@@
+         "description": "Direct self-cycle for the asymmetric-unroll test.",
+         "properties": {
+           "next": {
+-            "$ref": "#/components/schemas/DirectLoop"
++            "$ref": "#/components/schemas/LoopIndirect"
+           },
+           "value": {
+-            "type": "string"
++            "type": "integer"
+           }
+         },
+         "type": "object"
+@@
+         ],
+         "type": "object"
+       },
++      "LoopIndirect": {
++        "description": "Intermediate schema introduced to unroll DirectLoop's self-cycle by one level.",
++        "properties": {
++          "next": {
++            "$ref": "#/components/schemas/DirectLoop"
++          }
++        },
++        "type": "object"
++      },
+       "NodeA": {
+         "description": "First node of a three-way cycle.",
+         "properties": {
+
+
+Result for patch:
+[
+    Change {
+        message: "schema metadata changed",
+        old_path: [
+            "#/components/schemas/DirectLoop",
+            "#/components/schemas/DirectLoop/properties/next/$ref",
+            "#/paths/~1direct-loop/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/LoopIndirect",
+            "#/components/schemas/DirectLoop/properties/next/$ref",
+            "#/paths/~1direct-loop/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: Trivial,
+        details: Metadata,
+    },
+    Change {
+        message: "object properties changed",
+        old_path: [
+            "#/components/schemas/DirectLoop",
+            "#/components/schemas/DirectLoop/properties/next/$ref",
+            "#/paths/~1direct-loop/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/LoopIndirect",
+            "#/components/schemas/DirectLoop/properties/next/$ref",
+            "#/paths/~1direct-loop/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: Unhandled,
+        details: UnknownDifference,
+    },
+    Change {
+        message: "schema types changed",
+        old_path: [
+            "#/components/schemas/DirectLoop/properties/value",
+            "#/paths/~1direct-loop/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/DirectLoop/properties/value",
+            "#/paths/~1direct-loop/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: Incompatible,
+        details: UnknownDifference,
+    },
+]

@@ -1,0 +1,286 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Cycle detection test fixture",
+    "version": "1.0.0",
+    "description": "Exercises cycle detection across a variety of schema shapes."
+  },
+  "paths": {
+    "/items": {
+      "get": {
+        "operationId": "list_items",
+        "responses": {
+          "200": {
+            "description": "A page of items",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ItemPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/persons": {
+      "get": {
+        "operationId": "list_persons",
+        "responses": {
+          "200": {
+            "description": "Persons; reaches Company through a mutual reference",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Person"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/companies": {
+      "get": {
+        "operationId": "list_companies",
+        "responses": {
+          "200": {
+            "description": "Companies; reaches Person through a mutual reference",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Company"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/three-cycle": {
+      "get": {
+        "operationId": "get_three_cycle",
+        "responses": {
+          "200": {
+            "description": "Three-way cycle: NodeA -> NodeB -> NodeC -> NodeA",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NodeA"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/wrapped-cycle": {
+      "get": {
+        "operationId": "get_wrapped_cycle",
+        "responses": {
+          "200": {
+            "description": "Mutual recursion routed through allOf wrappers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Wrapper"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/direct-loop": {
+      "get": {
+        "operationId": "get_direct_loop",
+        "responses": {
+          "200": {
+            "description": "Direct self-cycle; patches may replace this with an unrolled cycle through an intermediate schema",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DirectLoop"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/self-cycle": {
+      "get": {
+        "operationId": "get_self_cycle",
+        "responses": {
+          "200": {
+            "description": "Self-cycle through SelfCycleA; patches may replace this with SelfCycleB to exercise pair-keyed cycle detection across different-named tops",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SelfCycleA"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ItemPage": {
+        "description": "A page of items",
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Item"
+            }
+          }
+        },
+        "required": ["items"]
+      },
+      "Item": {
+        "description": "An item",
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": ["value"]
+      },
+      "Person": {
+        "description": "A person who works at a company.",
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "employer": {
+            "$ref": "#/components/schemas/Company"
+          }
+        },
+        "required": ["name"]
+      },
+      "Company": {
+        "description": "A company with a CEO who is a person.",
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "ceo": {
+            "$ref": "#/components/schemas/Person"
+          }
+        },
+        "required": ["name"]
+      },
+      "NodeA": {
+        "description": "First node of a three-way cycle.",
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "next": {
+            "$ref": "#/components/schemas/NodeB"
+          }
+        }
+      },
+      "NodeB": {
+        "description": "Second node of a three-way cycle.",
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "next": {
+            "$ref": "#/components/schemas/NodeC"
+          }
+        }
+      },
+      "NodeC": {
+        "description": "Third node of a three-way cycle.",
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "next": {
+            "$ref": "#/components/schemas/NodeA"
+          }
+        }
+      },
+      "Wrapper": {
+        "description": "Cycles back to Wrapped through an allOf indirection.",
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "child": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Wrapped"
+              }
+            ]
+          }
+        }
+      },
+      "Wrapped": {
+        "description": "Cycles back to Wrapper through an allOf indirection.",
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "back": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Wrapper"
+              }
+            ]
+          }
+        }
+      },
+      "DirectLoop": {
+        "description": "Direct self-cycle for the asymmetric-unroll test.",
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "next": {
+            "$ref": "#/components/schemas/DirectLoop"
+          }
+        }
+      },
+      "SelfCycleA": {
+        "description": "Self-recursive schema A; paired with SelfCycleB to test pair-keyed cycle detection across different-named tops.",
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "next": {
+            "$ref": "#/components/schemas/SelfCycleA"
+          }
+        }
+      },
+      "SelfCycleB": {
+        "description": "Self-recursive schema B; structurally similar to SelfCycleA but distinct so a swap exercises (A, B) pair traversal.",
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "next": {
+            "$ref": "#/components/schemas/SelfCycleB"
+          }
+        }
+      }
+    }
+  }
+}

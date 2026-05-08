@@ -1,0 +1,53 @@
+--- swap-different-named-cycle.json
++++ patched
+@@
+             "$ref": "#/components/schemas/SelfCycleB"
+           },
+           "value": {
+-            "type": "string"
++            "type": "integer"
+           }
+         },
+         "type": "object"
+@@
+             "content": {
+               "application/json": {
+                 "schema": {
+-                  "$ref": "#/components/schemas/SelfCycleA"
++                  "$ref": "#/components/schemas/SelfCycleB"
+                 }
+               }
+             },
+
+
+Result for patch:
+[
+    Change {
+        message: "schema metadata changed",
+        old_path: [
+            "#/components/schemas/SelfCycleA",
+            "#/paths/~1self-cycle/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/SelfCycleB",
+            "#/paths/~1self-cycle/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: Trivial,
+        details: Metadata,
+    },
+    Change {
+        message: "schema types changed",
+        old_path: [
+            "#/components/schemas/SelfCycleA/properties/value",
+            "#/paths/~1self-cycle/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/SelfCycleB/properties/value",
+            "#/paths/~1self-cycle/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: Incompatible,
+        details: UnknownDifference,
+    },
+]
