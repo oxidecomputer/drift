@@ -195,16 +195,34 @@ impl Compare {
             new_schema.context().stack(),
         );
 
-        // Look up where this comparison sits in its lifecycle:
+        // Check if there are cycles or if this is a visit state cache hit:
         //
-        // - `Visiting`: the same key is in flight up the call stack -- the
-        //   schema graph has cycled back. Treat as compatible to break the
-        //   recursion; any genuine difference will be reported by the
-        //   in-flight expansion that put us here. We don't write to
-        //   `visit_state` on this branch: the in-flight visitor that put us
-        //   here will replace `Visiting` with `Completed` when it pops.
+        // - `Visiting`: the same key is being visited up the call stack, which
+        //   means we've encountered a cycle. Over here, we treat this as
+        //   compatible; if there are differences, they will be reported by the
+        //   in-flight comparison wherever the cycle originates.
+        //
+        //   Returning `true` on `Visiting` is sound only because the compare
+        //   methods call `schema_push_change` eagerly on detecting a change
+        //   rather than making decisions based on the value returned from this
+        //   function. If that weren't the case -- for example, if there were
+        //   code which did something like:
+        //
+        //   let inner_eq = self.compare_schema(...)?;
+        //   if !inner_eq {
+        //       self.schema_push_change(...);
+        //   }
+        //
+        //   Then, relying on `true` here would result in a false negative.
+        //   This invariant must be upheld by all compare methods.
+        //
+        //   We don't write to `visit_state` when we hit this branch.
+        //
         // - `Completed`: we've already compared this pair; reuse the result
         //   so we don't generate redundant notes.
+        //
+        // - Not present: we haven't seen this key before, so we need to
+        //   proceed with comparisons.
         match self.visit_state.get(&key) {
             Some(VisitState::Visiting) => return Ok(true),
             Some(VisitState::Completed { equal }) => return Ok(*equal),
@@ -274,8 +292,15 @@ impl Compare {
 
         let nullable_equal = old_nullable == new_nullable;
 
-        // Mark the key as in flight while we recurse; replace with the
-        // completed result on success.
+        // Mark the key as in flight while we recurse.
+        //
+        // If `compare_schema_kind` returns an error, the `?` below leaves the
+        // `Visiting` marker in place. This is benign today because `compare`
+        // propagates the error, and the entire `Compare` is dropped along with
+        // the marker. If we need to recover from this state in the future, we
+        // would most likely want to clear the stale `Visiting` entry -- if we
+        // don't do that, a re-entry for the same key would short-circuit to
+        // `Ok(true)`.
         self.visit_state.insert(key.clone(), VisitState::Visiting);
         let schema_equal = self.compare_schema_kind(
             comparison,
@@ -284,12 +309,8 @@ impl Compare {
             Contextual::new(new_schema.context().clone(), new_schema_kind),
         )?;
         let equal = nullable_equal && schema_equal;
-        self.visit_state.insert(
-            key,
-            VisitState::Completed {
-                equal: nullable_equal && schema_equal,
-            },
-        );
+        self.visit_state
+            .insert(key, VisitState::Completed { equal });
 
         Ok(equal)
     }

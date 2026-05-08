@@ -25,7 +25,7 @@
 //!
 //! Cycle detection is not the path stack's responsibility. It belongs at the
 //! comparison layer, keyed by the (old, new) schema pair currently being
-//! expanded -- see `compare::Compare::expanding`.
+//! expanded -- see `compare::Compare::visit_state`.
 
 use std::fmt;
 
