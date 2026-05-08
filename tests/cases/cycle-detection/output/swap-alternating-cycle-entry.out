@@ -1,0 +1,46 @@
+--- swap-alternating-cycle-entry.json
++++ patched
+@@
+             "content": {
+               "application/json": {
+                 "schema": {
+-                  "$ref": "#/components/schemas/AltX"
++                  "$ref": "#/components/schemas/AltY"
+                 }
+               }
+             },
+
+
+Result for patch:
+[
+    Change {
+        message: "schema metadata changed",
+        old_path: [
+            "#/components/schemas/AltX",
+            "#/paths/~1alternating-cycle/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/AltY",
+            "#/paths/~1alternating-cycle/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: Trivial,
+        details: Metadata,
+    },
+    Change {
+        message: "schema metadata changed",
+        old_path: [
+            "#/components/schemas/AltY",
+            "#/components/schemas/AltX/properties/next/$ref",
+            "#/paths/~1alternating-cycle/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/AltX",
+            "#/components/schemas/AltY/properties/next/$ref",
+            "#/paths/~1alternating-cycle/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: Trivial,
+        details: Metadata,
+    },
+]
