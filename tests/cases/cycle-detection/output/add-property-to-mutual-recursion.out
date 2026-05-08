@@ -1,0 +1,33 @@
+--- add-property-to-mutual-recursion.json
++++ patched
+@@
+       "Person": {
+         "description": "A person who works at a company.",
+         "properties": {
++          "age": {
++            "type": "integer"
++          },
+           "employer": {
+             "$ref": "#/components/schemas/Company"
+           },
+
+
+Result for patch:
+[
+    Change {
+        message: "object properties changed",
+        old_path: [
+            "#/components/schemas/Person",
+            "#/components/schemas/Company/properties/ceo/$ref",
+            "#/paths/~1companies/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        new_path: [
+            "#/components/schemas/Person",
+            "#/components/schemas/Company/properties/ceo/$ref",
+            "#/paths/~1companies/get/responses/200/content/application~1json/schema/$ref",
+        ],
+        comparison: Output,
+        class: Unhandled,
+        details: UnknownDifference,
+    },
+]
