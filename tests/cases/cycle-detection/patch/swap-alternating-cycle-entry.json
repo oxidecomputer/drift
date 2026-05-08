@@ -1,0 +1,7 @@
+[
+  {
+    "op": "replace",
+    "path": "/paths/~1alternating-cycle/get/responses/200/content/application~1json/schema/$ref",
+    "value": "#/components/schemas/AltY"
+  }
+]

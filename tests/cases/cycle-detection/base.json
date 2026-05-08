@@ -124,6 +124,23 @@
           }
         }
       }
+    },
+    "/alternating-cycle": {
+      "get": {
+        "operationId": "get_alternating_cycle",
+        "responses": {
+          "200": {
+            "description": "Mutual cycle AltX <-> AltY. Swapping the entry from AltX to AltY makes old-side traversal walk AltX -> AltY -> AltX -> ... while new-side walks AltY -> AltX -> AltY -> ..., exercising the alternating (A,B)/(B,A) pair-keyed traversal.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AltX"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -278,6 +295,24 @@
           },
           "next": {
             "$ref": "#/components/schemas/SelfCycleB"
+          }
+        }
+      },
+      "AltX": {
+        "description": "Mutual cycle pair, side X. Structurally identical to AltY (object whose `next` refers to the partner); distinguishable only by name and this description.",
+        "type": "object",
+        "properties": {
+          "next": {
+            "$ref": "#/components/schemas/AltY"
+          }
+        }
+      },
+      "AltY": {
+        "description": "Mutual cycle pair, side Y. Structurally identical to AltX (object whose `next` refers to the partner); distinguishable only by name and this description.",
+        "type": "object",
+        "properties": {
+          "next": {
+            "$ref": "#/components/schemas/AltX"
           }
         }
       }
