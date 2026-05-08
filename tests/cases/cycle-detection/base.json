@@ -90,6 +90,40 @@
           }
         }
       }
+    },
+    "/direct-loop": {
+      "get": {
+        "operationId": "get_direct_loop",
+        "responses": {
+          "200": {
+            "description": "Direct self-cycle; patches may replace this with an unrolled cycle through an intermediate schema",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DirectLoop"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/self-cycle": {
+      "get": {
+        "operationId": "get_self_cycle",
+        "responses": {
+          "200": {
+            "description": "Self-cycle through SelfCycleA; patches may replace this with SelfCycleB to exercise pair-keyed cycle detection across different-named tops",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SelfCycleA"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -208,6 +242,42 @@
                 "$ref": "#/components/schemas/Wrapper"
               }
             ]
+          }
+        }
+      },
+      "DirectLoop": {
+        "description": "Direct self-cycle for the asymmetric-unroll test.",
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "next": {
+            "$ref": "#/components/schemas/DirectLoop"
+          }
+        }
+      },
+      "SelfCycleA": {
+        "description": "Self-recursive schema A; paired with SelfCycleB to test pair-keyed cycle detection across different-named tops.",
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "next": {
+            "$ref": "#/components/schemas/SelfCycleA"
+          }
+        }
+      },
+      "SelfCycleB": {
+        "description": "Self-recursive schema B; structurally similar to SelfCycleA but distinct so a swap exercises (A, B) pair traversal.",
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "next": {
+            "$ref": "#/components/schemas/SelfCycleB"
           }
         }
       }
