@@ -2,12 +2,15 @@
 
 use std::fmt;
 
-use openapiv3::{AdditionalProperties, ArrayType, ObjectType, ReferenceOr, Schema, SchemaData};
+use openapiv3::{
+    AdditionalProperties, ArrayType, ObjectType, ReferenceOr, Schema, SchemaData, SchemaKind,
+};
 
 use crate::{
     ChangeClass, ChangeComparison, ChangeDetails,
-    compare::{Compare, VisitedKey},
-    context::{Contextual, ToContext},
+    compare::{Compare, VisitState, VisitedKey},
+    context::{Context, Contextual, ToContext},
+    resolve::ReferenceOrResolver,
     setops::SetCompare,
 };
 
@@ -186,25 +189,44 @@ impl Compare {
         old_schema: Contextual<'_, &Schema>,
         new_schema: Contextual<'_, &Schema>,
     ) -> anyhow::Result<bool> {
-        // We wait for both new and old to contain a cycle; this ensures that
-        // we consider "unrolled" cycles properly. There is a possibility of
-        // getting stuck in an A->B->A / B->A->B cycle... we can address that
-        // should that construction arise.
-        if old_schema.context().stack().contains_cycle()
-            && new_schema.context().stack().contains_cycle()
-        {
-            return Ok(true);
-        }
-
-        // Return the cached compatibility of these schemas so that we don't
-        // generate redundant notes.
         let key = VisitedKey::new(
             comparison,
             old_schema.context().stack(),
             new_schema.context().stack(),
         );
-        if let Some(equal) = self.visited.get(&key) {
-            return Ok(*equal);
+
+        // Check if there are cycles or if this is a visit state cache hit:
+        //
+        // - `Visiting`: the same key is being visited up the call stack, which
+        //   means we've encountered a cycle. Over here, we treat this as
+        //   compatible; if there are differences, they will be reported by the
+        //   in-flight comparison wherever the cycle originates.
+        //
+        //   Returning `true` on `Visiting` is sound only because the compare
+        //   methods call `schema_push_change` eagerly on detecting a change
+        //   rather than making decisions based on the value returned from this
+        //   function. If that weren't the case -- for example, if there were
+        //   code which did something like:
+        //
+        //   let inner_eq = self.compare_schema(...)?;
+        //   if !inner_eq {
+        //       self.schema_push_change(...);
+        //   }
+        //
+        //   Then, relying on `true` here would result in a false negative.
+        //   This invariant must be upheld by all compare methods.
+        //
+        //   We don't write to `visit_state` when we hit this branch.
+        //
+        // - `Completed`: we've already compared this pair; reuse the result
+        //   so we don't generate redundant notes.
+        //
+        // - Not present: we haven't seen this key before, so we need to
+        //   proceed with comparisons.
+        match self.visit_state.get(&key) {
+            Some(VisitState::Visiting) => return Ok(true),
+            Some(VisitState::Completed { equal }) => return Ok(*equal),
+            None => {}
         }
 
         // We expand structures to ensure we don't accidentally fail to examine
@@ -269,46 +291,55 @@ impl Compare {
         }
 
         let nullable_equal = old_nullable == new_nullable;
+
+        // Mark the key as in flight while we recurse.
+        //
+        // If `compare_schema_kind` returns an error, the `?` below leaves the
+        // `Visiting` marker in place. This is benign today because `compare`
+        // propagates the error, and the entire `Compare` is dropped along with
+        // the marker. If we need to recover from this state in the future, we
+        // would most likely want to clear the stale `Visiting` entry -- if we
+        // don't do that, a re-entry for the same key would short-circuit to
+        // `Ok(true)`.
+        self.visit_state.insert(key.clone(), VisitState::Visiting);
         let schema_equal = self.compare_schema_kind(
             comparison,
             dry_run,
             Contextual::new(old_schema.context().clone(), old_schema_kind),
             Contextual::new(new_schema.context().clone(), new_schema_kind),
         )?;
+        let equal = nullable_equal && schema_equal;
+        self.visit_state
+            .insert(key, VisitState::Completed { equal });
 
-        // Cache the result.
-        self.visited.insert(key, nullable_equal && schema_equal);
-
-        Ok(nullable_equal && schema_equal)
+        Ok(equal)
     }
 
     pub(crate) fn compare_schema_kind(
         &mut self,
         comparison: SchemaComparison,
         dry_run: bool,
-        old_schema_kind: Contextual<'_, &openapiv3::SchemaKind>,
-        new_schema_kind: Contextual<'_, &openapiv3::SchemaKind>,
+        old_schema_kind: Contextual<'_, &SchemaKind>,
+        new_schema_kind: Contextual<'_, &SchemaKind>,
     ) -> anyhow::Result<bool> {
         match (old_schema_kind.as_ref(), new_schema_kind.as_ref()) {
-            (&openapiv3::SchemaKind::Type(old_type), &openapiv3::SchemaKind::Type(new_type)) => {
-                self.compare_schema_type(
-                    comparison,
-                    dry_run,
-                    old_schema_kind.subcomponent(old_type),
-                    new_schema_kind.subcomponent(new_type),
-                )
-            }
+            (&SchemaKind::Type(old_type), &SchemaKind::Type(new_type)) => self.compare_schema_type(
+                comparison,
+                dry_run,
+                old_schema_kind.subcomponent(old_type),
+                new_schema_kind.subcomponent(new_type),
+            ),
             (
-                openapiv3::SchemaKind::OneOf { one_of: old_one_of },
-                openapiv3::SchemaKind::OneOf { one_of: new_one_of },
+                SchemaKind::OneOf { one_of: old_one_of },
+                SchemaKind::OneOf { one_of: new_one_of },
             ) => {
                 let old_one_of = old_schema_kind.append_deref(old_one_of, "oneOf");
                 let new_one_of = new_schema_kind.append_deref(new_one_of, "oneOf");
                 self.compare_schema_type_one_of(comparison, dry_run, old_one_of, new_one_of)
             }
             (
-                openapiv3::SchemaKind::AllOf { all_of: old_all_of },
-                openapiv3::SchemaKind::AllOf { all_of: new_all_of },
+                SchemaKind::AllOf { all_of: old_all_of },
+                SchemaKind::AllOf { all_of: new_all_of },
             ) => {
                 let old_all_of = old_schema_kind.append_deref(old_all_of, "allOf");
                 let new_all_of = new_schema_kind.append_deref(new_all_of, "allOf");
@@ -316,8 +347,8 @@ impl Compare {
             }
 
             (
-                openapiv3::SchemaKind::AnyOf { any_of: old_any_of },
-                openapiv3::SchemaKind::AnyOf { any_of: new_any_of },
+                SchemaKind::AnyOf { any_of: old_any_of },
+                SchemaKind::AnyOf { any_of: new_any_of },
             ) => {
                 if old_any_of != new_any_of {
                     self.schema_push_change(
@@ -333,15 +364,12 @@ impl Compare {
                     Ok(true)
                 }
             }
-            (
-                openapiv3::SchemaKind::Not { not: old_not },
-                openapiv3::SchemaKind::Not { not: new_not },
-            ) => {
+            (SchemaKind::Not { not: old_not }, SchemaKind::Not { not: new_not }) => {
                 let old_not = old_schema_kind.append_deref(old_not.as_ref(), "not");
                 let new_not = new_schema_kind.append_deref(new_not.as_ref(), "not");
                 self.compare_schema_ref_helper(dry_run, comparison, old_not, new_not)
             }
-            (&openapiv3::SchemaKind::Any(old_any), &openapiv3::SchemaKind::Any(new_any)) => {
+            (&SchemaKind::Any(old_any), &SchemaKind::Any(new_any)) => {
                 if old_any == new_any {
                     Ok(true)
                 } else {
@@ -357,6 +385,37 @@ impl Compare {
                 }
             }
             _ => {
+                // Consider the case where both old and new are -- effectively
+                // -- an enum of values. This might be an enum (with or without
+                // a type), or a oneOf where each subschema is an enum (again,
+                // with or without a type).
+                if let (Some(old_enum), Some(new_enum)) = (
+                    extract_enum_values(old_schema_kind.context(), old_schema_kind.as_ref()),
+                    extract_enum_values(new_schema_kind.context(), new_schema_kind.as_ref()),
+                ) {
+                    // We don't care about the order of enumerated values; yes,
+                    // this is an inefficient way to check, but with
+                    // serde_json::Value not implementing Hash or Ord... meh.
+                    if old_enum.len() == new_enum.len()
+                        && old_enum.iter().all(|v| new_enum.contains(v))
+                    {
+                        let old_tag = SchemaKindTag::new(&old_schema_kind);
+                        let new_tag = SchemaKindTag::new(&new_schema_kind);
+                        return self.schema_push_change(
+                            dry_run,
+                            format!(
+                                "schema kind changed from {} to {} with equivalent enum values",
+                                old_tag, new_tag
+                            ),
+                            &old_schema_kind,
+                            &new_schema_kind,
+                            comparison,
+                            ChangeClass::Trivial,
+                            ChangeDetails::Metadata,
+                        );
+                    }
+                }
+
                 let old_tag = SchemaKindTag::new(&old_schema_kind);
                 let new_tag = SchemaKindTag::new(&new_schema_kind);
                 self.schema_push_change(
@@ -727,9 +786,6 @@ impl Compare {
         Ok(ret)
     }
 
-    // NOTE: Single-element allOf schemas are flattened by `try_compare_flattened`
-    // before reaching this function. Multi-element allOf would require semantic
-    // merging for proper comparison, so we just do an equality check.
     fn compare_schema_type_all_of(
         &mut self,
         comparison: SchemaComparison,
@@ -737,18 +793,42 @@ impl Compare {
         old_all_of: Contextual<'_, &Vec<ReferenceOr<Schema>>>,
         new_all_of: Contextual<'_, &Vec<ReferenceOr<Schema>>>,
     ) -> anyhow::Result<bool> {
-        if old_all_of.as_ref() != new_all_of.as_ref() {
+        let old_schemas = old_all_of.as_ref();
+        let new_schemas = new_all_of.as_ref();
+        if old_schemas.len() != new_schemas.len() {
+            return self.schema_push_change(
+                dry_run,
+                "allOf schema count changed",
+                &old_all_of,
+                &new_all_of,
+                comparison,
+                ChangeClass::Unhandled,
+                ChangeDetails::UnknownDifference,
+            );
+        }
+
+        if old_schemas.len() == 1 {
+            let old_single_schema = old_all_of.append_deref(old_all_of.first().unwrap(), "0");
+            let new_single_schema = new_all_of.append_deref(new_all_of.first().unwrap(), "0");
+
+            self.compare_schema_ref_helper(
+                dry_run,
+                comparison,
+                old_single_schema,
+                new_single_schema,
+            )
+        } else if old_schemas == new_schemas {
+            Ok(true)
+        } else {
             self.schema_push_change(
                 dry_run,
-                "unhandled, 'allOf' schema",
+                "allOf with multiple schemas is unhandled",
                 &old_all_of,
                 &new_all_of,
                 comparison,
                 ChangeClass::Unhandled,
                 ChangeDetails::UnknownDifference,
             )
-        } else {
-            Ok(true)
         }
     }
 
@@ -794,19 +874,20 @@ impl fmt::Display for SchemaKindTag {
 }
 
 impl SchemaKindTag {
-    fn new(kind: &openapiv3::SchemaKind) -> Self {
+    fn new(kind: &SchemaKind) -> Self {
         match kind {
-            openapiv3::SchemaKind::Type(_) => Self::Type,
-            openapiv3::SchemaKind::OneOf { .. } => Self::OneOf,
-            openapiv3::SchemaKind::AllOf { .. } => Self::AllOf,
-            openapiv3::SchemaKind::AnyOf { .. } => Self::AnyOf,
-            openapiv3::SchemaKind::Not { .. } => Self::Not,
-            openapiv3::SchemaKind::Any { .. } => Self::Any,
+            SchemaKind::Type(_) => Self::Type,
+            SchemaKind::OneOf { .. } => Self::OneOf,
+            SchemaKind::AllOf { .. } => Self::AllOf,
+            SchemaKind::AnyOf { .. } => Self::AnyOf,
+            SchemaKind::Not { .. } => Self::Not,
+            SchemaKind::Any { .. } => Self::Any,
         }
     }
 }
 
 /// Classification of a schema reference for flattening purposes.
+#[derive(Debug)]
 enum SchemaRefKind<'a> {
     /// A bare $ref.
     BareRef,
@@ -831,31 +912,25 @@ fn classify_schema_ref(schema_ref: &ReferenceOr<Schema>) -> SchemaRefKind<'_> {
     match schema_ref {
         ReferenceOr::Reference { .. } => SchemaRefKind::BareRef,
         ReferenceOr::Item(schema) => match &schema.schema_kind {
-            openapiv3::SchemaKind::Type(_)
-            | openapiv3::SchemaKind::Not { .. }
-            | openapiv3::SchemaKind::Any(_) => SchemaRefKind::InlineType,
-            openapiv3::SchemaKind::AllOf { all_of } if all_of.len() == 1 => {
-                SchemaRefKind::SingleElement {
-                    inner: all_of.first().unwrap(),
-                    metadata: &schema.schema_data,
-                }
+            SchemaKind::Type(_) | SchemaKind::Not { .. } | SchemaKind::Any(_) => {
+                SchemaRefKind::InlineType
             }
-            openapiv3::SchemaKind::AnyOf { any_of } if any_of.len() == 1 => {
-                SchemaRefKind::SingleElement {
-                    inner: any_of.first().unwrap(),
-                    metadata: &schema.schema_data,
-                }
-            }
-            openapiv3::SchemaKind::OneOf { one_of } if one_of.len() == 1 => {
-                SchemaRefKind::SingleElement {
-                    inner: one_of.first().unwrap(),
-                    metadata: &schema.schema_data,
-                }
-            }
+            SchemaKind::AllOf { all_of } if all_of.len() == 1 => SchemaRefKind::SingleElement {
+                inner: all_of.first().unwrap(),
+                metadata: &schema.schema_data,
+            },
+            SchemaKind::AnyOf { any_of } if any_of.len() == 1 => SchemaRefKind::SingleElement {
+                inner: any_of.first().unwrap(),
+                metadata: &schema.schema_data,
+            },
+            SchemaKind::OneOf { one_of } if one_of.len() == 1 => SchemaRefKind::SingleElement {
+                inner: one_of.first().unwrap(),
+                metadata: &schema.schema_data,
+            },
             // Multi-element wrappers - not semantically equivalent to single schemas.
-            openapiv3::SchemaKind::AllOf { .. }
-            | openapiv3::SchemaKind::AnyOf { .. }
-            | openapiv3::SchemaKind::OneOf { .. } => SchemaRefKind::MultiElement,
+            SchemaKind::AllOf { .. } | SchemaKind::AnyOf { .. } | SchemaKind::OneOf { .. } => {
+                SchemaRefKind::MultiElement
+            }
         },
     }
 }
@@ -864,4 +939,72 @@ fn classify_schema_ref(schema_ref: &ReferenceOr<Schema>) -> SchemaRefKind<'_> {
 /// metadata worth preserving.
 fn has_meaningful_metadata(data: &SchemaData) -> bool {
     *data != SchemaData::default()
+}
+
+/// For a schema that is **exclusively** enumerated values, this returns a Some
+/// of those enumerated values. Note that this will never return Some of an
+/// empty Vec--there must always be at least a single enumerated value.
+fn extract_enum_values(context: &Context<'_>, kind: &SchemaKind) -> Option<Vec<serde_json::Value>> {
+    match kind {
+        // For untyped schemas, we can use the enum field as-is.
+        SchemaKind::Any(any) if !any.enumeration.is_empty() => Some(any.enumeration.clone()),
+
+        // For typed schemas, convert them to Values of the appropriate type.
+        SchemaKind::Type(openapiv3::Type::String(s)) if !s.enumeration.is_empty() => Some(
+            s.enumeration
+                .iter()
+                .map(|v| match v {
+                    Some(s) => serde_json::Value::String(s.clone()),
+                    None => serde_json::Value::Null,
+                })
+                .collect(),
+        ),
+        SchemaKind::Type(openapiv3::Type::Integer(i)) if !i.enumeration.is_empty() => Some(
+            i.enumeration
+                .iter()
+                .map(|v| match v {
+                    Some(n) => serde_json::Value::Number((*n).into()),
+                    None => serde_json::Value::Null,
+                })
+                .collect(),
+        ),
+        SchemaKind::Type(openapiv3::Type::Number(n)) if !n.enumeration.is_empty() => Some(
+            n.enumeration
+                .iter()
+                .map(|v| match v {
+                    Some(f) => serde_json::Number::from_f64(*f)
+                        .map(serde_json::Value::Number)
+                        .unwrap_or(serde_json::Value::Null),
+                    None => serde_json::Value::Null,
+                })
+                .collect(),
+        ),
+        SchemaKind::Type(openapiv3::Type::Boolean(b)) if !b.enumeration.is_empty() => Some(
+            b.enumeration
+                .iter()
+                .map(|v| match v {
+                    Some(b) => serde_json::Value::Bool(*b),
+                    None => serde_json::Value::Null,
+                })
+                .collect(),
+        ),
+
+        // A oneOf may be composed exclusively of enums in which case we can
+        // flatten them into a single collection. A oneOf isn't supposed to be
+        // empty... but we'll still check.
+        SchemaKind::OneOf { one_of } if !one_of.is_empty() => Some(
+            one_of
+                .iter()
+                .map(|schema_ref| {
+                    let (schema, _) = schema_ref.resolve(context).ok()?;
+                    extract_enum_values(context, &schema.schema_kind)
+                })
+                .collect::<Option<Vec<_>>>()?
+                .into_iter()
+                .flatten()
+                .collect(),
+        ),
+
+        _ => None,
+    }
 }

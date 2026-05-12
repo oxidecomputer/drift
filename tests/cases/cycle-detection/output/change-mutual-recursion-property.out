@@ -1,0 +1,42 @@
+--- change-mutual-recursion-property.json
++++ patched
+@@
+             "$ref": "#/components/schemas/Company"
+           },
+           "name": {
+-            "type": "string"
++            "type": "integer"
+           }
+         },
+         "required": [
+
+
+Result for patch:
+[
+    Change {
+        paths: [
+            ChangePath {
+                old: [
+                    "#/components/schemas/Person/properties/name",
+                    "#/components/schemas/Company/properties/ceo/$ref",
+                    "#/paths/~1companies/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                new: [
+                    "#/components/schemas/Person/properties/name",
+                    "#/components/schemas/Company/properties/ceo/$ref",
+                    "#/paths/~1companies/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                comparison: Output,
+            },
+        ],
+        changes: [
+            ChangeInfo {
+                old_subpath: "",
+                new_subpath: "",
+                message: "schema types changed",
+                class: Incompatible,
+                details: UnknownDifference,
+            },
+        ],
+    },
+]

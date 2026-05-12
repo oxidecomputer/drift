@@ -1,0 +1,73 @@
+--- swap-different-named-cycle.json
++++ patched
+@@
+             "$ref": "#/components/schemas/SelfCycleB"
+           },
+           "value": {
+-            "type": "string"
++            "type": "integer"
+           }
+         },
+         "type": "object"
+@@
+             "content": {
+               "application/json": {
+                 "schema": {
+-                  "$ref": "#/components/schemas/SelfCycleA"
++                  "$ref": "#/components/schemas/SelfCycleB"
+                 }
+               }
+             },
+
+
+Result for patch:
+[
+    Change {
+        paths: [
+            ChangePath {
+                old: [
+                    "#/components/schemas/SelfCycleA",
+                    "#/paths/~1self-cycle/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                new: [
+                    "#/components/schemas/SelfCycleB",
+                    "#/paths/~1self-cycle/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                comparison: Output,
+            },
+        ],
+        changes: [
+            ChangeInfo {
+                old_subpath: "",
+                new_subpath: "",
+                message: "schema metadata changed",
+                class: Trivial,
+                details: Metadata,
+            },
+        ],
+    },
+    Change {
+        paths: [
+            ChangePath {
+                old: [
+                    "#/components/schemas/SelfCycleA/properties/value",
+                    "#/paths/~1self-cycle/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                new: [
+                    "#/components/schemas/SelfCycleB/properties/value",
+                    "#/paths/~1self-cycle/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                comparison: Output,
+            },
+        ],
+        changes: [
+            ChangeInfo {
+                old_subpath: "",
+                new_subpath: "",
+                message: "schema types changed",
+                class: Incompatible,
+                details: UnknownDifference,
+            },
+        ],
+    },
+]

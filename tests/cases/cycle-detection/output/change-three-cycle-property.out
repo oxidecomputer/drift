@@ -1,0 +1,42 @@
+--- change-three-cycle-property.json
++++ patched
+@@
+         "description": "Second node of a three-way cycle.",
+         "properties": {
+           "label": {
+-            "type": "string"
++            "type": "integer"
+           },
+           "next": {
+             "$ref": "#/components/schemas/NodeC"
+
+
+Result for patch:
+[
+    Change {
+        paths: [
+            ChangePath {
+                old: [
+                    "#/components/schemas/NodeB/properties/label",
+                    "#/components/schemas/NodeA/properties/next/$ref",
+                    "#/paths/~1three-cycle/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                new: [
+                    "#/components/schemas/NodeB/properties/label",
+                    "#/components/schemas/NodeA/properties/next/$ref",
+                    "#/paths/~1three-cycle/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                comparison: Output,
+            },
+        ],
+        changes: [
+            ChangeInfo {
+                old_subpath: "",
+                new_subpath: "",
+                message: "schema types changed",
+                class: Incompatible,
+                details: UnknownDifference,
+            },
+        ],
+    },
+]
