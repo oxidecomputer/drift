@@ -3,6 +3,8 @@
 <!-- next-header -->
 ## Unreleased - ReleaseDate
 
+## [0.2.0] - 2026-05-12
+
 ### Added
 
 - Drift now returns every endpoint (and corresponding path) from which a particular changed type is accessible, not just the first.
@@ -37,6 +39,7 @@ Fixed a few missing cases:
 Initial release.
 
 <!-- next-url -->
+[0.2.0]: https://github.com/oxidecomputer/drift/releases/tag/drift-0.2.0
 [0.1.3]: https://github.com/oxidecomputer/drift/releases/tag/drift-0.1.3
 [0.1.2]: https://github.com/oxidecomputer/drift/releases/tag/drift-0.1.2
 [0.1.1]: https://github.com/oxidecomputer/drift/releases/tag/drift-0.1.1
