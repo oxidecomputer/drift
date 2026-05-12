@@ -1,0 +1,9 @@
+[
+  {
+    "op": "add",
+    "path": "/components/schemas/Person/properties/age",
+    "value": {
+      "type": "integer"
+    }
+  }
+]

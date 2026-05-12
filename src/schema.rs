@@ -189,10 +189,6 @@ impl Compare {
         old_schema: Contextual<'_, &Schema>,
         new_schema: Contextual<'_, &Schema>,
     ) -> anyhow::Result<bool> {
-        // We wait for both new and old to contain a cycle; this ensures that
-        // we consider "unrolled" cycles properly. There is a possibility of
-        // getting stuck in an A->B->A / B->A->B cycle... we can address that
-        // should that construction arise.
         if old_schema.context().stack().contains_cycle()
             && new_schema.context().stack().contains_cycle()
         {
