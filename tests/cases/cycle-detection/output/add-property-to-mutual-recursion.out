@@ -15,19 +15,29 @@
 Result for patch:
 [
     Change {
-        message: "object properties changed",
-        old_path: [
-            "#/components/schemas/Person",
-            "#/components/schemas/Company/properties/ceo/$ref",
-            "#/paths/~1companies/get/responses/200/content/application~1json/schema/$ref",
+        paths: [
+            ChangePath {
+                old: [
+                    "#/components/schemas/Person",
+                    "#/components/schemas/Company/properties/ceo/$ref",
+                    "#/paths/~1companies/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                new: [
+                    "#/components/schemas/Person",
+                    "#/components/schemas/Company/properties/ceo/$ref",
+                    "#/paths/~1companies/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                comparison: Output,
+            },
         ],
-        new_path: [
-            "#/components/schemas/Person",
-            "#/components/schemas/Company/properties/ceo/$ref",
-            "#/paths/~1companies/get/responses/200/content/application~1json/schema/$ref",
+        changes: [
+            ChangeInfo {
+                old_subpath: "",
+                new_subpath: "",
+                message: "object properties changed",
+                class: Unhandled,
+                details: UnknownDifference,
+            },
         ],
-        comparison: Output,
-        class: Unhandled,
-        details: UnknownDifference,
     },
 ]

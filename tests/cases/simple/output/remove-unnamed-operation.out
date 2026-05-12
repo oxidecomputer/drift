@@ -22,15 +22,25 @@
 Result for patch:
 [
     Change {
-        message: "The operation <unnamed> was removed",
-        old_path: [
-            "#/paths/~1unnamed/get",
+        paths: [
+            ChangePath {
+                old: [
+                    "#/paths/~1unnamed/get",
+                ],
+                new: [
+                    "#/paths",
+                ],
+                comparison: Structural,
+            },
         ],
-        new_path: [
-            "#/paths",
+        changes: [
+            ChangeInfo {
+                old_subpath: "",
+                new_subpath: "",
+                message: "The operation <unnamed> was removed",
+                class: BackwardIncompatible,
+                details: Removed,
+            },
         ],
-        comparison: Structural,
-        class: BackwardIncompatible,
-        details: Removed,
     },
 ]

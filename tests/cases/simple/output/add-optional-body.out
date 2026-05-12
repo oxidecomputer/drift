@@ -27,15 +27,25 @@
 Result for patch:
 [
     Change {
-        message: "no body parameter was specified and now one is accepted",
-        old_path: [
-            "#/paths/~1no-body/post",
+        paths: [
+            ChangePath {
+                old: [
+                    "#/paths/~1no-body/post",
+                ],
+                new: [
+                    "#/paths/~1no-body/post",
+                ],
+                comparison: Input,
+            },
         ],
-        new_path: [
-            "#/paths/~1no-body/post",
+        changes: [
+            ChangeInfo {
+                old_subpath: "",
+                new_subpath: "",
+                message: "no body parameter was specified and now one is accepted",
+                class: ForwardIncompatible,
+                details: Added,
+            },
         ],
-        comparison: Input,
-        class: ForwardIncompatible,
-        details: Added,
     },
 ]

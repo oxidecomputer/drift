@@ -29,33 +29,53 @@
 Result for patch:
 [
     Change {
-        message: "schema metadata removed",
-        old_path: [
-            "#/components/schemas/GreetingResponse/properties/via_allof",
-            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        paths: [
+            ChangePath {
+                old: [
+                    "#/components/schemas/GreetingResponse/properties/via_allof",
+                    "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                new: [
+                    "#/components/schemas/GreetingResponse/properties/via_allof",
+                    "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                comparison: Output,
+            },
         ],
-        new_path: [
-            "#/components/schemas/GreetingResponse/properties/via_allof",
-            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        changes: [
+            ChangeInfo {
+                old_subpath: "",
+                new_subpath: "",
+                message: "schema metadata removed",
+                class: Trivial,
+                details: Metadata,
+            },
         ],
-        comparison: Output,
-        class: Trivial,
-        details: Metadata,
     },
     Change {
-        message: "object properties changed",
-        old_path: [
-            "#/components/schemas/SubType",
-            "#/components/schemas/GreetingResponse/properties/via_allof/0/$ref",
-            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        paths: [
+            ChangePath {
+                old: [
+                    "#/components/schemas/SubType",
+                    "#/components/schemas/GreetingResponse/properties/via_allof/0/$ref",
+                    "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                new: [
+                    "#/components/schemas/SubType",
+                    "#/components/schemas/GreetingResponse/properties/via_allof/$ref",
+                    "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                comparison: Output,
+            },
         ],
-        new_path: [
-            "#/components/schemas/SubType",
-            "#/components/schemas/GreetingResponse/properties/via_allof/$ref",
-            "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+        changes: [
+            ChangeInfo {
+                old_subpath: "",
+                new_subpath: "",
+                message: "object properties changed",
+                class: Unhandled,
+                details: UnknownDifference,
+            },
         ],
-        comparison: Output,
-        class: Unhandled,
-        details: UnknownDifference,
     },
 ]

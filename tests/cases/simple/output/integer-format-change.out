@@ -13,17 +13,27 @@
 Result for patch:
 [
     Change {
-        message: "integer schema changed",
-        old_path: [
-            "#/components/schemas/TypedProperties/properties/count",
-            "#/paths/~1typed/get/responses/200/content/application~1json/schema/$ref",
+        paths: [
+            ChangePath {
+                old: [
+                    "#/components/schemas/TypedProperties/properties/count",
+                    "#/paths/~1typed/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                new: [
+                    "#/components/schemas/TypedProperties/properties/count",
+                    "#/paths/~1typed/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                comparison: Output,
+            },
         ],
-        new_path: [
-            "#/components/schemas/TypedProperties/properties/count",
-            "#/paths/~1typed/get/responses/200/content/application~1json/schema/$ref",
+        changes: [
+            ChangeInfo {
+                old_subpath: "",
+                new_subpath: "",
+                message: "integer schema changed",
+                class: Unhandled,
+                details: UnknownDifference,
+            },
         ],
-        comparison: Output,
-        class: Unhandled,
-        details: UnknownDifference,
     },
 ]

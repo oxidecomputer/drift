@@ -22,15 +22,25 @@
 Result for patch:
 [
     Change {
-        message: "The operation <unnamed> was added",
-        old_path: [
-            "#/paths",
+        paths: [
+            ChangePath {
+                old: [
+                    "#/paths",
+                ],
+                new: [
+                    "#/paths/~1foo/get",
+                ],
+                comparison: Structural,
+            },
         ],
-        new_path: [
-            "#/paths/~1foo/get",
+        changes: [
+            ChangeInfo {
+                old_subpath: "",
+                new_subpath: "",
+                message: "The operation <unnamed> was added",
+                class: ForwardIncompatible,
+                details: Added,
+            },
         ],
-        comparison: Structural,
-        class: ForwardIncompatible,
-        details: Added,
     },
 ]

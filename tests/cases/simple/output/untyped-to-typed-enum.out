@@ -15,19 +15,29 @@
 Result for patch:
 [
     Change {
-        message: "schema kind changed from any to regular type with equivalent enum values",
-        old_path: [
-            "#/components/schemas/ItemKind",
-            "#/components/schemas/CreateItem/properties/kind/$ref",
-            "#/paths/~1items/post/request_body/content/application~1json/schema/$ref",
+        paths: [
+            ChangePath {
+                old: [
+                    "#/components/schemas/ItemKind",
+                    "#/components/schemas/CreateItem/properties/kind/$ref",
+                    "#/paths/~1items/post/request_body/content/application~1json/schema/$ref",
+                ],
+                new: [
+                    "#/components/schemas/ItemKind",
+                    "#/components/schemas/CreateItem/properties/kind/$ref",
+                    "#/paths/~1items/post/request_body/content/application~1json/schema/$ref",
+                ],
+                comparison: Input,
+            },
         ],
-        new_path: [
-            "#/components/schemas/ItemKind",
-            "#/components/schemas/CreateItem/properties/kind/$ref",
-            "#/paths/~1items/post/request_body/content/application~1json/schema/$ref",
+        changes: [
+            ChangeInfo {
+                old_subpath: "",
+                new_subpath: "",
+                message: "schema kind changed from any to regular type with equivalent enum values",
+                class: Trivial,
+                details: Metadata,
+            },
         ],
-        comparison: Input,
-        class: Trivial,
-        details: Metadata,
     },
 ]

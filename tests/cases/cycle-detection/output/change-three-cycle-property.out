@@ -14,19 +14,29 @@
 Result for patch:
 [
     Change {
-        message: "schema types changed",
-        old_path: [
-            "#/components/schemas/NodeB/properties/label",
-            "#/components/schemas/NodeA/properties/next/$ref",
-            "#/paths/~1three-cycle/get/responses/200/content/application~1json/schema/$ref",
+        paths: [
+            ChangePath {
+                old: [
+                    "#/components/schemas/NodeB/properties/label",
+                    "#/components/schemas/NodeA/properties/next/$ref",
+                    "#/paths/~1three-cycle/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                new: [
+                    "#/components/schemas/NodeB/properties/label",
+                    "#/components/schemas/NodeA/properties/next/$ref",
+                    "#/paths/~1three-cycle/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                comparison: Output,
+            },
         ],
-        new_path: [
-            "#/components/schemas/NodeB/properties/label",
-            "#/components/schemas/NodeA/properties/next/$ref",
-            "#/paths/~1three-cycle/get/responses/200/content/application~1json/schema/$ref",
+        changes: [
+            ChangeInfo {
+                old_subpath: "",
+                new_subpath: "",
+                message: "schema types changed",
+                class: Incompatible,
+                details: UnknownDifference,
+            },
         ],
-        comparison: Output,
-        class: Incompatible,
-        details: UnknownDifference,
     },
 ]

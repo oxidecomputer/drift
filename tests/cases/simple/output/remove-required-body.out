@@ -22,15 +22,25 @@
 Result for patch:
 [
     Change {
-        message: "a required body parameter was removed",
-        old_path: [
-            "#/paths/~1items/post",
+        paths: [
+            ChangePath {
+                old: [
+                    "#/paths/~1items/post",
+                ],
+                new: [
+                    "#/paths/~1items/post",
+                ],
+                comparison: Input,
+            },
         ],
-        new_path: [
-            "#/paths/~1items/post",
+        changes: [
+            ChangeInfo {
+                old_subpath: "",
+                new_subpath: "",
+                message: "a required body parameter was removed",
+                class: ForwardIncompatible,
+                details: Removed,
+            },
         ],
-        comparison: Input,
-        class: ForwardIncompatible,
-        details: Removed,
     },
 ]
