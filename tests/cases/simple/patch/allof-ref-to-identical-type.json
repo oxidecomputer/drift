@@ -1,0 +1,21 @@
+[
+  {
+    "op": "add",
+    "path": "/components/schemas/SubTypeV2",
+    "value": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/components/schemas/SubTypeClone/allOf/0",
+    "value": {
+      "$ref": "#/components/schemas/SubTypeV2"
+    }
+  }
+]

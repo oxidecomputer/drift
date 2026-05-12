@@ -1,0 +1,42 @@
+--- change-wrapped-cycle-property.json
++++ patched
+@@
+             ]
+           },
+           "value": {
+-            "type": "string"
++            "type": "integer"
+           }
+         },
+         "type": "object"
+
+
+Result for patch:
+[
+    Change {
+        paths: [
+            ChangePath {
+                old: [
+                    "#/components/schemas/Wrapped",
+                    "#/components/schemas/Wrapper/properties/child/0/$ref",
+                    "#/paths/~1wrapped-cycle/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                new: [
+                    "#/components/schemas/Wrapped",
+                    "#/components/schemas/Wrapper/properties/child/0/$ref",
+                    "#/paths/~1wrapped-cycle/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                comparison: Output,
+            },
+        ],
+        changes: [
+            ChangeInfo {
+                old_subpath: "properties/value",
+                new_subpath: "properties/value",
+                message: "schema types changed",
+                class: Incompatible,
+                details: UnknownDifference,
+            },
+        ],
+    },
+]

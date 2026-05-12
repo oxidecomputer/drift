@@ -106,6 +106,20 @@ impl VisitedKey {
     }
 }
 
+/// Lifecycle of a schema comparison, keyed by `VisitedKey` in
+/// [`Compare::visit_state`].
+#[derive(Clone, Debug)]
+pub(crate) enum VisitState {
+    /// Comparison is in progress somewhere up the call stack. Re-entering a
+    /// key in this state means the schema graph has a cycle.
+    Visiting,
+    /// Comparison has completed.
+    Completed {
+        /// Whether the two schemas were determined to be equal.
+        equal: bool,
+    },
+}
+
 /// Tracks all paths reaching a change location and detected changes within it.
 #[derive(Debug)]
 pub(crate) struct ChangeRecord {
@@ -125,36 +139,36 @@ pub(crate) struct ChangeRecord {
 ///
 /// This struct uses two maps with deliberately different keying strategies:
 ///
-/// - `visited` is keyed by **full path** (`current_pointer`), e.g.,
+/// - `visit_state` is keyed by **full path** (`current_pointer`), e.g.,
 ///   `(SubType/properties/value, SubType/properties/value)`. This memoizes
 ///   individual node comparisons: "have we already compared these exact
 ///   schema nodes?" Full paths are required because comparing a schema at
 ///   its root is a different operation from comparing one of its children.
-///   If `visited` used base paths, recursing into `SubType/properties/value`
-///   would find the entry for `SubType` and return early, silently skipping
-///   the entire subtree.
+///   If `visit_state` used base paths, recursing into
+///   `SubType/properties/value` would find the entry for `SubType` and
+///   return early, silently skipping the entire subtree.
 ///
-/// - `records` is keyed by **base path** (`base_and_subpath().0`), e.g.,
-///   `{SubType, SubType}`. This groups changes by the component or endpoint
-///   that owns them. A type change at `SubType/properties/value` belongs to
-///   the `SubType` change record alongside root-level metadata changes.
-///   Multiple `visited` entries (root + children) feed into a single
-///   `records` entry.
+/// - `records` is keyed by **base path** only, e.g., `{SubType, SubType}`.
+///   This groups changes by the component or endpoint that owns them. A
+///   type change at `SubType/properties/value` belongs to the `SubType`
+///   change record alongside root-level metadata changes. Multiple
+///   `visit_state` entries are collated into a single `records` entry.
 ///
-/// `visited` also includes the comparison direction (Input vs Output) because
-/// that changes compatibility: adding an optional field is backward-compatible
-/// for output but forward-incompatible for input. `records` omits direction; a
-/// single Change groups all changes to a schema regardless of direction, with
-/// the direction preserved in each ChangePath's `comparison` field.
+/// `visit_state` also includes the comparison direction (Input vs Output)
+/// because that changes compatibility: adding an optional field is
+/// backward-compatible for output but forward-incompatible for input.
+/// `records` omits direction; a single Change groups all changes to a schema
+/// regardless of direction, with the direction preserved in each
+/// ChangePath's `comparison` field.
 ///
 /// When a schema moves between `$ref` (out-of-line) and inline across
-/// versions, the full paths diverge, producing distinct `visited` entries
+/// versions, the full paths diverge, producing distinct `visit_state` entries
 /// and potentially distinct `records` entries. See the comment in
 /// `compare_schema` and the `ref-vs-inline-type-change` test for details.
 #[derive(Default)]
 pub(crate) struct Compare {
-    /// Memoization of schema comparison results, keyed by full path pair.
-    pub(crate) visited: BTreeMap<VisitedKey, bool>,
+    /// State of every schema comparison we've started.
+    pub(crate) visit_state: BTreeMap<VisitedKey, VisitState>,
     /// Change records grouped by base path pair (component or endpoint).
     records: BTreeMap<ChangeKey, ChangeRecord>,
 }

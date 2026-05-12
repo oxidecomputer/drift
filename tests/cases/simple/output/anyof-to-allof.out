@@ -13,8 +13,8 @@
 -            "description": "Via anyOf."
 +            "description": "Via allOf."
            },
-           "via_oneof": {
-             "description": "Via oneOf.",
+           "via_clone": {
+             "allOf": [
 
 
 Result for patch:

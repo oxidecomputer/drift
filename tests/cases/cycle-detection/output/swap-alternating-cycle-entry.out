@@ -1,0 +1,81 @@
+--- swap-alternating-cycle-entry.json
++++ patched
+@@
+             "content": {
+               "application/json": {
+                 "schema": {
+-                  "$ref": "#/components/schemas/AltX"
++                  "$ref": "#/components/schemas/AltY"
+                 }
+               }
+             },
+
+
+Result for patch:
+[
+    Change {
+        paths: [
+            ChangePath {
+                old: [
+                    "#/components/schemas/AltX",
+                    "#/paths/~1alternating-cycle/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                new: [
+                    "#/components/schemas/AltY",
+                    "#/paths/~1alternating-cycle/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                comparison: Output,
+            },
+            ChangePath {
+                old: [
+                    "#/components/schemas/AltX",
+                    "#/components/schemas/AltY/properties/next/$ref",
+                    "#/components/schemas/AltX/properties/next/$ref",
+                    "#/paths/~1alternating-cycle/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                new: [
+                    "#/components/schemas/AltY",
+                    "#/components/schemas/AltX/properties/next/$ref",
+                    "#/components/schemas/AltY/properties/next/$ref",
+                    "#/paths/~1alternating-cycle/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                comparison: Output,
+            },
+        ],
+        changes: [
+            ChangeInfo {
+                old_subpath: "",
+                new_subpath: "",
+                message: "schema metadata changed",
+                class: Trivial,
+                details: Metadata,
+            },
+        ],
+    },
+    Change {
+        paths: [
+            ChangePath {
+                old: [
+                    "#/components/schemas/AltY",
+                    "#/components/schemas/AltX/properties/next/$ref",
+                    "#/paths/~1alternating-cycle/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                new: [
+                    "#/components/schemas/AltX",
+                    "#/components/schemas/AltY/properties/next/$ref",
+                    "#/paths/~1alternating-cycle/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                comparison: Output,
+            },
+        ],
+        changes: [
+            ChangeInfo {
+                old_subpath: "",
+                new_subpath: "",
+                message: "schema metadata changed",
+                class: Trivial,
+                details: Metadata,
+            },
+        ],
+    },
+]

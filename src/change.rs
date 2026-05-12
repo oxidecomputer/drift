@@ -3,7 +3,7 @@
 use crate::JsonPathStack;
 
 /// A paired path through old and new documents that led to a change.
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ChangePath {
     /// Path in the old document.
     pub old: JsonPathStack,
@@ -28,7 +28,7 @@ pub struct Change {
 }
 
 /// A single change detected at a specific location within a component/endpoint.
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ChangeInfo {
     /// The relative path in the old document where the change occurred.
     ///
@@ -52,7 +52,7 @@ pub struct ChangeInfo {
     pub details: ChangeDetails,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum ChangeComparison {
     // Inputs such as operation parameters and request bodies.
     Input,
@@ -63,7 +63,14 @@ pub enum ChangeComparison {
     Structural,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+/// Classification of how a change affects compatibility between two OpenAPI
+/// documents.
+///
+/// The `Ord` implementation is purely so that a `ChangeClass` can live in
+/// ordered collections. It carries no semantic meaning otherwise. In
+/// particular, `Ord` doesn't sort by severity. Use pattern matching or `==`
+/// when considering severity.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum ChangeClass {
     BackwardIncompatible,
     ForwardIncompatible,
@@ -72,7 +79,7 @@ pub enum ChangeClass {
     Unhandled,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum ChangeDetails {
     Metadata,
     Added,

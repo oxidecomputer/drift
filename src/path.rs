@@ -20,6 +20,12 @@
 //!
 //! This makes illegal states unrepresentable: you cannot have endpoint refs
 //! mixed into the intermediate chain, or push refs from `PathsRoot`.
+//!
+//! ## What this module deliberately does *not* do
+//!
+//! Cycle detection is not the path stack's responsibility. It belongs at the
+//! comparison layer, keyed by the (old, new) schema pair currently being
+//! expanded -- see `compare::Compare::visit_state`.
 
 use std::fmt;
 
@@ -58,7 +64,7 @@ impl std::error::Error for InvalidComponentRef {}
 /// distinction matters for change grouping: shared parameters (which live at
 /// the path-item level) group under the path-item base, while operation-level
 /// constructs group under the operation base.
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub(crate) struct EndpointPath {
     path: String,
     /// Length of the path at construction time, before any appends.
@@ -200,7 +206,7 @@ impl RefTargetPath {
 /// - If refs have been followed, the first was always from an endpoint.
 /// - All subsequent refs form a chain of intermediate locations.
 /// - Transitions: endpoint → ref target, or ref target → ref target.
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 enum PathState {
     /// At the paths root (`#/paths`), used only for operation add/remove reporting.
     /// Cannot follow refs from this state.
@@ -225,7 +231,7 @@ enum PathState {
 ///
 /// The stack tracks the location while traversing an OpenAPI document,
 /// particularly when following `$ref` references.
-#[derive(Clone, PartialEq, Eq, Hash)]
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct JsonPathStack {
     state: PathState,
 }
@@ -417,32 +423,6 @@ impl JsonPathStack {
         Ok(Self { state })
     }
 
-    /// Check if the stack contains a cycle.
-    ///
-    /// A cycle is detected when the current location is a path-segment-aligned
-    /// prefix of any entry in the reference chain. This means the current
-    /// schema (or an ancestor of it) was already visited, so descending into
-    /// it again would loop forever.
-    pub fn contains_cycle(&self) -> bool {
-        match &self.state {
-            PathState::PathsRoot | PathState::AtEndpoint(_) => false,
-            PathState::AtComponent {
-                current,
-                origin_ref,
-                intermediate_refs,
-            } => {
-                // In OAS 3.0, paths can `$ref` other paths, so we can't
-                // only look within intermediate_refs to check for cycles:
-                // there's a chance of a cycle involving the origin as well.
-                let current_str = current.as_str();
-                is_path_ancestor_of(current_str, origin_ref.as_str())
-                    || intermediate_refs
-                        .iter()
-                        .any(|r| is_path_ancestor_of(current_str, r.as_str()))
-            }
-        }
-    }
-
     /// Iterate over the path reference stack from top (current) to bottom
     /// (origin).
     ///
@@ -497,20 +477,6 @@ impl fmt::Display for JsonPathStack {
 /// Escape a segment for use in a JSON pointer per RFC 6901.
 fn escape_json_pointer_segment(segment: &str) -> String {
     segment.replace('~', "~0").replace('/', "~1")
-}
-
-/// Check if `ancestor` is a path-segment-aligned prefix of `path`.
-///
-/// Returns `true` if `path` starts with `ancestor` and the character
-/// immediately following the prefix (if any) is `/`. This prevents false
-/// matches where schema names share a common string prefix (e.g., `User`
-/// matching `UserProfile`).
-fn is_path_ancestor_of(ancestor: &str, path: &str) -> bool {
-    path.starts_with(ancestor)
-        && path
-            .as_bytes()
-            .get(ancestor.len())
-            .is_none_or(|&b| b == b'/')
 }
 
 #[cfg(test)]
@@ -676,112 +642,6 @@ mod tests {
         assert_eq!(entries.len(), 2);
         assert_eq!(entries[0], "#/components/schemas/User");
         assert_eq!(entries[1], "#/paths/~1users/get/responses/200/schema/$ref");
-    }
-
-    #[test]
-    fn json_path_stack_cycle_detection() {
-        let endpoint = EndpointPath::for_operation("/users", "get");
-        let stack = JsonPathStack::for_endpoint(endpoint)
-            .push("#/components/schemas/User")
-            .unwrap()
-            .append("properties")
-            .append("manager");
-
-        // No cycle yet.
-        assert!(!stack.contains_cycle());
-
-        // Push a reference back to User, creating a cycle.
-        let stack = stack.push("#/components/schemas/User").unwrap();
-        assert!(stack.contains_cycle());
-    }
-
-    // Schemas whose names share a common string prefix must not be treated as
-    // cycles. e.g. "User" is a prefix of "UserProfile" at the string level, but
-    // they are different schemas.
-    #[test]
-    fn cycle_detection_no_false_positive_on_shared_prefix() {
-        let endpoint = EndpointPath::for_operation("/users", "get");
-
-        let stack = JsonPathStack::for_endpoint(endpoint)
-            .push("#/components/schemas/User")
-            .unwrap()
-            .append("properties")
-            .append("manager")
-            .push("#/components/schemas/UserProfile")
-            .unwrap();
-
-        assert!(!stack.contains_cycle());
-    }
-
-    #[test]
-    fn cycle_detection_no_false_positive_on_shared_prefix_origin() {
-        // The origin endpoint path could also be a string prefix of
-        // the current location without being an ancestor.
-        let endpoint = EndpointPath::for_operation("/users", "get");
-
-        // Follow a ref to a schema whose path happens to start with
-        // the same characters as the origin but at a different location.
-        let stack = JsonPathStack::for_endpoint(endpoint)
-            .push("#/paths/~1users/get-details")
-            .unwrap();
-
-        // "AB" is not "A": no cycle, even though "A" is a string prefix
-        // of "AB".
-        assert!(!stack.contains_cycle());
-    }
-
-    #[test]
-    fn cycle_detection_true_positive_through_subpath() {
-        // A cycle exists when the current schema is an ancestor of a
-        // previously visited location (we'd descend into the same subtree).
-        let endpoint = EndpointPath::for_operation("/users", "get");
-        let stack = JsonPathStack::for_endpoint(endpoint)
-            .push("#/components/schemas/User")
-            .unwrap()
-            .append("properties")
-            .append("address")
-            .push("#/components/schemas/Address")
-            .unwrap()
-            .append("properties")
-            .append("owner")
-            // Cycle back to User: User -> ... -> Address -> ... -> User.
-            .push("#/components/schemas/User")
-            .unwrap();
-
-        assert!(stack.contains_cycle());
-    }
-
-    #[test]
-    fn is_path_ancestor_of_basics() {
-        // Exact match (after stripping /$ref the paths are equal).
-        assert!(is_path_ancestor_of(
-            "#/components/schemas/User",
-            "#/components/schemas/User/$ref"
-        ));
-
-        // True ancestor: current is a parent of the chain entry.
-        assert!(is_path_ancestor_of(
-            "#/components/schemas/User",
-            "#/components/schemas/User/properties/name/$ref"
-        ));
-
-        // False: shared string prefix but different schema name.
-        assert!(!is_path_ancestor_of(
-            "#/components/schemas/User",
-            "#/components/schemas/UserProfile/$ref"
-        ));
-
-        // False: completely unrelated paths.
-        assert!(!is_path_ancestor_of(
-            "#/components/schemas/User",
-            "#/components/schemas/Address/$ref"
-        ));
-
-        // Edge: ancestor equals path exactly (no trailing content).
-        assert!(is_path_ancestor_of(
-            "#/components/schemas/User",
-            "#/components/schemas/User"
-        ));
     }
 
     #[test]
