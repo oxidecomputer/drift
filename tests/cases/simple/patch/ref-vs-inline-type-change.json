@@ -1,0 +1,19 @@
+[
+  {
+    "op": "replace",
+    "path": "/components/schemas/SubType/properties/value/type",
+    "value": "integer"
+  },
+  {
+    "op": "replace",
+    "path": "/components/schemas/GreetingResponse/properties/via_ref",
+    "value": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "integer"
+        }
+      }
+    }
+  }
+]

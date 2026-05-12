@@ -1,7 +1,7 @@
 --- add-operation.json
 +++ patched
 @@
-         "summary": "Get arrays"
+         "summary": "Echo a shared type"
        }
      },
 +    "/foo": {
