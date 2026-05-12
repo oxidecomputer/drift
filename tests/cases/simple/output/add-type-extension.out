@@ -10,8 +10,8 @@
 +          "mumble": "frotz"
 +        }
        },
-       "MultiAllOf": {
-         "allOf": [
+       "ItemKind": {
+         "enum": [
 
 
 Result for patch:

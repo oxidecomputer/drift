@@ -1,0 +1,7 @@
+[
+  {
+    "op": "replace",
+    "path": "/components/schemas/NodeB/properties/label/type",
+    "value": "integer"
+  }
+]

@@ -1,0 +1,14 @@
+[
+  {
+    "op": "replace",
+    "path": "/paths/~1self-cycle/get/responses/200/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/SelfCycleB"
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/components/schemas/SelfCycleB/properties/value/type",
+    "value": "integer"
+  }
+]
