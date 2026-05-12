@@ -31,7 +31,7 @@ Result for patch:
             ChangeInfo {
                 old_subpath: "",
                 new_subpath: "",
-                message: "unhandled, 'allOf' schema",
+                message: "allOf with multiple schemas is unhandled",
                 class: Unhandled,
                 details: UnknownDifference,
             },

@@ -1,0 +1,43 @@
+--- untyped-to-typed-enum.json
++++ patched
+@@
+           "thoughtful",
+           "caring",
+           "considerate"
+-        ]
++        ],
++        "type": "string"
+       },
+       "ItemType": {
+         "oneOf": [
+
+
+Result for patch:
+[
+    Change {
+        paths: [
+            ChangePath {
+                old: [
+                    "#/components/schemas/ItemKind",
+                    "#/components/schemas/CreateItem/properties/kind/$ref",
+                    "#/paths/~1items/post/request_body/content/application~1json/schema/$ref",
+                ],
+                new: [
+                    "#/components/schemas/ItemKind",
+                    "#/components/schemas/CreateItem/properties/kind/$ref",
+                    "#/paths/~1items/post/request_body/content/application~1json/schema/$ref",
+                ],
+                comparison: Input,
+            },
+        ],
+        changes: [
+            ChangeInfo {
+                old_subpath: "",
+                new_subpath: "",
+                message: "schema kind changed from any to regular type with equivalent enum values",
+                class: Trivial,
+                details: Metadata,
+            },
+        ],
+    },
+]

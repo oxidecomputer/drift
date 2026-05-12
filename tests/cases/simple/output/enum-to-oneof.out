@@ -1,0 +1,70 @@
+--- enum-to-oneof.json
++++ patched
+@@
+         "type": "object"
+       },
+       "ItemKind": {
+-        "enum": [
+-          "compassionate",
+-          "thoughtful",
+-          "caring",
+-          "considerate"
++        "oneOf": [
++          {
++            "enum": [
++              "compassionate"
++            ],
++            "type": "string"
++          },
++          {
++            "enum": [
++              "thoughtful"
++            ],
++            "type": "string"
++          },
++          {
++            "enum": [
++              "caring"
++            ],
++            "type": "string"
++          },
++          {
++            "enum": [
++              "considerate"
++            ],
++            "type": "string"
++          }
+         ]
+       },
+       "ItemType": {
+
+
+Result for patch:
+[
+    Change {
+        paths: [
+            ChangePath {
+                old: [
+                    "#/components/schemas/ItemKind",
+                    "#/components/schemas/CreateItem/properties/kind/$ref",
+                    "#/paths/~1items/post/request_body/content/application~1json/schema/$ref",
+                ],
+                new: [
+                    "#/components/schemas/ItemKind",
+                    "#/components/schemas/CreateItem/properties/kind/$ref",
+                    "#/paths/~1items/post/request_body/content/application~1json/schema/$ref",
+                ],
+                comparison: Input,
+            },
+        ],
+        changes: [
+            ChangeInfo {
+                old_subpath: "",
+                new_subpath: "",
+                message: "schema kind changed from any to oneOf with equivalent enum values",
+                class: Trivial,
+                details: Metadata,
+            },
+        ],
+    },
+]

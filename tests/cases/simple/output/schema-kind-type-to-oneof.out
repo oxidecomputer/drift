@@ -17,8 +17,8 @@
 -        "type": "object"
 +        ]
        },
-       "Tree": {
-         "properties": {
+       "SubTypeClone": {
+         "allOf": [
 
 
 Result for patch:

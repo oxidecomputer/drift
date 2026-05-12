@@ -12,8 +12,8 @@
 -            "description": "Via anyOf."
 +            "$ref": "#/components/schemas/SubType"
            },
-           "via_oneof": {
-             "description": "Via oneOf.",
+           "via_clone": {
+             "allOf": [
 
 
 Result for patch:
