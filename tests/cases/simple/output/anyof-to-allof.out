@@ -23,11 +23,11 @@ Result for patch:
         paths: [
             ChangePath {
                 old: [
-                    "#/components/schemas/GreetingResponse/properties/via_anyof",
+                    "#/components/schemas/GreetingResponse",
                     "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
                 ],
                 new: [
-                    "#/components/schemas/GreetingResponse/properties/via_anyof",
+                    "#/components/schemas/GreetingResponse",
                     "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
                 ],
                 comparison: Output,
@@ -35,8 +35,8 @@ Result for patch:
         ],
         changes: [
             ChangeInfo {
-                old_subpath: "",
-                new_subpath: "",
+                old_subpath: "properties/via_anyof",
+                new_subpath: "properties/via_anyof",
                 message: "schema metadata changed",
                 class: Trivial,
                 details: Metadata,

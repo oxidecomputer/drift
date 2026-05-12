@@ -17,12 +17,12 @@ Result for patch:
         paths: [
             ChangePath {
                 old: [
-                    "#/components/schemas/NodeB/properties/label",
+                    "#/components/schemas/NodeB",
                     "#/components/schemas/NodeA/properties/next/$ref",
                     "#/paths/~1three-cycle/get/responses/200/content/application~1json/schema/$ref",
                 ],
                 new: [
-                    "#/components/schemas/NodeB/properties/label",
+                    "#/components/schemas/NodeB",
                     "#/components/schemas/NodeA/properties/next/$ref",
                     "#/paths/~1three-cycle/get/responses/200/content/application~1json/schema/$ref",
                 ],
@@ -31,8 +31,8 @@ Result for patch:
         ],
         changes: [
             ChangeInfo {
-                old_subpath: "",
-                new_subpath: "",
+                old_subpath: "properties/label",
+                new_subpath: "properties/label",
                 message: "schema types changed",
                 class: Incompatible,
                 details: UnknownDifference,

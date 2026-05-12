@@ -26,6 +26,21 @@ Result for patch:
                 ],
                 comparison: Output,
             },
+            ChangePath {
+                old: [
+                    "#/components/schemas/AltX",
+                    "#/components/schemas/AltY/properties/next/$ref",
+                    "#/components/schemas/AltX/properties/next/$ref",
+                    "#/paths/~1alternating-cycle/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                new: [
+                    "#/components/schemas/AltY",
+                    "#/components/schemas/AltX/properties/next/$ref",
+                    "#/components/schemas/AltY/properties/next/$ref",
+                    "#/paths/~1alternating-cycle/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                comparison: Output,
+            },
         ],
         changes: [
             ChangeInfo {

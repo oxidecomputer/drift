@@ -18,11 +18,11 @@ Result for patch:
         paths: [
             ChangePath {
                 old: [
-                    "#/components/schemas/MultiOneOf/oneOf",
+                    "#/components/schemas/MultiOneOf",
                     "#/paths/~1oneof/get/responses/200/content/application~1json/schema/$ref",
                 ],
                 new: [
-                    "#/components/schemas/MultiOneOf/oneOf",
+                    "#/components/schemas/MultiOneOf",
                     "#/paths/~1oneof/get/responses/200/content/application~1json/schema/$ref",
                 ],
                 comparison: Output,
@@ -30,8 +30,8 @@ Result for patch:
         ],
         changes: [
             ChangeInfo {
-                old_subpath: "",
-                new_subpath: "",
+                old_subpath: "oneOf",
+                new_subpath: "oneOf",
                 message: "oneOf schema count changed",
                 class: Unhandled,
                 details: UnknownDifference,

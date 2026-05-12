@@ -22,11 +22,11 @@ Result for patch:
         paths: [
             ChangePath {
                 old: [
-                    "#/components/schemas/GreetingResponse/properties/not_a_number/not",
+                    "#/components/schemas/GreetingResponse",
                     "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
                 ],
                 new: [
-                    "#/components/schemas/GreetingResponse/properties/not_a_number/not",
+                    "#/components/schemas/GreetingResponse",
                     "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
                 ],
                 comparison: Output,
@@ -34,8 +34,8 @@ Result for patch:
         ],
         changes: [
             ChangeInfo {
-                old_subpath: "",
-                new_subpath: "",
+                old_subpath: "properties/not_a_number/not",
+                new_subpath: "properties/not_a_number/not",
                 message: "schema metadata added",
                 class: Trivial,
                 details: Metadata,

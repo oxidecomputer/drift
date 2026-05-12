@@ -17,18 +17,18 @@ Result for patch:
         paths: [
             ChangePath {
                 old: [
-                    "#/paths/~1hello~1{name}/get/parameters/1",
+                    "#/paths/~1hello~1{name}/get",
                 ],
                 new: [
-                    "#/paths/~1hello~1{name}/get/parameters/1",
+                    "#/paths/~1hello~1{name}/get",
                 ],
                 comparison: Input,
             },
         ],
         changes: [
             ChangeInfo {
-                old_subpath: "",
-                new_subpath: "",
+                old_subpath: "parameters/1",
+                new_subpath: "parameters/1",
                 message: "The parameter 'language' was optional and is now required",
                 class: BackwardIncompatible,
                 details: MoreStrict,

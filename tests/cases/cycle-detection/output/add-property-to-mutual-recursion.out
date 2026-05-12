@@ -29,6 +29,17 @@ Result for patch:
                 ],
                 comparison: Output,
             },
+            ChangePath {
+                old: [
+                    "#/components/schemas/Person",
+                    "#/paths/~1persons/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                new: [
+                    "#/components/schemas/Person",
+                    "#/paths/~1persons/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                comparison: Output,
+            },
         ],
         changes: [
             ChangeInfo {

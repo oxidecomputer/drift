@@ -17,12 +17,12 @@ Result for patch:
         paths: [
             ChangePath {
                 old: [
-                    "#/components/schemas/Item/properties/value",
+                    "#/components/schemas/Item",
                     "#/components/schemas/ItemPage/properties/items/items/$ref",
                     "#/paths/~1items/get/responses/200/content/application~1json/schema/$ref",
                 ],
                 new: [
-                    "#/components/schemas/Item/properties/value",
+                    "#/components/schemas/Item",
                     "#/components/schemas/ItemPage/properties/items/items/$ref",
                     "#/paths/~1items/get/responses/200/content/application~1json/schema/$ref",
                 ],
@@ -31,8 +31,8 @@ Result for patch:
         ],
         changes: [
             ChangeInfo {
-                old_subpath: "",
-                new_subpath: "",
+                old_subpath: "properties/value",
+                new_subpath: "properties/value",
                 message: "schema types changed",
                 class: Incompatible,
                 details: UnknownDifference,

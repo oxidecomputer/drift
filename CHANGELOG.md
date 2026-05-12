@@ -3,6 +3,14 @@
 <!-- next-header -->
 ## Unreleased - ReleaseDate
 
+### Added
+
+- Drift now returns every endpoint (and corresponding path) from which a particular changed type is accessible, not just the first.
+
+### Changed
+
+- For every endpoint or component that had any number of changes in it, a single `Change` instance is now returned. `Change` now consists of a `Vec<ChangePath>` and a `Vec<ChangeInfo>`.
+
 ## [0.1.4] - 2026-05-06
 
 - evaluate oneOf <-> enum equivalency

@@ -17,18 +17,18 @@ Result for patch:
         paths: [
             ChangePath {
                 old: [
-                    "#/paths/~1with-header/get/parameters/0/schema",
+                    "#/paths/~1with-header/get",
                 ],
                 new: [
-                    "#/paths/~1with-header/get/parameters/0/schema",
+                    "#/paths/~1with-header/get",
                 ],
                 comparison: Input,
             },
         ],
         changes: [
             ChangeInfo {
-                old_subpath: "",
-                new_subpath: "",
+                old_subpath: "parameters/0/schema",
+                new_subpath: "parameters/0/schema",
                 message: "schema types changed",
                 class: Incompatible,
                 details: UnknownDifference,
