@@ -58,12 +58,12 @@ Result for patch:
             ChangePath {
                 old: [
                     "#/components/schemas/SubType",
-                    "#/components/schemas/GreetingResponse/properties/via_allof/0/$ref",
+                    "#/components/schemas/GreetingResponse/properties/via_allof/allOf/0/$ref",
                     "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
                 ],
                 new: [
                     "#/components/schemas/SubType",
-                    "#/components/schemas/GreetingResponse/properties/via_allof/0/$ref",
+                    "#/components/schemas/GreetingResponse/properties/via_allof/oneOf/0/$ref",
                     "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
                 ],
                 comparison: Output,
@@ -71,12 +71,12 @@ Result for patch:
             ChangePath {
                 old: [
                     "#/components/schemas/SubType",
-                    "#/components/schemas/GreetingResponse/properties/via_anyof/0/$ref",
+                    "#/components/schemas/GreetingResponse/properties/via_anyof/anyOf/0/$ref",
                     "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
                 ],
                 new: [
                     "#/components/schemas/SubType",
-                    "#/components/schemas/GreetingResponse/properties/via_anyof/0/$ref",
+                    "#/components/schemas/GreetingResponse/properties/via_anyof/anyOf/0/$ref",
                     "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
                 ],
                 comparison: Output,
@@ -85,13 +85,13 @@ Result for patch:
                 old: [
                     "#/components/schemas/SubType",
                     "#/components/schemas/SubTypeClone/allOf/0/$ref",
-                    "#/components/schemas/GreetingResponse/properties/via_clone/0/$ref",
+                    "#/components/schemas/GreetingResponse/properties/via_clone/allOf/0/$ref",
                     "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
                 ],
                 new: [
                     "#/components/schemas/SubType",
                     "#/components/schemas/SubTypeClone/allOf/0/$ref",
-                    "#/components/schemas/GreetingResponse/properties/via_clone/0/$ref",
+                    "#/components/schemas/GreetingResponse/properties/via_clone/allOf/0/$ref",
                     "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
                 ],
                 comparison: Output,
@@ -99,12 +99,12 @@ Result for patch:
             ChangePath {
                 old: [
                     "#/components/schemas/SubType",
-                    "#/components/schemas/GreetingResponse/properties/via_oneof/0/$ref",
+                    "#/components/schemas/GreetingResponse/properties/via_oneof/oneOf/0/$ref",
                     "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
                 ],
                 new: [
                     "#/components/schemas/SubType",
-                    "#/components/schemas/GreetingResponse/properties/via_oneof/0/$ref",
+                    "#/components/schemas/GreetingResponse/properties/via_oneof/oneOf/0/$ref",
                     "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
                 ],
                 comparison: Output,

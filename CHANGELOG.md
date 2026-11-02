@@ -3,6 +3,10 @@
 <!-- next-header -->
 ## Unreleased - ReleaseDate
 
+### Fixed
+
+- Paths through an inline single-element `allOf`, `anyOf`, or `oneOf` wrapper now always include the keyword, for example `properties/foo/allOf/0` rather than `properties/foo/0`. This ensures they are always valid pointers into the document.
+
 ## [0.2.0] - 2026-05-12
 
 ### Added
