@@ -1,0 +1,16 @@
+--- ref-to-wrapper-nullable.json
++++ patched
+@@
+             "$ref": "#/components/schemas/SubType"
+           }
+         ],
+-        "description": "..."
++        "description": "...",
++        "nullable": true
+       },
+       "Tree": {
+         "properties": {
+
+
+Result for patch:
+[]

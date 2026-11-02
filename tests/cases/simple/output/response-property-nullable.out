@@ -1,0 +1,14 @@
+--- response-property-nullable.json
++++ patched
+@@
+       "TypedProperties": {
+         "properties": {
+           "count": {
++            "nullable": true,
+             "type": "integer"
+           },
+           "enabled": {
+
+
+Result for patch:
+[]

@@ -1,0 +1,41 @@
+--- single-to-multi-element-allof.json
++++ patched
+@@
+             "allOf": [
+               {
+                 "$ref": "#/components/schemas/SubType"
++              },
++              {
++                "type": "object"
+               }
+             ],
+             "description": "Via allOf."
+
+
+Result for patch:
+[
+    Change {
+        paths: [
+            ChangePath {
+                old: [
+                    "#/components/schemas/GreetingResponse",
+                    "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                new: [
+                    "#/components/schemas/GreetingResponse",
+                    "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                comparison: Output,
+            },
+        ],
+        changes: [
+            ChangeInfo {
+                old_subpath: "properties/via_allof/allOf",
+                new_subpath: "properties/via_allof/allOf",
+                message: "allOf schema count changed",
+                class: Unhandled,
+                details: UnknownDifference,
+            },
+        ],
+    },
+]

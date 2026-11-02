@@ -1,0 +1,7 @@
+[
+  {
+    "op": "add",
+    "path": "/components/schemas/SubTypeClone/nullable",
+    "value": true
+  }
+]

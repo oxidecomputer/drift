@@ -1,0 +1,6 @@
+[
+  {
+    "op": "remove",
+    "path": "/components/schemas/NullableHolder/properties/maybe/nullable"
+  }
+]

@@ -1,0 +1,43 @@
+--- response-ref-to-nullable-allof.json
++++ patched
+@@
+             "content": {
+               "application/json": {
+                 "schema": {
+-                  "$ref": "#/components/schemas/GreetingResponse"
++                  "allOf": [
++                    {
++                      "$ref": "#/components/schemas/GreetingResponse"
++                    }
++                  ],
++                  "nullable": true
+                 }
+               }
+             },
+
+
+Result for patch:
+[
+    Change {
+        paths: [
+            ChangePath {
+                old: [
+                    "#/paths/~1hello~1{name}/get",
+                ],
+                new: [
+                    "#/paths/~1hello~1{name}/get",
+                ],
+                comparison: Output,
+            },
+        ],
+        changes: [
+            ChangeInfo {
+                old_subpath: "responses/200/content/application~1json/schema",
+                new_subpath: "responses/200/content/application~1json/schema",
+                message: "schema metadata added",
+                class: Trivial,
+                details: Metadata,
+            },
+        ],
+    },
+]

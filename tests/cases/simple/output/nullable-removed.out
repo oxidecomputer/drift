@@ -1,0 +1,14 @@
+--- nullable-removed.json
++++ patched
+@@
+       "NullableHolder": {
+         "properties": {
+           "maybe": {
+-            "nullable": true,
+             "type": "string"
+           }
+         },
+
+
+Result for patch:
+[]

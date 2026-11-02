@@ -1,0 +1,21 @@
+--- nullable-moved-into-wrapped-element.json
++++ patched
+@@
+       "NullableHolder": {
+         "properties": {
+           "maybe": {
+-            "nullable": true,
+-            "type": "string"
++            "allOf": [
++              {
++                "nullable": true,
++                "type": "string"
++              }
++            ]
+           }
+         },
+         "type": "object"
+
+
+Result for patch:
+[]
