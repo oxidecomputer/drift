@@ -1,0 +1,40 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Single-element anyOf API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/value": {
+      "get": {
+        "operationId": "get_value",
+        "responses": {
+          "200": {
+            "description": "A value behind a `$ref` to a single-element anyOf",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Wrapped"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Wrapped": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/Value"
+          }
+        ]
+      },
+      "Value": {
+        "type": "string"
+      }
+    }
+  }
+}

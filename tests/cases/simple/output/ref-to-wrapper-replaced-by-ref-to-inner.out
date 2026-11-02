@@ -1,0 +1,49 @@
+--- ref-to-wrapper-replaced-by-ref-to-inner.json
++++ patched
+@@
+           "via_clone": {
+             "allOf": [
+               {
+-                "$ref": "#/components/schemas/SubTypeClone"
++                "$ref": "#/components/schemas/SubType"
+               }
+             ],
+             "description": "Via clone of SubType using allOf."
+
+
+Result for patch:
+[
+    Change {
+        paths: [
+            ChangePath {
+                old: [
+                    "#/components/schemas/SubTypeClone",
+                    "#/components/schemas/GreetingResponse/properties/via_clone/allOf/0/$ref",
+                    "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                new: [
+                    "#/components/schemas/SubType",
+                    "#/components/schemas/GreetingResponse/properties/via_clone/allOf/0/$ref",
+                    "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                comparison: Output,
+            },
+        ],
+        changes: [
+            ChangeInfo {
+                old_subpath: "",
+                new_subpath: "",
+                message: "schema metadata changed",
+                class: Trivial,
+                details: Metadata,
+            },
+            ChangeInfo {
+                old_subpath: "",
+                new_subpath: "",
+                message: "schema kind changed from allOf to regular type",
+                class: Incompatible,
+                details: Datatype,
+            },
+        ],
+    },
+]

@@ -335,6 +335,23 @@
           }
         }
       }
+    },
+    "/nullable": {
+      "get": {
+        "operationId": "get_nullable",
+        "responses": {
+          "200": {
+            "description": "A type with a nullable property",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NullableHolder"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -572,6 +589,15 @@
         "type": "object",
         "properties": {
           "value": {
+            "type": "string"
+          }
+        }
+      },
+      "NullableHolder": {
+        "type": "object",
+        "properties": {
+          "maybe": {
+            "nullable": true,
             "type": "string"
           }
         }

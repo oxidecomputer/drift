@@ -1,0 +1,43 @@
+--- request-body-ref-to-nullable-allof.json
++++ patched
+@@
+           "content": {
+             "application/json": {
+               "schema": {
+-                "$ref": "#/components/schemas/CreateItem"
++                "allOf": [
++                  {
++                    "$ref": "#/components/schemas/CreateItem"
++                  }
++                ],
++                "nullable": true
+               }
+             }
+           },
+
+
+Result for patch:
+[
+    Change {
+        paths: [
+            ChangePath {
+                old: [
+                    "#/paths/~1items/post",
+                ],
+                new: [
+                    "#/paths/~1items/post",
+                ],
+                comparison: Input,
+            },
+        ],
+        changes: [
+            ChangeInfo {
+                old_subpath: "request_body/content/application~1json/schema",
+                new_subpath: "request_body/content/application~1json/schema",
+                message: "schema metadata added",
+                class: Trivial,
+                details: Metadata,
+            },
+        ],
+    },
+]

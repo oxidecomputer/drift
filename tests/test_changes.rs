@@ -96,3 +96,37 @@ fn test_change() {
         }
     }
 }
+
+fn document_with_schemas(schemas: serde_json::Value) -> serde_json::Value {
+    serde_json::json!({
+        "openapi": "3.0.0",
+        "info": { "title": "Cycle API", "version": "1.0.0" },
+        "paths": {
+            "/cycle": {
+                "get": {
+                    "operationId": "get_cycle",
+                    "responses": {
+                        "200": {
+                            "description": "A schema that never reaches a concrete type",
+                            "content": {
+                                "application/json": {
+                                    "schema": { "$ref": "#/components/schemas/A" }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "components": { "schemas": schemas }
+    })
+}
+
+#[test]
+fn test_wrapper_ref_cycle_is_accepted() {
+    let document = document_with_schemas(serde_json::json!({
+        "A": { "allOf": [{ "$ref": "#/components/schemas/A" }] }
+    }));
+    let result = compare(&document, &document).expect("comparison succeeds");
+    assert!(result.is_empty(), "unexpected changes: {result:#?}");
+}

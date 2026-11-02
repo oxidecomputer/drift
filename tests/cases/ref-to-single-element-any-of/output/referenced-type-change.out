@@ -1,0 +1,15 @@
+--- referenced-type-change.json
++++ patched
+@@
+   "components": {
+     "schemas": {
+       "Value": {
+-        "type": "string"
++        "type": "integer"
+       },
+       "Wrapped": {
+         "anyOf": [
+
+
+Result for patch:
+[]

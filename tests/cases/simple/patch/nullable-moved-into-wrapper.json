@@ -1,0 +1,14 @@
+[
+  {
+    "op": "replace",
+    "path": "/components/schemas/NullableHolder/properties/maybe",
+    "value": {
+      "nullable": true,
+      "allOf": [
+        {
+          "type": "string"
+        }
+      ]
+    }
+  }
+]

@@ -1,0 +1,45 @@
+--- remove-wrapper-around-ref-to-wrapper.json
++++ patched
+@@
+             "description": "Via anyOf."
+           },
+           "via_clone": {
+-            "allOf": [
+-              {
+-                "$ref": "#/components/schemas/SubTypeClone"
+-              }
+-            ],
+-            "description": "Via clone of SubType using allOf."
++            "$ref": "#/components/schemas/SubTypeClone"
+           },
+           "via_oneof": {
+             "description": "Via oneOf.",
+
+
+Result for patch:
+[
+    Change {
+        paths: [
+            ChangePath {
+                old: [
+                    "#/components/schemas/GreetingResponse",
+                    "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                new: [
+                    "#/components/schemas/GreetingResponse",
+                    "#/paths/~1hello~1{name}/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                comparison: Output,
+            },
+        ],
+        changes: [
+            ChangeInfo {
+                old_subpath: "properties/via_clone",
+                new_subpath: "properties/via_clone",
+                message: "schema metadata removed",
+                class: Trivial,
+                details: Metadata,
+            },
+        ],
+    },
+]

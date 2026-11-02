@@ -1,0 +1,46 @@
+--- nullable-moved-into-wrapper.json
++++ patched
+@@
+       "NullableHolder": {
+         "properties": {
+           "maybe": {
+-            "nullable": true,
+-            "type": "string"
++            "allOf": [
++              {
++                "type": "string"
++              }
++            ],
++            "nullable": true
+           }
+         },
+         "type": "object"
+
+
+Result for patch:
+[
+    Change {
+        paths: [
+            ChangePath {
+                old: [
+                    "#/components/schemas/NullableHolder",
+                    "#/paths/~1nullable/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                new: [
+                    "#/components/schemas/NullableHolder",
+                    "#/paths/~1nullable/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                comparison: Output,
+            },
+        ],
+        changes: [
+            ChangeInfo {
+                old_subpath: "properties/maybe",
+                new_subpath: "properties/maybe",
+                message: "schema metadata added",
+                class: Trivial,
+                details: Metadata,
+            },
+        ],
+    },
+]
