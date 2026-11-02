@@ -311,51 +311,16 @@ impl Compare {
         // We expand structures to ensure we don't accidentally fail to examine
         // a field.
         let Schema {
-            schema_data:
-                SchemaData {
-                    nullable: old_nullable,
-                    read_only: old_read_only,
-                    write_only: old_write_only,
-                    deprecated: old_deprecated,
-                    external_docs: old_external_docs,
-                    example: old_example,
-                    title: old_title,
-                    description: old_description,
-                    discriminator: old_discriminator,
-                    default: old_default,
-                    extensions: old_extensions,
-                },
+            schema_data: old_schema_data,
             schema_kind: old_schema_kind,
         } = old_schema.as_ref();
         let Schema {
-            schema_data:
-                SchemaData {
-                    nullable: new_nullable,
-                    read_only: new_read_only,
-                    write_only: new_write_only,
-                    deprecated: new_deprecated,
-                    external_docs: new_external_docs,
-                    example: new_example,
-                    title: new_title,
-                    description: new_description,
-                    discriminator: new_discriminator,
-                    default: new_default,
-                    extensions: new_extensions,
-                },
+            schema_data: new_schema_data,
             schema_kind: new_schema_kind,
         } = new_schema.as_ref();
 
         // Examine properties that don't affect the serialized form.
-        let metadata_equal = old_read_only == new_read_only
-            && old_write_only == new_write_only
-            && old_deprecated == new_deprecated
-            && old_external_docs == new_external_docs
-            && old_example == new_example
-            && old_title == new_title
-            && old_description == new_description
-            && old_discriminator == new_discriminator
-            && old_default == new_default
-            && old_extensions == new_extensions;
+        let metadata_equal = metadata_eq(old_schema_data, new_schema_data);
 
         if !metadata_equal {
             let _ = self.schema_record_change(
@@ -369,7 +334,7 @@ impl Compare {
             );
         }
 
-        let nullable_equal = old_nullable == new_nullable;
+        let nullable_equal = old_schema_data.nullable == new_schema_data.nullable;
 
         // Mark the key as in flight while we recurse.
         //
@@ -1044,6 +1009,47 @@ fn classify_schema_ref(schema_ref: &ReferenceOr<Schema>) -> SchemaRefKind<'_> {
 /// metadata worth preserving.
 fn has_meaningful_metadata(data: &SchemaData) -> bool {
     *data != SchemaData::default()
+}
+
+/// Returns true if the old metadata is equal to the new metadata.
+fn metadata_eq(old: &SchemaData, new: &SchemaData) -> bool {
+    let SchemaData {
+        // nullable is excluded because it changes which values are accepted.
+        nullable: _,
+        read_only: old_read_only,
+        write_only: old_write_only,
+        deprecated: old_deprecated,
+        external_docs: old_external_docs,
+        example: old_example,
+        title: old_title,
+        description: old_description,
+        discriminator: old_discriminator,
+        default: old_default,
+        extensions: old_extensions,
+    } = old;
+    let SchemaData {
+        nullable: _,
+        read_only: new_read_only,
+        write_only: new_write_only,
+        deprecated: new_deprecated,
+        external_docs: new_external_docs,
+        example: new_example,
+        title: new_title,
+        description: new_description,
+        discriminator: new_discriminator,
+        default: new_default,
+        extensions: new_extensions,
+    } = new;
+    old_read_only == new_read_only
+        && old_write_only == new_write_only
+        && old_deprecated == new_deprecated
+        && old_external_docs == new_external_docs
+        && old_example == new_example
+        && old_title == new_title
+        && old_description == new_description
+        && old_discriminator == new_discriminator
+        && old_default == new_default
+        && old_extensions == new_extensions
 }
 
 /// For a schema that is **exclusively** enumerated values, this returns a Some
