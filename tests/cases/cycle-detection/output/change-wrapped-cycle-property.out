@@ -18,12 +18,12 @@ Result for patch:
             ChangePath {
                 old: [
                     "#/components/schemas/Wrapped",
-                    "#/components/schemas/Wrapper/properties/child/0/$ref",
+                    "#/components/schemas/Wrapper/properties/child/allOf/0/$ref",
                     "#/paths/~1wrapped-cycle/get/responses/200/content/application~1json/schema/$ref",
                 ],
                 new: [
                     "#/components/schemas/Wrapped",
-                    "#/components/schemas/Wrapper/properties/child/0/$ref",
+                    "#/components/schemas/Wrapper/properties/child/allOf/0/$ref",
                     "#/paths/~1wrapped-cycle/get/responses/200/content/application~1json/schema/$ref",
                 ],
                 comparison: Output,

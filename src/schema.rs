@@ -87,10 +87,12 @@ impl Compare {
         match (old_kind, new_kind) {
             (
                 SingleElement {
+                    kind: old_wrapper_kind,
                     inner: old_inner,
                     metadata: old_meta,
                 },
                 SingleElement {
+                    kind: new_wrapper_kind,
                     inner: new_inner,
                     metadata: new_meta,
                 },
@@ -106,14 +108,27 @@ impl Compare {
                         ChangeDetails::Metadata,
                     );
                 }
-                let old_inner = old_schema.append_deref(old_inner, "0");
-                let new_inner = new_schema.append_deref(new_inner, "0");
+                let old_inner = Contextual::new(
+                    old_schema
+                        .context()
+                        .append(old_wrapper_kind.json_key())
+                        .append("0"),
+                    old_inner,
+                );
+                let new_inner = Contextual::new(
+                    new_schema
+                        .context()
+                        .append(new_wrapper_kind.json_key())
+                        .append("0"),
+                    new_inner,
+                );
                 Ok(Some(self.compare_schema_ref_helper(
                     dry_run, comparison, old_inner, new_inner,
                 )?))
             }
             (
                 SingleElement {
+                    kind: old_wrapper_kind,
                     inner: old_inner,
                     metadata: old_meta,
                 },
@@ -134,7 +149,13 @@ impl Compare {
                         ChangeDetails::Metadata,
                     );
                 }
-                let old_inner = old_schema.append_deref(old_inner, "0");
+                let old_inner = Contextual::new(
+                    old_schema
+                        .context()
+                        .append(old_wrapper_kind.json_key())
+                        .append("0"),
+                    old_inner,
+                );
                 Ok(Some(self.compare_schema_ref_helper(
                     dry_run,
                     comparison,
@@ -145,6 +166,7 @@ impl Compare {
             (
                 BareRef | InlineType,
                 SingleElement {
+                    kind: new_wrapper_kind,
                     inner: new_inner,
                     metadata: new_meta,
                 },
@@ -164,7 +186,13 @@ impl Compare {
                         ChangeDetails::Metadata,
                     );
                 }
-                let new_inner = new_schema.append_deref(new_inner, "0");
+                let new_inner = Contextual::new(
+                    new_schema
+                        .context()
+                        .append(new_wrapper_kind.json_key())
+                        .append("0"),
+                    new_inner,
+                );
                 Ok(Some(self.compare_schema_ref_helper(
                     dry_run,
                     comparison,
@@ -950,12 +978,35 @@ enum SchemaRefKind<'a> {
     /// A single-element allOf/anyOf/oneOf wrapper that can be flattened to its
     /// inner type.
     SingleElement {
+        kind: WrapperKind,
         inner: &'a ReferenceOr<Schema>,
         metadata: &'a SchemaData,
     },
     /// Multi (or, less commonly, zero) element allOf/anyOf/oneOf: cannot be
     /// flattened.
     MultiElement,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[expect(
+    clippy::enum_variant_names,
+    reason = "variants mirror the allOf, anyOf and oneOf keywords"
+)]
+enum WrapperKind {
+    AllOf,
+    AnyOf,
+    OneOf,
+}
+
+impl WrapperKind {
+    /// Returns the corresponding JSON key.
+    fn json_key(self) -> &'static str {
+        match self {
+            Self::AllOf => "allOf",
+            Self::AnyOf => "anyOf",
+            Self::OneOf => "oneOf",
+        }
+    }
 }
 
 /// Classify a schema reference for flattening purposes.
@@ -967,14 +1018,17 @@ fn classify_schema_ref(schema_ref: &ReferenceOr<Schema>) -> SchemaRefKind<'_> {
                 SchemaRefKind::InlineType
             }
             SchemaKind::AllOf { all_of } if all_of.len() == 1 => SchemaRefKind::SingleElement {
+                kind: WrapperKind::AllOf,
                 inner: all_of.first().unwrap(),
                 metadata: &schema.schema_data,
             },
             SchemaKind::AnyOf { any_of } if any_of.len() == 1 => SchemaRefKind::SingleElement {
+                kind: WrapperKind::AnyOf,
                 inner: any_of.first().unwrap(),
                 metadata: &schema.schema_data,
             },
             SchemaKind::OneOf { one_of } if one_of.len() == 1 => SchemaRefKind::SingleElement {
+                kind: WrapperKind::OneOf,
                 inner: one_of.first().unwrap(),
                 metadata: &schema.schema_data,
             },
