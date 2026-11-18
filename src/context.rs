@@ -7,7 +7,7 @@ use serde::de::DeserializeOwned;
 use serde_json::Value;
 
 use crate::{
-    path::{EndpointPath, InvalidComponentRef, JsonPathStack},
+    path::{EndpointPath, JsonPathStack, RefTargetPath},
     resolve::ReferenceOrResolver,
 };
 
@@ -47,11 +47,11 @@ impl<'a> Context<'a> {
         }
     }
 
-    pub(crate) fn push(&self, path: &str) -> Result<Context<'a>, InvalidComponentRef> {
-        Ok(Self {
+    pub(crate) fn push(&self, target: &RefTargetPath) -> Context<'a> {
+        Self {
             raw_openapi: self.raw_openapi,
-            stack: self.stack.push(path)?,
-        })
+            stack: self.stack.push(target),
+        }
     }
 
     pub fn stack(&self) -> &JsonPathStack {
