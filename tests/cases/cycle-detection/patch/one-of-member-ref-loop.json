@@ -1,0 +1,22 @@
+[
+  {
+    "op": "replace",
+    "path": "/components/schemas/Item/properties/value",
+    "value": {
+      "oneOf": [
+        { "type": "string", "enum": ["a"] },
+        { "$ref": "#/components/schemas/Loop1" }
+      ]
+    }
+  },
+  {
+    "op": "add",
+    "path": "/components/schemas/Loop1",
+    "value": { "$ref": "#/components/schemas/Loop2" }
+  },
+  {
+    "op": "add",
+    "path": "/components/schemas/Loop2",
+    "value": { "$ref": "#/components/schemas/Loop1" }
+  }
+]

@@ -1,0 +1,65 @@
+--- one-of-member-ref-loop.json
++++ patched
+@@
+         "description": "An item",
+         "properties": {
+           "value": {
+-            "type": "string"
++            "oneOf": [
++              {
++                "enum": [
++                  "a"
++                ],
++                "type": "string"
++              },
++              {
++                "$ref": "#/components/schemas/Loop1"
++              }
++            ]
+           }
+         },
+         "required": [
+@@
+         ],
+         "type": "object"
+       },
++      "Loop1": {
++        "$ref": "#/components/schemas/Loop2"
++      },
++      "Loop2": {
++        "$ref": "#/components/schemas/Loop1"
++      },
+       "NodeA": {
+         "description": "First node of a three-way cycle.",
+         "properties": {
+
+
+Result for patch:
+[
+    Change {
+        paths: [
+            ChangePath {
+                old: [
+                    "#/components/schemas/Item",
+                    "#/components/schemas/ItemPage/properties/items/items/$ref",
+                    "#/paths/~1items/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                new: [
+                    "#/components/schemas/Item",
+                    "#/components/schemas/ItemPage/properties/items/items/$ref",
+                    "#/paths/~1items/get/responses/200/content/application~1json/schema/$ref",
+                ],
+                comparison: Output,
+            },
+        ],
+        changes: [
+            ChangeInfo {
+                old_subpath: "properties/value",
+                new_subpath: "properties/value",
+                message: "schema kind changed from regular type to oneOf",
+                class: Incompatible,
+                details: Datatype,
+            },
+        ],
+    },
+]
