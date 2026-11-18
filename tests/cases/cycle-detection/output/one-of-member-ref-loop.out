@@ -34,32 +34,5 @@
          "properties": {
 
 
-Result for patch:
-[
-    Change {
-        paths: [
-            ChangePath {
-                old: [
-                    "#/components/schemas/Item",
-                    "#/components/schemas/ItemPage/properties/items/items/$ref",
-                    "#/paths/~1items/get/responses/200/content/application~1json/schema/$ref",
-                ],
-                new: [
-                    "#/components/schemas/Item",
-                    "#/components/schemas/ItemPage/properties/items/items/$ref",
-                    "#/paths/~1items/get/responses/200/content/application~1json/schema/$ref",
-                ],
-                comparison: Output,
-            },
-        ],
-        changes: [
-            ChangeInfo {
-                old_subpath: "properties/value",
-                new_subpath: "properties/value",
-                message: "schema kind changed from regular type to oneOf",
-                class: Incompatible,
-                details: Datatype,
-            },
-        ],
-    },
-]
+Error for patch:
+`$ref` #/components/schemas/Loop1 leads back to itself without reaching a definition (references followed: #/components/schemas/Loop2 -> #/components/schemas/Loop1/$ref -> #/components/schemas/Item/properties/value/oneOf/1/$ref -> #/components/schemas/ItemPage/properties/items/items/$ref -> #/paths/~1items/get/responses/200/content/application~1json/schema/$ref)

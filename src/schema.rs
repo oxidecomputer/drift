@@ -434,8 +434,8 @@ impl Compare {
                 // a type), or a oneOf where each subschema is an enum (again,
                 // with or without a type).
                 if let (Some(old_enum), Some(new_enum)) = (
-                    extract_enum_values(old_schema_kind.context(), old_schema_kind.as_ref()),
-                    extract_enum_values(new_schema_kind.context(), new_schema_kind.as_ref()),
+                    extract_enum_values(old_schema_kind.context(), old_schema_kind.as_ref())?,
+                    extract_enum_values(new_schema_kind.context(), new_schema_kind.as_ref())?,
                 ) {
                     // We don't care about the order of enumerated values; yes,
                     // this is an inefficient way to check, but with
@@ -1055,8 +1055,13 @@ fn metadata_eq(old: &SchemaData, new: &SchemaData) -> bool {
 /// For a schema that is **exclusively** enumerated values, this returns a Some
 /// of those enumerated values. Note that this will never return Some of an
 /// empty Vec--there must always be at least a single enumerated value.
-fn extract_enum_values(context: &Context<'_>, kind: &SchemaKind) -> Option<Vec<serde_json::Value>> {
-    match kind {
+///
+/// Returns an error if a `oneOf` member's `$ref` cannot be resolved.
+fn extract_enum_values(
+    context: &Context<'_>,
+    kind: &SchemaKind,
+) -> anyhow::Result<Option<Vec<serde_json::Value>>> {
+    let values = match kind {
         // For untyped schemas, we can use the enum field as-is.
         SchemaKind::Any(any) if !any.enumeration.is_empty() => Some(any.enumeration.clone()),
 
@@ -1103,19 +1108,44 @@ fn extract_enum_values(context: &Context<'_>, kind: &SchemaKind) -> Option<Vec<s
         // A oneOf may be composed exclusively of enums in which case we can
         // flatten them into a single collection. A oneOf isn't supposed to be
         // empty... but we'll still check.
-        SchemaKind::OneOf { one_of } if !one_of.is_empty() => Some(
-            one_of
+        SchemaKind::OneOf { one_of } if !one_of.is_empty() => {
+            let one_of_context = context.append("oneOf");
+            let members = one_of
                 .iter()
-                .map(|schema_ref| {
-                    let (schema, _) = schema_ref.resolve(context).ok()?;
-                    extract_enum_values(context, &schema.schema_kind)
+                .enumerate()
+                .map(|(index, schema_ref)| {
+                    schema_ref.resolve(&one_of_context.append(&index.to_string()))
                 })
-                .collect::<Option<Vec<_>>>()?
-                .into_iter()
-                .flatten()
-                .collect(),
-        ),
+                .collect::<anyhow::Result<Vec<_>>>()?;
+
+            let mut values = Vec::new();
+            for (member, member_context) in &members {
+                // TODO: Unlike schema_ref.resolve() which protects against
+                // cycles (returning an error if a cycle is detected), this
+                // recursive call doesn't protect against them.
+                //
+                // One would hit this with a schema like:
+                //
+                //     Rec: { oneOf: [{ type: string, enum: [a] }, { $ref: Rec }] }
+                //
+                // when comparing `value: { type: string }` (old) against
+                // `value: { $ref: Rec }` (new) would cause call stack
+                // exhaustion.
+                //
+                // The fix is to maintain a set of resolved pointers on the
+                // current path. We already have such a helper,
+                // `Compare::visit_state`, but that isn't quite usable here. We
+                // should either add a local visited set or do a larger
+                // refactor.
+                match extract_enum_values(member_context, &member.schema_kind)? {
+                    Some(member_values) => values.extend(member_values),
+                    None => return Ok(None),
+                }
+            }
+            Some(values)
+        }
 
         _ => None,
-    }
+    };
+    Ok(values)
 }
