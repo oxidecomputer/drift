@@ -74,10 +74,10 @@ fn test_change() {
                         out
                     };
 
-                    let result =
-                        compare(&base_value, &patched).expect("fatal failure in comparison");
-
-                    let output = format!("{udiff}\n\nResult for patch:\n{:#?}\n", result);
+                    let output = match compare(&base_value, &patched) {
+                        Ok(result) => format!("{udiff}\n\nResult for patch:\n{result:#?}\n"),
+                        Err(error) => format!("{udiff}\n\nError for patch:\n{error:#}\n"),
+                    };
                     let mut output_path = output_dir.join(patch_entry.file_name());
                     output_path.set_extension("out");
 
@@ -122,6 +122,16 @@ fn document_with_schemas(schemas: serde_json::Value) -> serde_json::Value {
     })
 }
 
+// TODO: typed errors so we don't have to do string matching?
+fn assert_reference_cycle_error(document: &serde_json::Value) {
+    let error = compare(document, document).expect_err("cycle is reported as an error");
+    let message = format!("{error:#}");
+    assert!(
+        message.contains("leads back to itself without reaching a definition"),
+        "unexpected error: {message}"
+    );
+}
+
 #[test]
 fn test_wrapper_ref_cycle_is_accepted() {
     let document = document_with_schemas(serde_json::json!({
@@ -129,4 +139,36 @@ fn test_wrapper_ref_cycle_is_accepted() {
     }));
     let result = compare(&document, &document).expect("comparison succeeds");
     assert!(result.is_empty(), "unexpected changes: {result:#?}");
+}
+
+#[test]
+fn test_pure_ref_cycle_is_an_error() {
+    assert_reference_cycle_error(&document_with_schemas(serde_json::json!({
+        "A": { "$ref": "#/components/schemas/B" },
+        "B": { "$ref": "#/components/schemas/A" }
+    })));
+}
+
+#[test]
+fn test_parameter_ref_cycle_is_an_error() {
+    let document = serde_json::json!({
+        "openapi": "3.0.0",
+        "info": { "title": "Cycle API", "version": "1.0.0" },
+        "paths": {
+            "/cycle": {
+                "get": {
+                    "operationId": "get_cycle",
+                    "parameters": [{ "$ref": "#/components/parameters/A" }],
+                    "responses": { "204": { "description": "No content" } }
+                }
+            }
+        },
+        "components": {
+            "parameters": {
+                "A": { "$ref": "#/components/parameters/B" },
+                "B": { "$ref": "#/components/parameters/A" }
+            }
+        }
+    });
+    assert_reference_cycle_error(&document);
 }
