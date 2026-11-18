@@ -6,7 +6,7 @@ use anyhow::anyhow;
 use openapiv3::ReferenceOr;
 use serde::{Deserialize, de::DeserializeOwned};
 
-use crate::context::Context;
+use crate::{context::Context, path::RefTargetPath};
 
 pub trait ReferenceOrResolver<'a, 'context, T>
 where
@@ -33,11 +33,12 @@ where
         };
 
         loop {
-            context = context.push(target.as_ref())?;
+            let target_path: RefTargetPath = target.parse()?;
+            context = context.push(&target_path);
 
             let subtree = context
                 .raw_openapi
-                .pointer(&target.as_str()[1..])
+                .pointer(target_path.json_pointer())
                 .ok_or(anyhow!("invalid reference {target}"))?;
 
             let item_or_reference = ReferenceOr::<T>::deserialize(subtree)?;

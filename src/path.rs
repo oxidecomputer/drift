@@ -27,9 +27,9 @@
 //! comparison layer, keyed by the (old, new) schema pair currently being
 //! expanded -- see `compare::Compare::visit_state`.
 
-use std::fmt;
+use std::{fmt, str::FromStr};
 
-/// Error returned when `JsonPathStack::push()` receives an invalid reference.
+/// Error returned when parsing a `RefTargetPath` from an invalid reference.
 ///
 /// A valid reference must be a JSON pointer starting with `#/`.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -142,25 +142,36 @@ impl EndpointPath {
 /// to any location in the document, not only components.
 ///
 /// The `base_len` field stores the length of the path when first constructed
-/// (via `parse`), before any `append` calls. This allows retrieval of the
+/// (via `FromStr`), before any `append` calls. This allows retrieval of the
 /// original ref target (e.g., the named type) after path segments have been
 /// appended.
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
-struct RefTargetPath {
+pub(crate) struct RefTargetPath {
     path: String,
     /// Length of the path at construction time, before any appends.
     base_len: usize,
 }
 
-impl RefTargetPath {
-    /// Parse from a JSON pointer. Returns `None` if not a valid local ref.
-    fn parse(pointer: &str) -> Option<Self> {
-        pointer.starts_with("#/").then(|| Self {
-            base_len: pointer.len(),
-            path: pointer.to_string(),
-        })
-    }
+impl FromStr for RefTargetPath {
+    type Err = InvalidComponentRef;
 
+    /// Parse from a JSON pointer. Returns an error if not a valid local ref
+    /// (`#/...`).
+    fn from_str(pointer: &str) -> Result<Self, Self::Err> {
+        if pointer.starts_with("#/") {
+            Ok(Self {
+                base_len: pointer.len(),
+                path: pointer.to_string(),
+            })
+        } else {
+            Err(InvalidComponentRef {
+                reference: pointer.to_string(),
+            })
+        }
+    }
+}
+
+impl RefTargetPath {
     /// Append a path segment, escaping special characters per RFC 6901.
     fn append(&self, segment: &str) -> Self {
         let escaped = escape_json_pointer_segment(segment);
@@ -173,6 +184,14 @@ impl RefTargetPath {
     /// Get the JSON pointer string.
     fn as_str(&self) -> &str {
         &self.path
+    }
+
+    /// Return the path as an RFC 6901 JSON pointer.
+    ///
+    /// This can be used with [`serde_json::Value::pointer`].
+    pub(crate) fn json_pointer(&self) -> &str {
+        // Our FromStr impl guarantees that the first byte is `#`.
+        &self.path[1..]
     }
 
     /// Get the base path (the path at construction time, before any appends).
@@ -386,23 +405,16 @@ impl JsonPathStack {
     /// This records the current location (with `/$ref` appended) in the
     /// reference chain and sets the new current location to the schema path.
     ///
-    /// Returns an error if `reference` is not a valid local schema path
-    /// (`#/...`).
-    ///
     /// # Panics
     ///
     /// Panics if called on a `paths_root()` stack (a programming error).
-    pub(crate) fn push(&self, reference: &str) -> Result<JsonPathStack, InvalidComponentRef> {
-        let schema = RefTargetPath::parse(reference).ok_or_else(|| InvalidComponentRef {
-            reference: reference.to_string(),
-        })?;
-
+    pub(crate) fn push(&self, target: &RefTargetPath) -> JsonPathStack {
         let state = match &self.state {
             PathState::PathsRoot => {
                 panic!("cannot push from paths_root (no endpoint context)")
             }
             PathState::AtEndpoint(path) => PathState::AtComponent {
-                current: schema,
+                current: target.clone(),
                 origin_ref: path.append("$ref"),
                 intermediate_refs: Vec::new(),
             },
@@ -414,13 +426,13 @@ impl JsonPathStack {
                 let mut new_intermediates = intermediate_refs.clone();
                 new_intermediates.push(current.append("$ref"));
                 PathState::AtComponent {
-                    current: schema,
+                    current: target.clone(),
                     origin_ref: origin_ref.clone(),
                     intermediate_refs: new_intermediates,
                 }
             }
         };
-        Ok(Self { state })
+        Self { state }
     }
 
     /// Iterate over the path reference stack from top (current) to bottom
@@ -483,6 +495,10 @@ fn escape_json_pointer_segment(segment: &str) -> String {
 mod tests {
     use super::*;
 
+    fn parse_ref_target(pointer: &str) -> RefTargetPath {
+        pointer.parse().expect("parsed a valid local reference")
+    }
+
     #[test]
     fn endpoint_path_for_path() {
         let path = EndpointPath::for_path("/users");
@@ -524,32 +540,48 @@ mod tests {
 
     #[test]
     fn component_path_parse_valid() {
-        let path = RefTargetPath::parse("#/components/schemas/User");
-        assert!(path.is_some());
-        assert_eq!(path.unwrap().as_str(), "#/components/schemas/User");
+        let path = parse_ref_target("#/components/schemas/User");
+        assert_eq!(path.as_str(), "#/components/schemas/User");
     }
 
     #[test]
     fn component_path_parse_valid_various() {
         // Any JSON pointer is valid.
-        assert!(RefTargetPath::parse("#/components/responses/NotFound").is_some());
-        assert!(RefTargetPath::parse("#/components/parameters/PageSize").is_some());
-        assert!(RefTargetPath::parse("#/paths/~1users/get").is_some());
-        assert!(RefTargetPath::parse("#/definitions/User").is_some());
+        parse_ref_target("#/components/responses/NotFound");
+        parse_ref_target("#/components/parameters/PageSize");
+        parse_ref_target("#/paths/~1users/get");
+        parse_ref_target("#/definitions/User");
     }
 
     #[test]
     fn component_path_parse_invalid() {
         // Must start with #/.
-        assert!(RefTargetPath::parse("components/schemas/User").is_none());
-        assert!(RefTargetPath::parse("/components/schemas/User").is_none());
-        assert!(RefTargetPath::parse("https://example.com/schema.json").is_none());
+        "components/schemas/User"
+            .parse::<RefTargetPath>()
+            .expect_err("rejected a reference without a leading `#/`");
+        "/components/schemas/User"
+            .parse::<RefTargetPath>()
+            .expect_err("rejected a reference without a leading `#/`");
+        "https://example.com/schema.json"
+            .parse::<RefTargetPath>()
+            .expect_err("rejected a reference without a leading `#/`");
+    }
+
+    #[test]
+    fn ref_target_path_json_pointer() {
+        let path = parse_ref_target("#/components/schemas/User");
+        assert_eq!(path.json_pointer(), "/components/schemas/User");
+
+        let appended = path.append("properties").append("a/b");
+        assert_eq!(
+            appended.json_pointer(),
+            "/components/schemas/User/properties/a~1b"
+        );
     }
 
     #[test]
     fn component_path_append() {
-        let path = RefTargetPath::parse("#/components/schemas/User")
-            .unwrap()
+        let path = parse_ref_target("#/components/schemas/User")
             .append("properties")
             .append("name");
         assert_eq!(path.as_str(), "#/components/schemas/User/properties/name");
@@ -557,7 +589,7 @@ mod tests {
 
     #[test]
     fn ref_target_path_base_and_subpath() {
-        let path = RefTargetPath::parse("#/components/schemas/User").unwrap();
+        let path = parse_ref_target("#/components/schemas/User");
         assert_eq!(path.base_path(), "#/components/schemas/User");
         assert_eq!(path.subpath(), "");
 
@@ -568,8 +600,7 @@ mod tests {
 
     #[test]
     fn ref_target_path_without_subpath() {
-        let path = RefTargetPath::parse("#/components/schemas/User")
-            .unwrap()
+        let path = parse_ref_target("#/components/schemas/User")
             .append("properties")
             .append("name");
 
@@ -632,8 +663,7 @@ mod tests {
             .append("responses")
             .append("200")
             .append("schema")
-            .push("#/components/schemas/User")
-            .unwrap();
+            .push(&parse_ref_target("#/components/schemas/User"));
 
         assert_eq!(stack.current_pointer(), "#/components/schemas/User");
         assert!(stack.is_at_component());
@@ -648,10 +678,8 @@ mod tests {
     fn json_path_stack_iter_order() {
         let endpoint = EndpointPath::for_operation("/users", "get");
         let stack = JsonPathStack::for_endpoint(endpoint)
-            .push("#/components/schemas/A")
-            .unwrap()
-            .push("#/components/schemas/B")
-            .unwrap();
+            .push(&parse_ref_target("#/components/schemas/A"))
+            .push(&parse_ref_target("#/components/schemas/B"));
 
         let entries: Vec<_> = stack.iter().collect();
         assert_eq!(entries.len(), 3);
@@ -667,8 +695,7 @@ mod tests {
     fn json_path_stack_display() {
         let endpoint = EndpointPath::for_operation("/users", "get");
         let stack = JsonPathStack::for_endpoint(endpoint)
-            .push("#/components/schemas/User")
-            .unwrap();
+            .push(&parse_ref_target("#/components/schemas/User"));
 
         let displayed = format!("{}", stack);
         assert_eq!(
@@ -678,12 +705,9 @@ mod tests {
     }
 
     #[test]
-    fn json_path_stack_push_invalid_ref_returns_error() {
-        let endpoint = EndpointPath::for_operation("/users", "get");
-        let stack = JsonPathStack::for_endpoint(endpoint);
-
-        let err = stack
-            .push("not/a/json/pointer")
+    fn ref_target_path_parse_invalid_returns_error() {
+        let err = "not/a/json/pointer"
+            .parse::<RefTargetPath>()
             .expect_err("expected error for invalid reference");
 
         assert_eq!(err.reference, "not/a/json/pointer");
@@ -715,8 +739,7 @@ mod tests {
         // Component at base.
         let stack = stack
             .append("schema")
-            .push("#/components/schemas/User")
-            .unwrap();
+            .push(&parse_ref_target("#/components/schemas/User"));
         assert_eq!(stack.base_and_subpath(), ("#/components/schemas/User", ""));
 
         // Component with appended segments.
@@ -746,8 +769,7 @@ mod tests {
         // preserving the reference chain.
         let endpoint = EndpointPath::for_operation("/users", "get");
         let stack = JsonPathStack::for_endpoint(endpoint)
-            .push("#/components/schemas/User")
-            .unwrap()
+            .push(&parse_ref_target("#/components/schemas/User"))
             .append("properties")
             .append("name");
         let stripped = stack.without_subpath();
@@ -775,7 +797,7 @@ mod tests {
         assert_eq!(stack.component_base(), None);
 
         // Component at base: returns the ref target.
-        let stack = stack.push("#/components/schemas/User").unwrap();
+        let stack = stack.push(&parse_ref_target("#/components/schemas/User"));
         assert_eq!(stack.component_base(), Some("#/components/schemas/User"));
 
         // Component with appended segments: still returns the ref target base.
@@ -797,14 +819,12 @@ mod tests {
 
         let stack = stack
             .append("schema")
-            .push("#/components/schemas/User")
-            .unwrap();
+            .push(&parse_ref_target("#/components/schemas/User"));
         assert_eq!(stack.endpoint_base(), Some("#/paths/~1users/get"));
 
         let stack = stack
             .append("properties")
-            .push("#/components/schemas/Address")
-            .unwrap();
+            .push(&parse_ref_target("#/components/schemas/Address"));
         assert_eq!(stack.endpoint_base(), Some("#/paths/~1users/get"));
     }
 }
